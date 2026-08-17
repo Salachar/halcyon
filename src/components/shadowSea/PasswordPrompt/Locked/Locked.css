@@ -1,0 +1,51 @@
+.locked-banner {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', monospace;
+  background: rgba(15, 23, 42, 0.95);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  padding: 0.5rem;
+}
+
+.locked-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.locked-visual {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color);
+  filter: drop-shadow(0 0 15px var(--glow-color));
+}
+
+.locked-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.locked-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 10px var(--glow-color);
+}
+
+.locked-message {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(148, 163, 184);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

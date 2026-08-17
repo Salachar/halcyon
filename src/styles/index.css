@@ -1,0 +1,156 @@
+/* ==========================================================================
+   SHADOWRUN APP THEME — foundation
+   Tokens + global reset live here. Everything else is split into its own
+   file and pulled in below — import order matters a little (content before
+   input is fine either way, but keep tokens/reset first, always).
+   ========================================================================== */
+
+@import './navigation.css';
+@import './content.css';
+@import './input.css';
+@import './modal.css';
+
+@import './pages/homes.css';
+@import './pages/notes.css';
+
+:root {
+  /* ---- Backgrounds (layered, darkest to lightest) ---- */
+  --sr-bg-black: rgb(10, 12, 18);          /* app shell / outermost */
+  --sr-bg-base: rgb(19, 23, 34);           /* page background */
+  --sr-bg-elevated: rgb(27, 36, 58);       /* headers, nav, bars, input rows */
+  --sr-bg-panel: rgba(29, 35, 50, 0.7);    /* translucent content panels */
+  --sr-bg-panel-solid: rgb(29, 35, 50);    /* solid panels (cards on cards) */
+
+  /* ---- Blue: structure. Borders, rules, secondary emphasis. ---- */
+  --sr-blue: rgb(77, 167, 188);
+  --sr-blue-bright: rgb(130, 205, 224);    /* headings / text needing more contrast */
+  --sr-blue-dim: rgba(77, 167, 188, 0.35); /* default borders */
+  --sr-blue-faint: rgba(77, 167, 188, 0.15);
+  --sr-blue-bg: rgba(77, 167, 188, 0.08);  /* tinted panel fill */
+
+  /* ---- Amber: muted accent. Subtle emphasis, asides, secondary notes. ---- */
+  --sr-amber: rgb(180, 116, 58);
+  --sr-amber-border: rgba(180, 116, 58, 0.45);
+  --sr-amber-bg: rgba(180, 116, 58, 0.12);
+
+  /* ---- Orange: bright accent. Primary actions, active states, critical callouts. ---- */
+  --sr-orange: rgb(234, 112, 32);
+  --sr-orange-bright: rgb(255, 138, 61);
+  --sr-orange-border: rgba(234, 112, 32, 0.55);
+  --sr-orange-bg: rgba(234, 112, 32, 0.14);
+
+  /* ---- Red: reserved for danger/damage/delete only. Never used as "emphasis." ---- */
+  --sr-red: rgb(220, 65, 65);
+  --sr-red-border: rgba(220, 65, 65, 0.4);
+  --sr-red-bg: rgba(220, 65, 65, 0.12);
+
+  /* ---- Text ---- */
+  --sr-text: rgb(226, 232, 240);
+  --sr-text-muted: rgb(148, 163, 184);
+  --sr-text-dim: rgba(148, 163, 184, 0.55);
+
+  /* ---- Neutral structural hairline (dividers that aren't blue-emphasis) ---- */
+  --sr-hairline: rgba(148, 163, 184, 0.15);
+
+  /* ---- Layout ---- */
+  --sr-radius: 2px;      /* sharp, HUD-like — not rounded */
+  --sr-max-width: 1200px;
+  --sr-font: "Courier New", monospace;
+
+  /* ---- Safe-area ----
+     Single source of truth for bottom safe-area spacing. Applied at the
+     bottom of whichever element is actually the scroll/content boundary
+     for a given page (see .sr-page and .sr-fullbleed in content.css)
+     rather than re-derived per fixed bar. */
+  --sr-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ==========================================================================
+   GLOBAL RESET
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--sr-bg-black);
+  color: var(--sr-text);
+  font-family: var(--sr-font);
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  max-width: var(--sr-max-width);
+  height: 100vh;
+  margin: 0 auto;
+  background-color: var(--sr-bg-base);
+}
+
+.sr-app * {
+  box-sizing: border-box;
+}
+
+.sr-app {
+  background-color: var(--sr-bg-base);
+  color: var(--sr-text);
+  font-family: var(--sr-font);
+}
+
+.sr-app h1, .sr-app h2, .sr-app h3, .sr-app h4 {
+  margin: 0;
+  font-weight: 700;
+}
+
+.sr-app p {
+  margin: 0 0 0.85rem 0;
+  line-height: 1.6;
+}
+.sr-app p:last-child {
+  margin-bottom: 0;
+}
+
+.sr-app ul, .sr-app ol {
+  margin: 0 0 0.85rem 1.25rem;
+  padding: 0;
+}
+.sr-app ul:last-child, .sr-app ol:last-child {
+  margin-bottom: 0;
+}
+.sr-app li {
+  margin-bottom: 0.35rem;
+  line-height: 1.6;
+}
+.sr-app li:last-child {
+  margin-bottom: 0;
+}
+
+.bold { font-weight: bold !important; }
+.center { text-align: center !important; }
+.no-borders { border: 0 !important; }
+.flex { display: flex; }
+.flex-1 { flex-grow: 1; }
+
+button {
+  color: var(--sr-text);
+  font-family: var(--sr-font);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}

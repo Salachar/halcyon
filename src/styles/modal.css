@@ -1,0 +1,96 @@
+/* ==========================================================================
+  MODAL — purchase modal for now; generic enough to reuse for others
+========================================================================== */
+
+.sr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 12, 18, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.sr-modal {
+  background-color: var(--sr-bg-elevated);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  padding: 1.5rem;
+  width: min(420px, 90%);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.sr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.sr-modal-title {
+  font-size: 1.1rem;
+  color: var(--sr-blue-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sr-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--sr-text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+.sr-modal-close:hover {
+  color: var(--sr-text);
+}
+
+.sr-modal-description {
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+  margin-bottom: 1rem;
+}
+
+.sr-modal-config {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sr-modal-config-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sr-text-muted);
+}
+
+.sr-modal-cost {
+  font-size: 1rem;
+  color: var(--sr-text);
+  margin-bottom: 0.75rem;
+}
+.sr-modal-cost strong {
+  color: var(--sr-orange-bright);
+}
+
+.sr-modal-hint {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  margin-bottom: 0.75rem;
+}
+.sr-modal-hint--danger {
+  color: var(--sr-red);
+}
+
+.sr-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

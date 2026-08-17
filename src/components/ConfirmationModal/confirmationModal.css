@@ -1,0 +1,70 @@
+.cm-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.cm-modal {
+  background-color: rgb(19, 23, 34);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  font-family: monospace;
+  min-width: 240px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.cm-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: rgb(79, 209, 197);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 8px rgba(79, 209, 197, 0.3);
+}
+
+.cm-message {
+  font-size: 0.8rem;
+  color: rgb(148, 163, 184);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.cm-title + .cm-actions,
+.cm-message + .cm-actions {
+  margin-top: 1rem;
+}
+
+.cm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.cm-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+}
+
+.cm-btn-confirm {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: rgb(239, 68, 68);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.cm-btn-cancel {
+  background-color: rgba(79, 209, 197, 0.12);
+  color: rgb(79, 209, 197);
+  border: 1px solid rgba(79, 209, 197, 0.35);
+}

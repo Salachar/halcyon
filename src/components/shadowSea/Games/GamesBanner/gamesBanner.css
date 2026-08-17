@@ -1,0 +1,162 @@
+/* GamesBanner - Retro arcade style */
+
+.games-banner {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border: 2px solid rgb(139, 92, 246);
+  border-radius: 8px;
+  font-family: monospace;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated background shimmer */
+.games-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Border lines */
+.games-banner-border {
+  color: rgb(139, 92, 246);
+  font-size: 0.75rem;
+  text-align: center;
+  opacity: 0.6;
+  letter-spacing: -0.05em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.games-banner-border.top {
+  margin-bottom: 1rem;
+}
+
+.games-banner-border.bottom {
+  margin-top: 1rem;
+}
+
+/* Main title section */
+.games-banner-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.games-banner-icon {
+  font-size: 2rem;
+  color: rgb(251, 191, 36);
+  text-shadow:
+    0 0 10px rgba(251, 191, 36, 0.8),
+    0 0 20px rgba(251, 191, 36, 0.6),
+    0 0 30px rgba(251, 191, 36, 0.4);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.games-banner-text {
+  text-align: center;
+}
+
+.games-banner-main {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: rgb(139, 92, 246);
+  text-shadow:
+    0 0 10px rgba(139, 92, 246, 0.8),
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4);
+  letter-spacing: 0.1em;
+}
+
+@keyframes text-flicker {
+  0%, 100% { opacity: 1; }
+  98% { opacity: 1; }
+  99% { opacity: 0.8; }
+}
+
+.games-banner-sub {
+  font-size: 0.875rem;
+  color: rgb(59, 130, 246);
+  margin-top: 0.25rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Disclaimer */
+.games-banner-disclaimer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgb(251, 191, 36);
+  background-color: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-left: none;
+  border-right: none;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.games-banner-disclaimer-icon {
+  font-size: 1rem;
+}
+
+@keyframes blink {
+  0%, 49%, 100% { opacity: 1; }
+  50%, 99% { opacity: 0.3; }
+}
+
+/* Flavor text */
+.games-banner-flavor {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgb(148, 163, 184);
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .games-banner {
+    padding: 1rem;
+  }
+
+  .games-banner-main {
+    font-size: 1.25rem;
+  }
+
+  .games-banner-icon {
+    font-size: 1.5rem;
+  }
+
+  .games-banner-border {
+    font-size: 0.5rem;
+  }
+
+  .games-banner-disclaimer {
+    font-size: 0.65rem;
+  }
+}

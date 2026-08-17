@@ -1,0 +1,85 @@
+.sr-modal.sr-creation-modal {
+  width: 95vw;
+  max-width: 1400px;
+}
+
+.sr-creation-step-hint {
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+  margin-bottom: 1rem;
+}
+
+.sr-creation-warning {
+  color: var(--sr-amber);
+}
+
+.sr-creation-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sr-creation-info-placeholder {
+  font-size: 0.85rem;
+  color: var(--sr-text-dim);
+  font-style: italic;
+}
+
+.sr-creation-locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.sr-creation-option--unavailable {
+  opacity: 0.6;
+}
+
+/* ---- Priority Grid — click-to-assign ---- */
+
+.sr-priority-row-label {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  text-align: center;
+}
+
+.sr-priority-cell {
+  font-size: 0.78rem;
+  transition: all 0.15s ease;
+}
+
+.sr-priority-cell--clickable {
+  cursor: pointer;
+}
+.sr-priority-cell--clickable:hover {
+  background-color: var(--sr-blue-bg);
+}
+
+.sr-priority-cell--assigned {
+  background-color: var(--sr-orange-bg);
+  color: var(--sr-orange-bright);
+  font-weight: 700;
+}
+.sr-priority-cell--assigned:hover {
+  background-color: var(--sr-orange-bg);
+}
+
+.sr-priority-cell--taken {
+  opacity: 0.35;
+}
+
+.sr-priority-magic-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.sr-priority-mundane {
+  color: var(--sr-text-dim);
+  font-style: italic;
+}
+
+/* ---- Attribute Spend — vertical stack, bespoke rows (not reused elsewhere) ---- */
+
+/* ---- Attribute Spend styling lives in AttributeSpend.jsx's own
+   attributeSpend.css, imported directly there — not here. ---- */

@@ -1,0 +1,58 @@
+.sr-char-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--sr-blue-dim);
+}
+
+.sr-char-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.sr-char-tab:hover {
+  border-color: var(--sr-blue-dim);
+}
+.sr-char-tab--active {
+  border-color: var(--sr-orange-border);
+  background-color: var(--sr-orange-bg);
+}
+
+.sr-char-tab-name {
+  font-size: 0.85rem;
+  color: var(--sr-text);
+  font-weight: 700;
+}
+.sr-char-tab--active .sr-char-tab-name {
+  color: var(--sr-orange-bright);
+}
+
+.sr-char-tab-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: none;
+  background: transparent;
+  color: var(--sr-text-dim);
+  cursor: pointer;
+  font-size: 0.75rem;
+  border-radius: var(--sr-radius);
+}
+.sr-char-tab-delete:hover {
+  color: var(--sr-red);
+}
+
+.sr-char-tab-new {
+  margin-left: 0.25rem;
+}

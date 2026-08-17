@@ -1,0 +1,88 @@
+.msub-root {
+  background-color: rgb(14, 18, 27);
+  border-bottom: 1px solid rgba(79, 209, 197, 0.15);
+  flex-shrink: 0;
+  font-family: monospace;
+}
+
+.msub-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 1rem;
+}
+
+.msub-view-btn {
+  flex-shrink: 0;
+  padding: 0.2rem 0.5rem;
+  background-color: transparent;
+  color: rgba(79, 209, 197, 0.6);
+  border: 1px solid rgba(79, 209, 197, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.msub-view-btn:hover {
+  color: rgb(79, 209, 197);
+  border-color: rgba(79, 209, 197, 0.4);
+}
+
+.msub-last-message {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.msub-last-label {
+  font-size: 0.6rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.msub-last-text {
+  font-size: 0.7rem;
+  color: rgb(148, 163, 184);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msub-last-empty {
+  font-size: 0.68rem;
+  color: rgba(148, 163, 184, 0.3);
+  font-style: italic;
+}
+
+.msub-clients-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.2rem 1rem 0.3rem 1rem;
+  border-top: 1px solid rgba(79, 209, 197, 0.08);
+}
+
+.msub-client {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  color: rgba(148, 163, 184, 0.7);
+  letter-spacing: 0.04em;
+}
+
+.msub-client-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: rgb(0, 170, 40);
+  flex-shrink: 0;
+}

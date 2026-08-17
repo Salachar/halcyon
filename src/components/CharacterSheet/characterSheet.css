@@ -1,0 +1,39 @@
+.sr-sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sr-sheet-name-input {
+  flex: 1;
+  min-width: 200px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  text-align: left;
+}
+
+.sr-sheet-meta {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sr-sheet-attributes {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.5rem;
+}
+
+.sr-sheet-resources {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+}
+.sr-sheet-resources strong {
+  color: var(--sr-text);
+}

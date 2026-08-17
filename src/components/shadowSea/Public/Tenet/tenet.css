@@ -1,0 +1,288 @@
+/* Tenet - Social Network Profile Card (Dark Mode, Horizontal) */
+
+.tenet-profile {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: rgba(30, 41, 59, 0.95);
+  border: 2px solid rgba(79, 209, 197, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.tenet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.8);
+  border-bottom: 1px solid rgba(79, 209, 197, 0.2);
+}
+
+.tenet-brand {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: rgb(79, 209, 197);
+  letter-spacing: 0.1em;
+}
+
+.tenet-privacy {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.privacy-badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+.privacy-public {
+  background: rgba(16, 185, 129, 0.15);
+  color: rgb(16, 185, 129);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.privacy-friends {
+  background: rgba(59, 130, 246, 0.15);
+  color: rgb(59, 130, 246);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.privacy-private {
+  background: rgba(148, 163, 184, 0.15);
+  color: rgb(148, 163, 184);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Content - Horizontal layout */
+.tenet-content {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  align-items: start;
+}
+
+/* Left - Profile picture */
+.tenet-left {
+  flex-shrink: 0;
+}
+
+.tenet-profile-pic {
+  width: 80px;
+  height: 80px;
+  position: relative;
+}
+
+.tenet-profile-pic img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgb(79, 209, 197);
+}
+
+.tenet-initials {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(79, 209, 197, 0.15);
+  border: 3px solid rgb(79, 209, 197);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: rgb(79, 209, 197);
+}
+
+.tenet-status-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgb(239, 68, 68);
+  letter-spacing: 0.05em;
+}
+
+/* Center - Profile info */
+.tenet-center {
+  flex: 1;
+  min-width: 0;
+}
+
+.tenet-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(226, 232, 240);
+  margin-bottom: 0.25rem;
+}
+
+.tenet-tagline {
+  font-size: 0.875rem;
+  color: rgb(148, 163, 184);
+  margin-bottom: 0.25rem;
+}
+
+.tenet-location {
+  font-size: 0.8rem;
+  color: rgb(100, 116, 139);
+  margin-bottom: 0.75rem;
+}
+
+/* Stats */
+.tenet-stats {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.75rem 0;
+  margin-bottom: 0.75rem;
+  border-top: 1px solid rgba(79, 209, 197, 0.2);
+  border-bottom: 1px solid rgba(79, 209, 197, 0.2);
+}
+
+.tenet-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tenet-stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(79, 209, 197);
+}
+
+.tenet-stat-label {
+  font-size: 0.7rem;
+  color: rgb(148, 163, 184);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Bio */
+.tenet-bio {
+  margin-top: 0.75rem;
+}
+
+.tenet-bio-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(148, 163, 184);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tenet-bio-text {
+  font-size: 0.875rem;
+  color: rgb(203, 213, 225);
+  line-height: 1.5;
+}
+
+/* Restricted */
+.tenet-restricted {
+  padding: 1rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  margin-top: 0.75rem;
+}
+
+.tenet-restricted-text {
+  font-size: 0.875rem;
+  color: rgb(251, 191, 36);
+  line-height: 1.4;
+}
+
+/* Right - Actions and footer */
+.tenet-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+/* Intercom button */
+.tenet-intercom-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 2px solid rgb(79, 209, 197);
+  background: rgba(79, 209, 197, 0.1);
+  color: rgb(79, 209, 197);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tenet-intercom-button:hover {
+  background: rgba(79, 209, 197, 0.2);
+  box-shadow: 0 0 10px rgba(79, 209, 197, 0.3);
+}
+
+.tenet-intercom-button svg {
+  flex-shrink: 0;
+}
+
+/* Footer */
+.tenet-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(79, 209, 197, 0.2);
+  text-align: right;
+  font-size: 0.75rem;
+  color: rgb(100, 116, 139);
+}
+
+.tenet-id {
+  font-family: monospace;
+  color: rgb(148, 163, 184);
+}
+
+.tenet-member {
+  font-style: italic;
+  color: rgb(100, 116, 139);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tenet-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tenet-left {
+    display: flex;
+    justify-content: center;
+  }
+
+  .tenet-center {
+    text-align: center;
+  }
+
+  .tenet-stats {
+    justify-content: center;
+  }
+
+  .tenet-right {
+    align-items: center;
+  }
+
+  .tenet-footer {
+    text-align: center;
+  }
+}

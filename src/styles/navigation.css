@@ -1,0 +1,88 @@
+/* ==========================================================================
+   NAVIGATION — top nav bar, in-page tab switching
+   ========================================================================== */
+
+.sr-nav {
+  background-color: var(--sr-bg-elevated);
+  border-bottom: 1px solid var(--sr-blue-dim);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 3.5rem;
+  padding: 0 1rem;
+}
+
+.sr-nav-link {
+  font-family: var(--sr-font);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-text-muted);
+  text-decoration: none;
+  padding: 0.5rem 0.9rem;
+  margin-right: 0.25rem;
+  border-radius: var(--sr-radius);
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.sr-nav-link:hover {
+  color: var(--sr-blue-bright);
+}
+.sr-nav-link--active {
+  color: var(--sr-orange-bright);
+  border-color: var(--sr-orange-border);
+  background-color: var(--sr-orange-bg);
+}
+
+.sr-nav-extra {
+  margin-left: auto;
+}
+
+.sr-nav-divider {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--sr-blue-dim);
+  margin: 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.sr-nav-live-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--sr-orange);
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.sr-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--sr-blue-dim);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.sr-tab {
+  font-family: var(--sr-font);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sr-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sr-tab:hover {
+  color: var(--sr-blue-bright);
+}
+.sr-tab--active {
+  color: var(--sr-orange-bright);
+  border-bottom-color: var(--sr-orange);
+}

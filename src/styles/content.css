@@ -1,0 +1,414 @@
+/* ==========================================================================
+   CONTENT — page shells, sections, panels, callouts, cards, tables
+   ========================================================================== */
+
+.sr-page {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem 2rem calc(3rem + var(--sr-safe-bottom));
+}
+
+.sr-fullbleed {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sr-fullbleed-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background-color: var(--sr-bg-panel);
+  padding: 0.75rem 48px calc(0.75rem + var(--sr-safe-bottom));
+}
+
+.sr-content-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sr-page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--sr-blue-dim);
+}
+
+.sr-page-header-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.sr-page-header-subtitle {
+  font-size: 1rem;
+  color: var(--sr-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.sr-section {
+  margin-bottom: 2.5rem;
+}
+
+.sr-section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--sr-blue-dim);
+}
+
+.sr-divider {
+  height: 1px;
+  background-color: var(--sr-blue-dim);
+  border: none;
+  margin: 1.5rem 0;
+}
+
+/* ---- Panel ---- */
+
+.sr-panel {
+  background-color: var(--sr-bg-panel);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  padding: 1.25rem 1.5rem;
+}
+
+.sr-panel-solid {
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  padding: 1.25rem 1.5rem;
+}
+
+/* ---- Callout — variant: note (default) | critical | danger ---- */
+
+.sr-callout {
+  border-left: 3px solid var(--sr-amber-border);
+  background-color: var(--sr-amber-bg);
+  border-radius: 0 var(--sr-radius) var(--sr-radius) 0;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.sr-callout-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sr-amber);
+  margin-bottom: 0.5rem;
+}
+
+.sr-callout--critical {
+  border-left: 3px solid var(--sr-orange-border);
+  background-color: var(--sr-orange-bg);
+}
+.sr-callout--critical .sr-callout-title {
+  color: var(--sr-orange-bright);
+}
+
+.sr-callout--danger {
+  border-left: 3px solid var(--sr-red-border);
+  background-color: var(--sr-red-bg);
+}
+.sr-callout--danger .sr-callout-title {
+  color: var(--sr-red);
+}
+
+/* ---- Card ---- */
+
+.sr-card {
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  padding: 1rem;
+  transition: border-color 0.15s ease;
+}
+.sr-card:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.sr-card-tagline {
+  font-size: 0.8rem;
+  color: var(--sr-amber);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.sr-card-detail {
+  font-size: 0.78rem;
+  color: var(--sr-text-muted);
+  line-height: 1.5;
+}
+
+.sr-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+.sr-card-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---- Collapsible section ---- */
+
+.sr-collapsible {
+  margin-bottom: 2.5rem;
+}
+
+.sr-collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--sr-blue-dim);
+}
+
+.sr-collapsible-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sr-collapsible-chevron {
+  color: var(--sr-blue);
+  font-size: 0.7rem;
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.sr-collapsible-chevron--open {
+  transform: rotate(90deg);
+}
+
+.sr-collapsible-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sr-blue-bright);
+}
+
+.sr-collapsible-hint {
+  font-size: 0.65rem;
+  color: var(--sr-text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* ---- Table ---- */
+
+.sr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.sr-table:last-child {
+  margin-bottom: 0;
+}
+
+.sr-table th, .sr-table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--sr-hairline);
+  vertical-align: top;
+}
+
+.sr-table th {
+  color: var(--sr-blue-bright);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--sr-blue-dim);
+  white-space: nowrap;
+}
+
+.sr-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==========================================================================
+   SKILL CARD — slim, full-width row, stacked vertically (not a grid)
+   ========================================================================== */
+
+.sr-skill-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.5rem;
+  transition: border-color 0.15s ease;
+}
+.sr-skill-card:last-child {
+  margin-bottom: 0;
+}
+.sr-skill-card:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-skill-card-identity {
+  flex: 0 0 170px;
+}
+
+.sr-skill-card-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+}
+
+.sr-skill-card-meta {
+  font-size: 0.68rem;
+  color: var(--sr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.15rem;
+}
+
+.sr-skill-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sr-skill-card-description {
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sr-skill-card-specializations {
+  font-size: 0.75rem;
+  color: var(--sr-amber);
+  margin-top: 0.3rem;
+}
+
+/* ==========================================================================
+   QUALITY CARD — same shape as skill card; type drives the accent color
+   ========================================================================== */
+
+.sr-quality-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-left: 3px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.5rem;
+  transition: border-color 0.15s ease;
+}
+.sr-quality-card:last-child {
+  margin-bottom: 0;
+}
+.sr-quality-card:hover {
+  border-color: var(--sr-blue-dim);
+  border-left-color: var(--sr-blue);
+}
+
+.sr-quality-card--negative {
+  border-left-color: var(--sr-red-border);
+}
+.sr-quality-card--negative:hover {
+  border-left-color: var(--sr-red);
+}
+
+.sr-quality-card-identity {
+  flex: 0 0 210px;
+}
+
+.sr-quality-card-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+}
+
+.sr-quality-card--negative .sr-quality-card-name {
+  color: var(--sr-text);
+}
+
+.sr-quality-card-meta {
+  font-size: 0.68rem;
+  color: var(--sr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.15rem;
+}
+
+.sr-quality-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sr-quality-card-description {
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sr-quality-card-tag {
+  font-size: 0.72rem;
+  color: var(--sr-amber);
+  margin-top: 0.3rem;
+  text-transform: capitalize;
+}
+
+/* Mentor Spirit card — reuses .sr-skill-card, just taller (4 labeled
+   rows instead of 1 description), so align-items needs to start at the
+   top instead of centering against a much taller body. */
+.sr-mentor-card {
+  align-items: flex-start;
+}
+
+.sr-mentor-row {
+  font-size: 0.83rem;
+  color: var(--sr-text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.35rem;
+}
+.sr-mentor-row:last-child {
+  margin-bottom: 0;
+}
+
+.sr-mentor-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.5rem;
+}
+
+.sr-mentor-row--negative .sr-mentor-label {
+  color: var(--sr-red);
+}

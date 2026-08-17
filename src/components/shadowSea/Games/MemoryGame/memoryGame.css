@@ -1,0 +1,202 @@
+/* MemoryGame.css */
+
+.mem-container {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-family: monospace;
+  width: 100%;
+}
+
+.mem-container.collapsed {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.mem-collapsed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mem-collapsed-header:hover {
+  opacity: 0.8;
+}
+
+.mem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.mem-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mem-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.mem-game-state {
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem;
+}
+
+.mem-board-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.mem-board {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mem-card {
+  perspective: 1000px;
+  cursor: pointer;
+  position: relative;
+}
+
+.mem-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.mem-card.flipped .mem-card-inner {
+  transform: rotateY(180deg);
+}
+
+.mem-card.matched .mem-card-inner {
+  transform: rotateY(180deg);
+}
+
+.mem-card-front,
+.mem-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 0.25rem;
+  border: 2px solid rgb(77, 167, 188);
+}
+
+.mem-card-back {
+  background: rgb(45, 53, 72);
+  box-shadow: inset 0 0 8px rgba(77, 167, 188, 0.3);
+}
+
+.mem-card:not(.flipped):not(.matched) .mem-card-back:hover {
+  background: rgb(56, 178, 172);
+  box-shadow: inset 0 0 12px rgba(79, 209, 197, 0.5);
+}
+
+.mem-card-pattern {
+  color: rgb(77, 167, 188);
+  opacity: 0.3;
+  text-shadow: 0 0 4px rgba(77, 167, 188, 0.5);
+}
+
+.mem-card-front {
+  background: rgb(29, 35, 50);
+  transform: rotateY(180deg);
+  color: rgb(79, 209, 197);
+  text-shadow: 0 0 8px rgba(79, 209, 197, 0.6);
+}
+
+.mem-card.matched .mem-card-front {
+  background: rgb(20, 40, 30);
+  border-color: rgb(79, 209, 197);
+  animation: matchPulse 0.6s ease-out;
+}
+
+@keyframes matchPulse {
+  0% {
+    transform: rotateY(180deg) scale(1);
+    box-shadow: 0 0 0 rgba(79, 209, 197, 0);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(79, 209, 197, 0.8);
+  }
+  100% {
+    transform: rotateY(180deg) scale(1);
+    box-shadow: 0 0 8px rgba(79, 209, 197, 0.4);
+  }
+}
+
+.mem-reset-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mem-reset-button:hover {
+  transform: rotate(180deg) scale(1.1);
+  opacity: 0.8;
+}
+
+.mem-button {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+}
+
+.mem-win-message {
+  padding: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: bold;
+  animation: winFade 0.5s ease-in;
+}
+
+@keyframes winFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mem-stats {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mem-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mem-header-actions {
+    align-self: flex-end;
+  }
+}

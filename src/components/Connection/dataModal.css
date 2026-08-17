@@ -1,0 +1,121 @@
+/* Matches the existing Modal/ConnectionModal/MessageHistoryModal family
+   exactly — same hardcoded teal rgb() values, same monospace convention,
+   no CSS variables. This is a deliberate match to DataModal's real
+   neighbors (it renders inside the shared teal Modal component), not a
+   departure from the sr- system used everywhere else in the app. */
+
+.dmod-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dmod-action-btn {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(79, 209, 197, 0.1);
+  color: rgb(79, 209, 197);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.dmod-action-btn:hover:not(:disabled) {
+  background-color: rgba(79, 209, 197, 0.18);
+}
+.dmod-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.dmod-hint {
+  font-size: 0.68rem;
+  color: rgba(148, 163, 184, 0.6);
+  margin-top: -0.15rem;
+}
+
+.dmod-status {
+  padding: 0.75rem;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.dmod-status-success {
+  background-color: rgba(0, 170, 40, 0.12);
+  border: 1px solid rgba(0, 170, 40, 0.4);
+  color: rgb(0, 200, 60);
+}
+.dmod-status-error {
+  background-color: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: rgb(239, 68, 68);
+}
+.dmod-status-title {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.dmod-recipients {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dmod-recipient {
+  padding: 0.5rem 0.75rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  text-align: left;
+  border-radius: 2px;
+  cursor: pointer;
+  background-color: rgba(29, 35, 50, 0.5);
+  color: rgb(203, 213, 225);
+  border: 1px solid rgba(79, 209, 197, 0.2);
+}
+.dmod-recipient:hover {
+  border-color: rgba(79, 209, 197, 0.45);
+}
+.dmod-recipient--selected {
+  background-color: rgba(79, 209, 197, 0.2);
+  color: rgb(79, 209, 197);
+  border-color: rgba(79, 209, 197, 0.5);
+}
+
+.dmod-empty {
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.dmod-transfer-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.dmod-transfer-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  background-color: rgba(79, 209, 197, 0.15);
+  color: rgb(79, 209, 197);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+}
+.dmod-transfer-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.dmod-transfer-btn-dim {
+  background-color: transparent;
+  color: rgba(148, 163, 184, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+}

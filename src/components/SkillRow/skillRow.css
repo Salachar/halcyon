@@ -1,0 +1,61 @@
+.sr-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.5rem;
+  transition: border-color 0.15s ease;
+}
+.sr-skill-row:last-child {
+  margin-bottom: 0;
+}
+.sr-skill-row:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-skill-row-identity {
+  flex: 0 0 170px;
+}
+
+.sr-skill-row-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+}
+
+.sr-skill-row-meta {
+  font-size: 0.68rem;
+  color: var(--sr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.15rem;
+}
+
+.sr-skill-row-rank {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sr-skill-row-cost {
+  font-size: 0.68rem;
+  color: var(--sr-text-dim);
+  white-space: nowrap;
+  min-width: 3.5rem;
+}
+
+.sr-skill-row-dice {
+  flex: 1;
+  min-width: 0;
+}
+
+.sr-skill-row-untrainable {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--sr-text-dim);
+  font-style: italic;
+}

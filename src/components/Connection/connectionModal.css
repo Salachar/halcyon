@@ -1,0 +1,216 @@
+.comod-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.comod-modal {
+  background-color: rgb(19, 23, 34);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 420px;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+.comod-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+  background-color: rgb(27, 36, 58);
+}
+
+.comod-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  color: rgb(79, 209, 197);
+  text-shadow: 0 0 8px rgba(79, 209, 197, 0.4);
+  margin-bottom: 0.25rem;
+}
+
+.comod-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+}
+
+.comod-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background-color: rgba(79, 209, 197, 0.12);
+  color: rgb(79, 209, 197);
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.comod-body {
+  padding: 0.75rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comod-field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comod-field-label {
+  font-size: 0.6rem;
+  color: rgba(79, 209, 197, 0.6);
+  letter-spacing: 0.1em;
+  width: 4rem;
+  flex-shrink: 0;
+}
+
+.comod-input {
+  flex: 1;
+  background-color: rgba(29, 35, 50, 0.6);
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  border-radius: 2px;
+  color: rgb(203, 213, 225);
+  font-family: monospace;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.5rem;
+  outline: none;
+}
+
+.comod-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.comod-input::placeholder {
+  color: rgba(148, 163, 184, 0.4);
+}
+
+.comod-quickfill-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.1rem;
+}
+
+.comod-quickfill-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.comod-quickfill-btn {
+  text-align: left;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(29, 35, 50, 0.4);
+  border: 1px solid rgba(79, 209, 197, 0.2);
+  border-radius: 2px;
+  color: rgba(79, 209, 197, 0.6);
+  font-family: monospace;
+  font-size: 0.7rem;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+}
+
+.comod-quickfill-btn:hover {
+  border-color: rgba(79, 209, 197, 0.45);
+  color: rgb(79, 209, 197);
+  background-color: rgba(79, 209, 197, 0.08);
+}
+
+.comod-children {
+  padding: 0.5rem 0.6rem;
+  background-color: rgba(29, 35, 50, 0.4);
+  border: 1px solid rgba(79, 209, 197, 0.15);
+  border-radius: 2px;
+  font-size: 0.75rem;
+  color: rgb(148, 163, 184);
+  line-height: 1.5;
+}
+
+.comod-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
+.comod-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  background-color: rgba(79, 209, 197, 0.15);
+  color: rgb(79, 209, 197);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+}
+
+.comod-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.comod-btn-danger {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: rgb(239, 68, 68);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.comod-btn-dim {
+  background-color: transparent;
+  color: rgba(148, 163, 184, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.comod-clients {
+  margin-top: 0.25rem;
+  border-top: 1px solid rgba(79, 209, 197, 0.15);
+  padding-top: 0.6rem;
+}
+
+.comod-clients-label {
+  font-size: 0.62rem;
+  color: rgba(79, 209, 197, 0.6);
+  letter-spacing: 0.1em;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+.comod-clients-empty {
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.comod-client-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: rgb(203, 213, 225);
+  padding: 0.2rem 0;
+}
+
+.comod-client-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: rgb(0, 170, 40);
+  flex-shrink: 0;
+}

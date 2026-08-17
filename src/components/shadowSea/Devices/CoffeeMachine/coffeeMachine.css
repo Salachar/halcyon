@@ -1,0 +1,466 @@
+.coffee-machine {
+  --color-coffee: #3d2817;
+  --color-coffee-light: #4a2f1a;
+  --color-cuppa: #6F4436;
+  --color-coffee-dark: #191009;
+
+  --color-border-strong: rgba(238, 140, 48, 0.7);
+  --color-border: rgba(238, 140, 48, 0.5);
+  --color-border-weak: rgba(238, 140, 48, 0.3);
+
+  background: var(--color-coffee);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.coffee-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--color-coffee-light);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.coffee-header-left {
+  flex: 1;
+}
+.coffee-header-right {
+  flex-shrink: 0;
+}
+
+.coffee-brand {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgb(210, 180, 140);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 0 10px rgba(210, 180, 140, 0.3);
+}
+
+.coffee-location {
+  font-size: 0.75rem;
+  color: rgb(160, 130, 90);
+}
+
+.coffee-status {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.coffee-status-ready {
+  background: rgba(139, 90, 43, 0.3);
+  color: rgb(210, 180, 140);
+  border: 1px solid rgba(210, 180, 140, 0.4);
+}
+
+.coffee-status-brewing {
+  background: rgba(210, 180, 140, 0.2);
+  color: rgb(230, 200, 160);
+  border: 1px solid rgba(210, 180, 140, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.coffee-status-offline {
+  background: rgba(139, 69, 19, 0.3);
+  color: rgb(180, 120, 60);
+  border: 1px solid rgba(139, 69, 19, 0.4);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Content - brewing left, buttons right */
+.coffee-content {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Brewing area - left with decorative shapes */
+.coffee-brewing-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-coffee-dark);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+/* Decorative background shapes */
+.coffee-decorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+/* Coffee bean shapes */
+.coffee-bean {
+  position: absolute;
+  width: 40px;
+  height: 50px;
+  background: radial-gradient(ellipse at 30% 30%, rgba(139, 90, 43, 0.8), rgba(92, 64, 51, 0.9));
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  transform: rotate(45deg);
+}
+
+.coffee-bean::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: rgba(61, 40, 23, 0.6);
+  transform: translateY(-50%);
+}
+
+.coffee-bean-1 {
+  top: 10%;
+  left: 15%;
+  width: 30px;
+  height: 38px;
+}
+
+.coffee-bean-2 {
+  bottom: 15%;
+  right: 10%;
+  width: 35px;
+  height: 44px;
+  transform: rotate(-20deg);
+}
+
+.coffee-bean-3 {
+  top: 60%;
+  left: 5%;
+  width: 25px;
+  height: 32px;
+  transform: rotate(120deg);
+}
+
+/* Swirl shapes */
+.coffee-swirl {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 3px solid rgba(139, 90, 43, 0.3);
+  border-radius: 50%;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.coffee-swirl-1 {
+  top: 20%;
+  right: 15%;
+  transform: rotate(45deg);
+}
+
+.coffee-swirl-2 {
+  bottom: 20%;
+  left: 20%;
+  width: 60px;
+  height: 60px;
+  transform: rotate(-30deg);
+}
+
+/* Brewing content */
+.coffee-brewing-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Progress bar */
+.coffee-progress-container {
+  width: 100%;
+}
+
+.coffee-progress-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(210, 180, 140);
+  margin-bottom: 0.75rem;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.coffee-progress-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(61, 40, 23, 0.8);
+  border: 2px solid rgba(139, 90, 43, 0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.coffee-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5A2B, #D2B48C);
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px rgba(210, 180, 140, 0.6);
+}
+
+.coffee-progress-percent {
+  font-size: 0.75rem;
+  color: rgb(160, 130, 90);
+  text-align: center;
+  font-family: monospace;
+}
+
+/* Cup animation */
+.coffee-cup-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.coffee-cup-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+/* CSS Cup */
+.coffee-cup {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.coffee-cup-body {
+  width: 70px;
+  height: 70px;
+  background: rgba(210, 180, 140, 0.1);
+  border: 3px solid rgb(210, 180, 140);
+  border-radius: 0 0 10px 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.coffee-cup-liquid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #6b4423 0%, #3d2817 100%);
+  transition: height 0.1s linear;
+  border-radius: 0 0 8px 8px;
+}
+
+.coffee-cup-handle {
+  width: 20px;
+  height: 30px;
+  border: 3px solid rgb(210, 180, 140);
+  border-left: none;
+  border-radius: 0 15px 15px 0;
+  margin-left: -3px;
+  margin-bottom: 20px;
+}
+
+/* Steam animation */
+.coffee-steam {
+  position: absolute;
+  top: 10px;
+  left: 44%;
+  transform: translateX(-50%);
+  width: 60px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.steam-line {
+  width: 3px;
+  height: 30px;
+  background: linear-gradient(to top, rgba(210, 180, 140, 0.4), transparent);
+  border-radius: 2px;
+  animation: steam-rise 2s ease-in-out infinite;
+}
+
+.steam-line-1 {
+  animation-delay: 0s;
+}
+
+.steam-line-2 {
+  animation-delay: 0.3s;
+}
+
+.steam-line-3 {
+  animation-delay: 0.6s;
+}
+
+@keyframes steam-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(1.5);
+  }
+}
+
+/* Idle message */
+.coffee-idle-message {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.coffee-idle-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(210, 180, 140);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 10px rgba(210, 180, 140, 0.3);
+}
+
+.coffee-idle-subtext {
+  font-size: 0.875rem;
+  color: rgb(160, 130, 90);
+}
+
+.coffee-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.coffee-drink-button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(116, 72, 36, 0.6);
+  border: 2px solid var(--color-border-weak);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.coffee-drink-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.coffee-drink-selected {
+  background: rgba(139, 90, 43, 0.4);
+  border-color: rgb(210, 180, 140);
+  box-shadow: 0 0 15px rgba(210, 180, 140, 0.3);
+}
+
+.coffee-drink-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: rgb(210, 180, 140);
+  letter-spacing: 0.05em;
+}
+
+.coffee-drink-desc {
+  font-size: 0.75rem;
+  color: rgb(160, 130, 90);
+  line-height: 1.3;
+}
+
+/* Footer */
+.coffee-footer {
+  background: linear-gradient(180deg, #3d2817 0%, #2a1810 100%);
+  padding: 0.75rem 1.5rem;
+  border-top: 2px solid rgba(139, 90, 43, 0.3);
+}
+
+.coffee-footer-text {
+  font-size: 0.75rem;
+  color: rgb(160, 130, 90);
+  text-align: center;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .coffee-content {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .coffee-brewing-area {
+    padding: 1rem;
+    min-height: 160px;
+  }
+
+  .coffee-cup-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  .coffee-cup {
+    width: 60px;
+    height: 60px;
+  }
+
+  .coffee-cup-body {
+    width: 52px;
+    height: 52px;
+  }
+
+  .coffee-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .coffee-brand {
+    font-size: 0.8rem;
+  }
+
+  .coffee-status {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .coffee-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .coffee-drink-button {
+    padding: 0.5rem;
+    gap: 0.25rem;
+  }
+
+  .coffee-drink-name {
+    font-size: 0.75rem;
+  }
+
+  .coffee-drink-desc {
+    font-size: 0.65rem;
+  }
+
+  .coffee-footer {
+    padding: 0.5rem 1rem;
+  }
+}

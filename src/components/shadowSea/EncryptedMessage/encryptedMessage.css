@@ -1,0 +1,146 @@
+.encrypted-message {
+  border: 2px solid rgb(139, 92, 246);
+  border-radius: 4px;
+  background: linear-gradient(
+    135deg,
+    rgba(88, 28, 135, 0.1) 0%,
+    rgba(59, 7, 100, 0.15) 100%
+  );
+  overflow: hidden;
+  font-family: monospace;
+  transition: all 0.3s ease;
+}
+
+.encrypted-message-locked {
+  border-color: rgb(251, 191, 36);
+}
+
+/* ============================================
+   LOCKED STATE
+   ============================================ */
+
+.encrypted-lock-screen {
+  padding: 1.5rem 1rem;
+}
+
+.encrypted-lock-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: rgb(251, 191, 36);
+}
+
+.encrypted-lock-header svg {
+  color: rgb(251, 191, 36);
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.encrypted-lock-title {
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+
+.encrypted-scramble {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgb(71, 85, 105);
+  border-radius: 3px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.encrypted-scramble-line {
+  font-size: 0.85rem;
+  color: rgb(148, 163, 184);
+  margin: 0.4rem 0;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+  font-family: 'Courier New', monospace;
+}
+
+.encrypted-lock-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgb(251, 191, 36);
+  font-style: italic;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+/* ============================================
+   UNLOCKED STATE
+   ============================================ */
+
+.encrypted-message-content {
+  padding: 1rem;
+}
+
+.encrypted-message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(139, 92, 246);
+  color: rgb(139, 92, 246);
+}
+
+.encrypted-message-header svg {
+  color: rgb(139, 92, 246);
+  filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
+}
+
+.encrypted-message-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+}
+
+.encrypted-message-body {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 3px;
+  padding: 0.75rem;
+}
+
+.encrypted-message-line {
+  font-size: 0.875rem;
+  color: rgb(203, 213, 225);
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.encrypted-message-line:first-child {
+  margin-top: 0;
+}
+
+.encrypted-message-line:last-child {
+  margin-bottom: 0;
+}
+
+/* Subtle glow effect on unlocked state */
+.encrypted-message:not(.encrypted-message-locked) {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+/* Subtle pulse on locked state */
+.encrypted-message-locked .encrypted-lock-header svg,
+.encrypted-message-locked .encrypted-lock-title {
+  animation: encrypted-pulse 2s ease-in-out infinite;
+}
+
+@keyframes encrypted-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}

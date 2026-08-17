@@ -1,0 +1,9 @@
+.sr-priority-row--unavailable {
+  opacity: 0.6;
+}
+
+.sr-table-cell-note {
+  font-size: 0.78rem;
+  color: var(--sr-text-muted);
+  max-width: 220px;
+}

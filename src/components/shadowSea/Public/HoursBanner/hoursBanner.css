@@ -1,0 +1,180 @@
+/* HoursBanner - Hours of operation display */
+
+/* ── Base ─────────────────────────────────────────────── */
+
+.hours-banner {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+  border: 2px solid rgba(79, 209, 197, 0.4);
+  border-radius: 4px;
+  padding: 1rem;
+  font-family: monospace;
+  box-shadow: 0 0 10px rgba(79, 209, 197, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Header ───────────────────────────────────────────── */
+
+.hours-banner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+}
+
+.hours-banner-business {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: rgb(79, 209, 197);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgba(79, 209, 197, 0.6);
+}
+
+/* ── Status badge ─────────────────────────────────────── */
+
+.hours-banner-status {
+  padding: 0.2rem 0.65rem;
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  border: 1px solid;
+  border-radius: 3px;
+}
+
+.hours-banner-status-open {
+  color: rgb(16, 185, 129);
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.hours-banner-status-closed {
+  color: rgb(239, 68, 68);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.hours-banner-status-warning {
+  color: rgb(251, 191, 36);
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+/* ── Hours ────────────────────────────────────────────── */
+
+.hours-banner-main {
+  margin-bottom: 0.75rem;
+}
+
+.hours-banner-label {
+  font-size: 0.65rem;
+  color: rgb(148, 163, 184);
+  letter-spacing: 0.12em;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.hours-banner-hours {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: rgb(79, 209, 197);
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(79, 209, 197, 0.5);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.hours-banner-days {
+  font-size: 0.72rem;
+  color: rgb(148, 163, 184);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Location ─────────────────────────────────────────── */
+
+.hours-banner-location {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-left: 3px solid rgba(79, 209, 197, 0.5);
+  font-size: 0.75rem;
+  color: rgb(203, 213, 225);
+  margin-bottom: 0.5rem;
+}
+
+.hours-banner-location-label {
+  font-weight: bold;
+  color: rgb(79, 209, 197);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+/* ── Note ─────────────────────────────────────────────── */
+
+.hours-banner-note {
+  font-size: 0.7rem;
+  color: rgb(148, 163, 184);
+  font-style: italic;
+  text-align: center;
+  padding: 0.45rem 0.5rem;
+  background: rgba(15, 23, 42, 0.4);
+  border-top: 1px solid rgba(79, 209, 197, 0.2);
+  margin-top: 0.5rem;
+}
+
+
+/* ── Fancy theme ──────────────────────────────────────── */
+
+.hours-banner-fancy {
+  background: linear-gradient(135deg, rgba(20, 15, 10, 0.95), rgba(10, 8, 5, 0.98));
+  border-color: rgba(217, 160, 80, 0.35);
+  box-shadow: 0 0 10px rgba(217, 160, 80, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.hours-banner-fancy .hours-banner-header {
+  border-bottom-color: rgba(217, 160, 80, 0.2);
+}
+
+.hours-banner-fancy .hours-banner-business {
+  color: rgb(217, 160, 80);
+  text-shadow: 0 0 8px rgba(217, 160, 80, 0.5);
+}
+
+.hours-banner-fancy .hours-banner-label {
+  color: rgba(180, 130, 55, 0.6);
+}
+
+.hours-banner-fancy .hours-banner-hours {
+  color: rgb(217, 160, 80);
+  text-shadow: 0 0 10px rgba(217, 160, 80, 0.4);
+}
+
+.hours-banner-fancy .hours-banner-days {
+  color: rgba(180, 130, 55, 0.7);
+}
+
+.hours-banner-fancy .hours-banner-location {
+  background: rgba(10, 8, 5, 0.7);
+  border-left-color: rgba(217, 160, 80, 0.4);
+  color: rgb(203, 185, 155);
+}
+
+.hours-banner-fancy .hours-banner-location-label {
+  color: rgb(180, 130, 55);
+}
+
+.hours-banner-fancy .hours-banner-note {
+  color: rgba(180, 130, 55, 0.6);
+  background: rgba(10, 8, 5, 0.5);
+  border-top-color: rgba(217, 160, 80, 0.15);
+}
+
+
+/* ── Responsive ───────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .hours-banner-hours {
+    font-size: 1.35rem;
+  }
+}

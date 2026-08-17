@@ -1,0 +1,75 @@
+.mdl-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.mdl-modal {
+  background-color: rgb(19, 23, 34);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 420px;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+.mdl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+  background-color: rgb(27, 36, 58);
+}
+
+.mdl-header-text {
+  min-width: 0;
+}
+
+.mdl-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  color: rgb(79, 209, 197);
+  text-shadow: 0 0 8px rgba(79, 209, 197, 0.4);
+}
+
+.mdl-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  color: rgba(203, 213, 225, 0.7);
+  letter-spacing: 0.04em;
+}
+
+.mdl-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  background-color: rgba(79, 209, 197, 0.12);
+  color: rgb(79, 209, 197);
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.mdl-body {
+  padding: 0.75rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mdl-message {
+  font-size: 0.78rem;
+  color: rgb(203, 213, 225);
+  line-height: 1.5;
+}

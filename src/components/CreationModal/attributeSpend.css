@@ -1,0 +1,90 @@
+.sr-attr-spend-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.sr-attr-spend-points {
+  font-size: 0.9rem;
+  color: var(--sr-text-muted);
+}
+.sr-attr-spend-points strong {
+  color: var(--sr-orange-bright);
+}
+
+.sr-attr-spend-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.5rem;
+  transition: border-color 0.15s ease;
+}
+.sr-attr-spend-row:last-child {
+  margin-bottom: 0;
+}
+.sr-attr-spend-row:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-attr-spend-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sr-attr-spend-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.sr-attr-spend-description {
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sr-attr-spend-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sr-attr-spend-bound {
+  font-size: 0.8rem;
+  color: var(--sr-text-dim);
+  min-width: 1rem;
+  text-align: center;
+}
+
+.sr-attr-spend-asterisk {
+  color: var(--sr-amber);
+  cursor: help;
+  margin-left: 0.1rem;
+}
+
+/* Absolutely positioned against .sr-attr-spend-row (position: relative
+   above) so it appearing/disappearing never shifts the control group's
+   width — badges used to live inline in the flex row and would nudge
+   the +/- buttons sideways as they toggled on and off. */
+.sr-attr-spend-max-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--sr-amber);
+  background-color: var(--sr-amber-bg);
+  border: 1px solid var(--sr-amber-border);
+  border-radius: var(--sr-radius);
+  padding: 0.15rem 0.4rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}

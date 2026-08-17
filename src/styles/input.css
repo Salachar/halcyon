@@ -1,0 +1,122 @@
+/* ==========================================================================
+   INPUT — buttons, and a home for future form controls (text fields,
+   checkboxes, steppers, etc.) as they get built
+   ========================================================================== */
+
+.sr-btn {
+  display: inline-block;
+  font-family: var(--sr-font);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--sr-radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.sr-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sr-btn--primary {
+  background-color: var(--sr-orange);
+  border-color: var(--sr-orange);
+  color: var(--sr-bg-black);
+}
+.sr-btn--primary:hover:not(:disabled) {
+  background-color: var(--sr-orange-bright);
+}
+
+.sr-btn--secondary {
+  background-color: transparent;
+  border-color: var(--sr-blue-dim);
+  color: var(--sr-blue-bright);
+}
+.sr-btn--secondary:hover:not(:disabled) {
+  border-color: var(--sr-blue);
+  background-color: var(--sr-blue-bg);
+}
+
+.sr-btn--subtle {
+  background-color: var(--sr-amber-bg);
+  border-color: var(--sr-amber-border);
+  color: var(--sr-amber);
+}
+.sr-btn--subtle:hover:not(:disabled) {
+  border-color: var(--sr-amber);
+}
+
+.sr-btn--danger {
+  background-color: var(--sr-red-bg);
+  border-color: var(--sr-red-border);
+  color: var(--sr-red);
+}
+.sr-btn--danger:hover:not(:disabled) {
+  border-color: var(--sr-red);
+}
+
+.sr-search-input {
+  width: 100%;
+  font-family: var(--sr-font);
+  font-size: 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  color: var(--sr-text);
+  padding: 0.6rem 0.85rem;
+  outline: none;
+  margin-bottom: 1rem;
+}
+.sr-search-input::placeholder {
+  color: var(--sr-text-dim);
+}
+.sr-search-input:focus {
+  border-color: var(--sr-blue);
+}
+
+.sr-number-input {
+  width: 5rem;
+  font-family: var(--sr-font);
+  font-size: 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  color: var(--sr-text);
+  padding: 0.4rem 0.5rem;
+  outline: none;
+  text-align: center;
+}
+.sr-number-input:focus {
+  border-color: var(--sr-blue);
+}
+
+/* Generic small square icon button — same visual for .sr-buy-btn (Gear)
+   and .sr-icon-btn (everything after it), one rule instead of two
+   copies that could quietly drift apart. */
+.sr-icon-btn,
+.sr-buy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-family: var(--sr-font);
+  font-weight: 700;
+  font-size: 0.85rem;
+  background-color: var(--sr-orange-bg);
+  border: 1px solid var(--sr-orange-border);
+  border-radius: var(--sr-radius);
+  color: var(--sr-orange-bright);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.sr-icon-btn:hover,
+.sr-buy-btn:hover {
+  border-color: var(--sr-orange);
+}

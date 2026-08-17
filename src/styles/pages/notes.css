@@ -1,0 +1,92 @@
+/* Root uses .sr-fullbleed directly in JSX — no bespoke page wrapper needed,
+   it's the exact same shell NetInterface uses. */
+
+.notes-header {
+  background-color: var(--sr-bg-elevated);
+  border-bottom: 1px solid var(--sr-blue-dim);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+}
+
+.notes-header-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--sr-blue-bright);
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.notes-header-subtitle {
+  font-size: 0.55rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.15rem;
+  letter-spacing: 0.08em;
+}
+
+.notes-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Layered on top of .sr-btn for icon + label spacing */
+.notes-icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Input bar sits between header and list, not pinned to the bottom —
+   the list is the bottom-most element, so it owns the safe-area padding
+   via .sr-fullbleed-content. */
+.notes-input-bar {
+  flex-shrink: 0;
+  background-color: var(--sr-bg-elevated);
+  border-bottom: 1px solid var(--sr-blue-dim);
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.notes-input {
+  flex: 1;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  color: var(--sr-text);
+  font-family: var(--sr-font);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.6rem;
+  resize: none;
+  outline: none;
+  max-height: 200px;
+}
+
+.notes-input::placeholder {
+  color: var(--sr-text-dim);
+}
+
+/* Applied alongside .sr-fullbleed-content, which already owns the
+   background, padding, and safe-area bottom spacing — this just adds
+   the message-list layout on top of that. */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notes-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sr-text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1rem;
+}
