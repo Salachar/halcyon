@@ -4,11 +4,18 @@
 // red — the same "danger/negative" color already meaning that
 // everywhere else in the app (damage, delete, Callout's danger variant),
 // not a new color rule invented for qualities specifically.
-export default function QualityCard({ quality }) {
+//
+// `entry` and `onRemove` are optional — absent (Shadowrunners reference
+// page), this is pure definition display. Present (CharacterSheet), the
+// meta line resolves to the actual owned level/selection instead of the
+// generic range/type, and a remove button appears.
+export default function QualityCard({ quality, entry, onRemove }) {
   const isNegative = quality.type === 'negative';
 
   const costLabel = quality.karmaCostPerLevel != null
-    ? `${quality.karmaCostPerLevel} Karma/level`
+    ? entry?.level
+      ? `${quality.karmaCostPerLevel * entry.level} Karma`
+      : `${quality.karmaCostPerLevel} Karma/level`
     : `${quality.karmaCost} Karma`;
 
   return (
@@ -17,16 +24,22 @@ export default function QualityCard({ quality }) {
         <div className="sr-quality-card-name">{quality.label}</div>
         <div className="sr-quality-card-meta">
           {isNegative ? 'Bonus' : 'Cost'}: {costLabel}
-          {quality.levelRange && ` · Levels ${quality.levelRange[0]}–${quality.levelRange[1]}`}
+          {!entry && quality.levelRange && ` · Levels ${quality.levelRange[0]}–${quality.levelRange[1]}`}
+          {entry?.level && ` · Level ${entry.level}`}
         </div>
       </div>
 
       <div className="sr-quality-card-body">
         <p className="sr-quality-card-description">{quality.description}</p>
-        {quality.requiresSelection && (
+        {entry?.selection && <div className="sr-quality-card-tag">Selected: {entry.selection}</div>}
+        {!entry && quality.requiresSelection && (
           <div className="sr-quality-card-tag">Requires selection: {quality.requiresSelection}</div>
         )}
       </div>
+
+      {onRemove && (
+        <button className="sr-icon-btn" onClick={onRemove} title="Remove">−</button>
+      )}
     </div>
   );
 }

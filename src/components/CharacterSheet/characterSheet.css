@@ -8,10 +8,22 @@
 .sr-sheet-name-input {
   flex: 1;
   min-width: 200px;
+  font-family: var(--sr-font);
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--sr-blue-bright);
   text-align: left;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  padding: 0.4rem 0.6rem;
+  outline: none;
+}
+.sr-sheet-name-input:focus {
+  border-color: var(--sr-blue);
+}
+.sr-sheet-name-input::placeholder {
+  color: var(--sr-text-dim);
 }
 
 .sr-sheet-meta {
@@ -27,13 +39,27 @@
   gap: 0.5rem;
 }
 
+.sr-sheet-resources-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
 .sr-sheet-resources {
   display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 0.85rem;
   color: var(--sr-text-muted);
 }
 .sr-sheet-resources strong {
   color: var(--sr-text);
+}
+
+.sr-sheet-empty {
+  font-size: 0.85rem;
+  color: var(--sr-text-dim);
+  font-style: italic;
 }

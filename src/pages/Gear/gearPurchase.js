@@ -37,3 +37,18 @@ export function defaultConfig(item) {
   if (item.costPerUnit != null) return { units: 1 };
   return {};
 }
+
+// Actually applies a purchase to a character — deducts nuyen, adds the
+// item to inventory. `purchase` is whatever PurchaseModal's onPurchase
+// receives: { itemId, ...config }. Returns false if spendNuyen fails
+// (shouldn't happen in normal use, since the Buy button is already
+// disabled when unaffordable — this is just a defensive check, not
+// meant to drive any error UI).
+export function commitPurchase(character, item, purchase) {
+  const cost = resolveCost(item, purchase);
+  if (!character.spendNuyen(cost)) return false;
+
+  const { itemId, ...config } = purchase;
+  character.addGear(itemId, config, 1);
+  return true;
+}

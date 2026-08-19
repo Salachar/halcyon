@@ -4,17 +4,28 @@ import { Section, GearTable } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
 import { formatDamageValue, formatAttackRatings, formatAvailability, formatCost } from '@utils/gearFormat';
 import { gearByTag } from './gearTags';
+import { commitPurchase } from './gearPurchase';
 import { SKILLS } from '@data/character/skills';
+import { useCharacterManager } from '@hooks/useCharacterManager';
 import PurchaseModal from './PurchaseModal';
+
+import './gearBuyButton.css';
 
 export default function GearMeleeThrown({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
+  const { touch } = useCharacterManager();
 
   const buyColumn = {
     label: '',
-    render: (item) => (
-      <button className="sr-buy-btn" onClick={() => setPurchaseItem(item)} title={`Buy ${item.label}`}>$</button>
-    ),
+    render: (item) => {
+      const owned = character?.gear?.[item.id];
+      return (
+        <div className="sr-gear-buy-cell">
+          <button className="sr-buy-btn" onClick={() => setPurchaseItem(item)} title={`Buy ${item.label}`}>$</button>
+          {owned && <span className="sr-gear-owned-badge">×{owned.quantity}</span>}
+        </div>
+      );
+    },
   };
 
   const weaponColumns = [
@@ -37,7 +48,7 @@ export default function GearMeleeThrown({ character }) {
 
   return (
     <>
-      <CollapsibleSection id="gear-melee-blades" title="Blades">
+      <CollapsibleSection id="gear-melee-blades" title="Blades" defaultOpen>
         <GearTable items={gearByTag('blade')} columns={weaponColumns} />
       </CollapsibleSection>
       <CollapsibleSection id="gear-melee-clubs" title="Clubs">
@@ -61,9 +72,8 @@ export default function GearMeleeThrown({ character }) {
           character={character}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
-            // TODO: character.purchaseItem(purchase) once Character exists —
-            // deduct nuyen, add { itemId, ...config } to inventory.
-            console.log('purchase', purchase);
+            commitPurchase(character, purchaseItem, purchase);
+            touch();
             setPurchaseItem(null);
           }}
         />

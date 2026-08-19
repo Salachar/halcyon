@@ -13,6 +13,11 @@ function capitalize(word) {
 // Returns null when the skill genuinely can't be attempted (rank 0 on a
 // skill that isn't untrainable) — callers should treat null as "don't
 // render a roller," not as an empty pool.
+//
+// Wound penalty is applied here since a skill test is never Damage
+// Resistance — the one exemption the rule carves out. A future
+// buildResistancePool (or similar) needs to deliberately NOT call this
+// same step, not inherit it by accident.
 export function buildSkillPool(character, skillId, { useSecondary = false } = {}) {
   const def = SKILLS[skillId];
   if (!def) return null;
@@ -28,8 +33,12 @@ export function buildSkillPool(character, skillId, { useSecondary = false } = {}
     ? addComponent(pool, def.label, rank, 'skill')
     : addComponent(pool, `${def.label} (untrained)`, -1, 'untrained');
   pool = addComponent(pool, capitalize(attrKey), attrValue, 'attribute');
+  pool = addComponent(pool, 'Wound Penalty', -character.woundPenalty, 'wound');
 
-  return pool;
+  // A dice pool can't go negative — addComponent is a pure accumulator
+  // with no opinion on that, so the floor lives here, where Shadowrun's
+  // actual dice-pool semantics are known.
+  return { ...pool, total: Math.max(0, pool.total) };
 }
 
 // Cumulative Karma cost climbing from one rank to another — matches the

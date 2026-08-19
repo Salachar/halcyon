@@ -1,0 +1,40 @@
+.sr-keypad-display {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+  text-align: center;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+}
+
+.sr-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sr-keypad-key {
+  font-family: var(--sr-font);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--sr-text);
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  padding: 0.9rem 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sr-keypad-key:hover {
+  border-color: var(--sr-blue-dim);
+  background-color: var(--sr-blue-bg);
+}
+
+.sr-keypad-key--action {
+  color: var(--sr-amber);
+  font-size: 1rem;
+}

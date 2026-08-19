@@ -1,0 +1,54 @@
+.sr-quickadjust-current {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+  text-align: center;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+}
+
+.sr-quickadjust-sign {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.sr-quickadjust-sign .sr-btn {
+  flex: 1;
+}
+
+.sr-quickadjust-presets {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.sr-quickadjust-preset {
+  font-family: var(--sr-font);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sr-text);
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  padding: 0.6rem 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sr-quickadjust-preset:hover {
+  border-color: var(--sr-blue-dim);
+  background-color: var(--sr-blue-bg);
+}
+
+.sr-quickadjust-custom {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.sr-quickadjust-custom .sr-number-input {
+  flex: 1;
+  width: auto;
+}

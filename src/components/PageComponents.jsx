@@ -1,8 +1,3 @@
-// Base layout primitives for the Shadowrun app.
-// Plain CSS (see theme.css), no Tailwind, no responsive breakpoints.
-// Every page (Home, Rules, Combat, ...) should build on these rather than
-// hand-rolling section/panel markup, so the whole app stays visually consistent.
-
 import { useState } from 'react';
 
 export const Page = ({ children }) => {

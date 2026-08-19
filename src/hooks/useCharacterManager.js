@@ -6,12 +6,6 @@ import characterManager from '@data/characterManager';
 // Combat, Matrix, Characters) calls this directly — no Provider needed,
 // since characterManager is already a true app-wide singleton. This hook
 // just gives React a reason to re-render when it changes.
-//
-// Until Character exists, load() in the manager is a no-op (its body is
-// commented out) — so characters will always be {} and currentCharacter
-// will always be null. That's expected, not a bug: it's exactly the
-// "works with no character selected" state the purchase modal is
-// already built to handle.
 export function useCharacterManager() {
   const [, forceUpdate] = useState(0);
 
@@ -31,11 +25,26 @@ export function useCharacterManager() {
     characterManager.deleteCharacter(id);
   }, []);
 
+  // Call after mutating a character in place (character.nuyen -= cost,
+  // character.name = value, etc.) — see the touch() doc comment on
+  // CharacterManager itself for why this is needed at all.
+  const touch = useCallback(() => {
+    characterManager.touch();
+  }, []);
+
   return {
     characters: characterManager.characters,
     currentCharacter: characterManager.currentCharacter,
     selectCharacter,
     addCharacter,
     deleteCharacter,
+    touch,
   };
+}
+
+// Convenience hook for consumers that just want to read the currently
+// selected character reactively without pulling in the selection/
+// mutation actions.
+export function useSelectedCharacter() {
+  return useCharacterManager().currentCharacter;
 }

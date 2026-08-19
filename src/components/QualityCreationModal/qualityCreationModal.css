@@ -1,0 +1,112 @@
+.sr-modal.sr-quality-creation-modal {
+  width: 95vw;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.sr-quality-creation-modal .sr-modal-header {
+  flex-shrink: 0;
+}
+
+.sr-qcreate-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--sr-text-muted);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--sr-hairline);
+}
+.sr-qcreate-bar strong {
+  color: var(--sr-orange-bright);
+}
+.sr-qcreate-bar strong.sr-qpick-cap-hit {
+  color: var(--sr-red);
+}
+
+.sr-qcreate-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.sr-qcreate-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sr-qcreate-row--blocked {
+  opacity: 0.5;
+}
+
+.sr-qcreate-checkbox {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+.sr-qcreate-row--blocked .sr-qcreate-checkbox {
+  cursor: not-allowed;
+}
+
+.sr-qcreate-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 1rem 0 0.5rem;
+}
+.sr-qcreate-section-title:first-child {
+  margin-top: 0;
+}
+
+.sr-qcreate-expand {
+  width: 100%;
+  padding-top: 0.6rem;
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--sr-hairline);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sr-qcreate-level {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sr-qcreate-selection-input {
+  flex: 1;
+  min-width: 150px;
+}
+
+.sr-qcreate-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-qcreate-review-item {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--sr-hairline);
+  font-size: 0.85rem;
+}
+.sr-qcreate-review-item:last-child {
+  border-bottom: none;
+}

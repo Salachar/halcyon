@@ -73,14 +73,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: var(--sr-radius);
   background-color: var(--sr-bg-base);
   border: 1px solid var(--sr-hairline);
   color: var(--sr-text-muted);
-  font-size: 0.8rem;
+  font-family: var(--sr-font);
+  font-size: 0.9rem;
   font-weight: 700;
+  cursor: default;
+  transition: opacity 0.1s ease;
 }
 
 .sr-die--hit {
@@ -93,6 +96,24 @@
   background-color: var(--sr-red-bg);
   border-color: var(--sr-red-border);
   color: var(--sr-red);
+}
+
+.sr-die--rolling {
+  animation: sr-die-roll 0.15s ease-in-out infinite;
+}
+@keyframes sr-die-roll {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.sr-die--rerollable {
+  cursor: pointer;
+}
+.sr-die--rerollable:active {
+  border-color: var(--sr-blue);
+}
+.sr-die:disabled {
+  cursor: default;
 }
 
 .sr-dice-outcome {
@@ -120,18 +141,4 @@
 
 .sr-dice-reset {
   margin-left: auto;
-}
-
-.sr-dice-manual {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--sr-hairline);
-}
-
-.sr-dice-manual-label {
-  font-size: 0.75rem;
-  color: var(--sr-text-dim);
-  flex: 1;
 }

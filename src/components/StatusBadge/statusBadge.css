@@ -1,0 +1,20 @@
+.sr-status-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--sr-radius);
+}
+
+.sr-status-badge--complete {
+  color: var(--sr-blue-bright);
+  background-color: var(--sr-blue-bg);
+  border: 1px solid var(--sr-blue-dim);
+}
+
+.sr-status-badge--incomplete {
+  color: var(--sr-amber);
+  background-color: var(--sr-amber-bg);
+  border: 1px solid var(--sr-amber-border);
+}

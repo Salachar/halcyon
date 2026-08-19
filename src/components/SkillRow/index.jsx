@@ -29,7 +29,11 @@ export default function SkillRow({ character, skillId }) {
 
   const nextCost = karmaCost(rank, rank + 1);
   const canIncrease = rank < maxRank && (usingPoints || character.karma >= nextCost);
-  const canDecrease = rank > 0 && usingPoints;
+  // Once the global points pool hits 0 it can never refill — the rank
+  // itself stays freely adjustable both directions from then on, just
+  // priced in Karma instead of points. Only the points-to-karma
+  // transition is one-way, not the rank adjustment itself.
+  const canDecrease = rank > 0;
 
   const handleIncrease = () => {
     if (!canIncrease) return;
@@ -45,8 +49,17 @@ export default function SkillRow({ character, skillId }) {
 
   const handleDecrease = () => {
     if (!canDecrease) return;
-    character.setSkillRank(skillId, rank - 1);
-    character.skillPointsRemaining += 1;
+    if (usingPoints) {
+      character.setSkillRank(skillId, rank - 1);
+      character.skillPointsRemaining += 1;
+    } else {
+      // Refunds whatever the step being undone would cost right now —
+      // doesn't try to track whether this specific rank was originally
+      // bought with points or Karma. Once the global pool's exhausted,
+      // every adjustment (either direction) is priced in Karma.
+      character.karma += karmaCost(rank - 1, rank);
+      character.setSkillRank(skillId, rank - 1);
+    }
     touch();
   };
 
