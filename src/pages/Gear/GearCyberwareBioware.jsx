@@ -1,35 +1,60 @@
+import { useState } from 'react';
+
 import { Section, GearTable, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
 import { formatAvailability, formatCost, formatEssence, formatCapacity, formatDamageValue, formatAttackRatings } from '@utils/gearFormat';
 import { gearByTag } from './gearTags';
+import { commitPurchase } from './gearPurchase';
+import { useCharacterManager } from '@hooks/useCharacterManager';
+import PurchaseModal from './PurchaseModal';
+import './gearBuyButton.css';
 
-const limbColumns = [
-  { label: 'Limb', render: (i) => i.label },
-  { label: 'Essence', render: formatEssence },
-  { label: 'Capacity', render: formatCapacity },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const implantWeaponColumns = [
-  { label: 'Weapon', render: (i) => i.label },
-  { label: 'Essence', render: formatEssence },
-  { label: 'Capacity', render: formatCapacity },
-  { label: 'DV', render: formatDamageValue },
-  { label: 'Attack Ratings (C/N/M/F/E)', render: formatAttackRatings },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const bioColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Essence', render: formatEssence },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
+export default function GearCyberwareBioware({ character }) {
+  const [purchaseItem, setPurchaseItem] = useState(null);
+  const { touch } = useCharacterManager();
 
-export default function GearCyberwareBioware() {
+  const buyColumn = {
+    label: '',
+    render: (item) => {
+      const owned = character?.gear?.[item.id];
+      return (
+        <div className="sr-gear-buy-cell">
+          <button className="sr-buy-btn" onClick={() => setPurchaseItem(item)} title={`Buy ${item.label}`}>$</button>
+          {owned && <span className="sr-gear-owned-badge">×{owned.quantity}</span>}
+        </div>
+      );
+    },
+  };
+
+  const limbColumns = [
+    { label: 'Limb', render: (i) => i.label },
+    { label: 'Essence', render: formatEssence },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const implantWeaponColumns = [
+    { label: 'Weapon', render: (i) => i.label },
+    { label: 'Essence', render: formatEssence },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'DV', render: formatDamageValue },
+    { label: 'Attack Ratings (C/N/M/F/E)', render: formatAttackRatings },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const bioColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Essence', render: formatEssence },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+
   return (
     <>
-      <CollapsibleSection id="gear-cw-limbs" title="Cyberlimbs">
+      <CollapsibleSection id="gear-cw-limbs" title="Cyberlimbs" defaultOpen>
         <GearTable items={gearByTag('cyberlimb')} columns={limbColumns} />
         <Section title="Cyberlimb Accessories">
           <GearTable items={gearByTag('cyberlimb_accessory')} columns={limbColumns} />
@@ -53,6 +78,19 @@ export default function GearCyberwareBioware() {
       <CollapsibleSection id="gear-cw-cultured" title="Cultured Bioware">
         <GearTable items={gearByTag('bioware_cultured')} columns={bioColumns} />
       </CollapsibleSection>
+
+      {purchaseItem && (
+        <PurchaseModal
+          item={purchaseItem}
+          character={character}
+          onClose={() => setPurchaseItem(null)}
+          onPurchase={(purchase) => {
+            commitPurchase(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+        />
+      )}
     </>
   );
 }

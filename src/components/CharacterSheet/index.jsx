@@ -84,7 +84,11 @@ export default function CharacterSheet({ character }) {
           />
           <div className="sr-sheet-meta">
             {capitalize(character.metatype)} · {capitalize(character.magicType)}
-            {character.magicResonance > 0 && ` · ${magicLabel} ${character.magicResonance}`}
+            {character.magicResonance > 0 && (
+              character.magicPointsLostToEssence > 0
+                ? ` · ${magicLabel} ${character.effectiveMagicResonance} (${character.magicResonance} base, −${character.magicPointsLostToEssence} Essence)`
+                : ` · ${magicLabel} ${character.magicResonance}`
+            )}
           </div>
         </div>
       </Panel>
@@ -109,6 +113,7 @@ export default function CharacterSheet({ character }) {
               <button className="sr-icon-btn" style={{ marginLeft: '0.5rem' }} onClick={() => setKarmaModalOpen(true)}>+</button>
             </span>
             <span>Skill Points Remaining: <strong>{character.skillPointsRemaining}</strong></span>
+            <span>Essence: <strong>{character.essence.toFixed(2)}</strong> / 6</span>
           </div>
 
           <ConditionMonitor character={character} />

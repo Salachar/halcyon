@@ -1,3 +1,5 @@
+import { isGradeable, gradeCostMultiplier } from '@utils/augmentationEconomy';
+
 // Cost resolution for the purchase flow — same branching shape as
 // formatCost in gearFormat.js, but returns a real number instead of a
 // display string, since the modal needs to check it against nuyen.
@@ -20,22 +22,38 @@ export function configRange(item) {
 }
 
 // config is { rating } or { capacity } or { units } depending on the item —
-// only one axis is ever relevant per item, matching formatCost's branching.
+// only one of those axes is ever relevant per item, matching formatCost's
+// branching. Grade is a SEPARATE, independent axis that stacks on top of
+// whichever of those applies (a Rating 3 item at Beta grade needs both),
+// rather than being one more mutually-exclusive branch.
 export function resolveCost(item, config = {}) {
+  let base;
   if (item.costBase != null && item.costPerRating != null) {
-    return item.costBase + item.costPerRating * (config.rating ?? 0);
+    base = item.costBase + item.costPerRating * (config.rating ?? 0);
+  } else if (item.costPerRating != null) {
+    base = item.costPerRating * (config.rating ?? 0);
+  } else if (item.costPerCapacity != null) {
+    base = item.costPerCapacity * (config.capacity ?? 0);
+  } else if (item.costPerUnit != null) {
+    base = item.costPerUnit * (config.units ?? 1);
+  } else {
+    base = item.cost ?? 0;
   }
-  if (item.costPerRating != null) return item.costPerRating * (config.rating ?? 0);
-  if (item.costPerCapacity != null) return item.costPerCapacity * (config.capacity ?? 0);
-  if (item.costPerUnit != null) return item.costPerUnit * (config.units ?? 1);
-  return item.cost ?? 0;
+
+  if (isGradeable(item)) {
+    base *= gradeCostMultiplier(config.grade || 'standard');
+  }
+
+  return base;
 }
 
 export function defaultConfig(item) {
-  if (item.ratingRange) return { rating: item.ratingRange[0] };
-  if (item.capacityRange) return { capacity: item.capacityRange[0] };
-  if (item.costPerUnit != null) return { units: 1 };
-  return {};
+  const config = {};
+  if (item.ratingRange) config.rating = item.ratingRange[0];
+  else if (item.capacityRange) config.capacity = item.capacityRange[0];
+  else if (item.costPerUnit != null) config.units = 1;
+  if (isGradeable(item)) config.grade = 'standard';
+  return config;
 }
 
 // Actually applies a purchase to a character — deducts nuyen, adds the

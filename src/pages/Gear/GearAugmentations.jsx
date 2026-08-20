@@ -1,23 +1,48 @@
+import { useState } from 'react';
+
 import { Section, GearTable, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
 import { formatAvailability, formatCost, formatEssence, formatCapacity } from '@utils/gearFormat';
 import { gearByTag } from './gearTags';
+import { commitPurchase } from './gearPurchase';
+import { useCharacterManager } from '@hooks/useCharacterManager';
+import PurchaseModal from './PurchaseModal';
 import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
 
-const basicColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const headwareColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Essence', render: formatEssence },
-  { label: 'Capacity', render: formatCapacity },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
+import './gearBuyButton.css';
 
-export default function GearAugmentations() {
+export default function GearAugmentations({ character }) {
+  const [purchaseItem, setPurchaseItem] = useState(null);
+  const { touch } = useCharacterManager();
+
+  const buyColumn = {
+    label: '',
+    render: (item) => {
+      const owned = character?.gear?.[item.id];
+      return (
+        <div className="sr-gear-buy-cell">
+          <button className="sr-buy-btn" onClick={() => setPurchaseItem(item)} title={`Buy ${item.label}`}>$</button>
+          {owned && <span className="sr-gear-owned-badge">×{owned.quantity}</span>}
+        </div>
+      );
+    },
+  };
+
+  const basicColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const headwareColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Essence', render: formatEssence },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+
   return (
     <>
       <Callout title="Grades" variant="critical">
@@ -26,10 +51,10 @@ export default function GearAugmentations() {
             <strong style={{ textTransform: 'capitalize' }}>{grade}</strong>: Essence ×{m.essenceMultiplier}, Cost ×{m.costMultiplier}, Availability {m.availabilityModifier >= 0 ? '+' : ''}{m.availabilityModifier}
           </div>
         ))}
-        Applies to every item below — listed prices are standard grade.
+        Applies to every item below except Biotech Basics — grade is chosen when buying, in the purchase modal.
       </Callout>
 
-      <CollapsibleSection id="gear-aug-biotech" title="Biotech Basics">
+      <CollapsibleSection id="gear-aug-biotech" title="Biotech Basics" defaultOpen>
         <GearTable items={gearByTag('biotech')} columns={basicColumns} />
       </CollapsibleSection>
 
@@ -53,6 +78,19 @@ export default function GearAugmentations() {
           </Callout>
         </Section>
       </CollapsibleSection>
+
+      {purchaseItem && (
+        <PurchaseModal
+          item={purchaseItem}
+          character={character}
+          onClose={() => setPurchaseItem(null)}
+          onPurchase={(purchase) => {
+            commitPurchase(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+        />
+      )}
     </>
   );
 }

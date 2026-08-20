@@ -254,6 +254,167 @@
 }
 
 /* ==========================================================================
+   MODAL — purchase modal for now; generic enough to reuse for others
+   ========================================================================== */
+
+.sr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 12, 18, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.sr-modal {
+  background-color: var(--sr-bg-elevated);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  padding: 1.5rem;
+  width: min(420px, 90%);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.sr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.sr-modal-title {
+  font-size: 1.1rem;
+  color: var(--sr-blue-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sr-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--sr-text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+.sr-modal-close:hover {
+  color: var(--sr-text);
+}
+
+.sr-modal-description {
+  font-size: 0.85rem;
+  color: var(--sr-text-muted);
+  margin-bottom: 1rem;
+}
+
+.sr-modal-config {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sr-modal-config-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sr-text-muted);
+}
+
+.sr-modal-cost {
+  font-size: 1rem;
+  color: var(--sr-text);
+  margin-bottom: 0.75rem;
+}
+.sr-modal-cost strong {
+  color: var(--sr-orange-bright);
+}
+
+.sr-modal-essence strong {
+  color: var(--sr-amber);
+}
+
+.sr-modal-hint {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  margin-bottom: 0.75rem;
+}
+.sr-modal-hint--danger {
+  color: var(--sr-red);
+}
+
+.sr-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* ==========================================================================
+   TIMELINE — plain vertical line + dot per event
+   ========================================================================== */
+
+.sr-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.sr-timeline::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 1px;
+  background-color: var(--sr-blue-dim);
+}
+
+.sr-timeline-event {
+  position: relative;
+  padding-bottom: 1.75rem;
+}
+.sr-timeline-event:last-child {
+  padding-bottom: 0;
+}
+
+.sr-timeline-dot {
+  position: absolute;
+  left: -1.5rem;
+  top: 0.3rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--sr-bg-base);
+  border: 2px solid var(--sr-blue);
+}
+
+.sr-timeline-date {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sr-amber);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.2rem;
+}
+
+.sr-timeline-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  margin-bottom: 0.35rem;
+}
+
+.sr-timeline-description {
+  font-size: 0.88rem;
+  color: var(--sr-text-muted);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
    SKILL CARD — slim, full-width row, stacked vertically (not a grid)
    ========================================================================== */
 
@@ -411,4 +572,142 @@
 
 .sr-mentor-row--negative .sr-mentor-label {
   color: var(--sr-red);
+}
+
+/* ==========================================================================
+   DICE — the universal Pool consumer. Collapsed by default.
+   ========================================================================== */
+
+.sr-dice {
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  font-size: 0.85rem;
+}
+
+.sr-dice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.sr-dice-summary {
+  color: var(--sr-text);
+}
+.sr-dice-summary strong {
+  color: var(--sr-blue-bright);
+}
+
+.sr-dice-threshold {
+  color: var(--sr-text-muted);
+}
+
+.sr-dice-toggle {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sr-text-dim);
+}
+
+.sr-dice-body {
+  padding: 0 0.75rem 0.75rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-dice-breakdown {
+  font-size: 0.78rem;
+  color: var(--sr-text-muted);
+  padding-top: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.sr-dice-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.sr-dice-count {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--sr-text);
+}
+
+.sr-dice-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.sr-die {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: var(--sr-radius);
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+  color: var(--sr-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sr-die--hit {
+  background-color: var(--sr-orange-bg);
+  border-color: var(--sr-orange-border);
+  color: var(--sr-orange-bright);
+}
+
+.sr-die--one {
+  background-color: var(--sr-red-bg);
+  border-color: var(--sr-red-border);
+  color: var(--sr-red);
+}
+
+.sr-dice-outcome {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  color: var(--sr-text);
+  margin-bottom: 0.6rem;
+}
+
+.sr-dice-pass {
+  color: var(--sr-orange-bright);
+}
+.sr-dice-fail {
+  color: var(--sr-text-muted);
+}
+.sr-dice-glitch {
+  color: var(--sr-amber);
+}
+.sr-dice-critical-glitch {
+  color: var(--sr-red);
+  font-weight: 700;
+}
+
+.sr-dice-reset {
+  margin-left: auto;
+}
+
+.sr-dice-manual {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-dice-manual-label {
+  font-size: 0.75rem;
+  color: var(--sr-text-dim);
+  flex: 1;
 }

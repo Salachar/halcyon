@@ -24,6 +24,8 @@
 // single number with no notion of what kind of test it's for.
 
 import { METATYPES } from '@data/character/metatypes';
+import { ALL_GEAR } from '@data/gear';
+import { isGradeable, resolveEssenceCost } from '@utils/augmentationEconomy';
 
 const CORE_ATTRIBUTES = [
   'body', 'agility', 'reaction', 'strength',
@@ -158,6 +160,40 @@ class Character {
   set magicResonance(value) {
     if (value < 0 || value > 6) return;
     this._magicResonance = value;
+  }
+
+  // ---- Essence — computed from installed cyberware/bioware, not
+  // stored. Starts at 6 (the RAW baseline) and walks every gear entry,
+  // resolving each against ALL_GEAR + its saved grade. Rounded to 2
+  // decimals to avoid float-accumulation artifacts (0.1 + 0.2 !== 0.3
+  // territory) before anything downstream reads it, including the
+  // whole-integer threshold check below.
+
+  get essence() {
+    let essence = 6;
+    Object.entries(this._gear).forEach(([itemId, entry]) => {
+      const item = ALL_GEAR[itemId];
+      if (!item || !isGradeable(item)) return;
+      essence -= resolveEssenceCost(item, entry.config) * entry.quantity;
+    });
+    return Math.max(0, Math.round(essence * 100) / 100);
+  }
+
+  // How many whole-integer Essence thresholds have been crossed below 6
+  // — "anytime your Essence goes below any whole integer, you lose a
+  // corresponding point of Magic or Resonance." Exactly at a threshold
+  // (Essence === 5.0) doesn't count as having crossed it yet.
+  get magicPointsLostToEssence() {
+    return 6 - Math.floor(this.essence);
+  }
+
+  // The practical Magic/Resonance value after Essence loss — magicResonance
+  // itself stays untouched (the character's inherent base potential),
+  // same "don't mutate the base, expose a derived value" instinct as
+  // woundPenalty leaving attributes alone. If Essence is later restored
+  // (bioware removed), the original base is still there, not overwritten.
+  get effectiveMagicResonance() {
+    return Math.max(0, this._magicResonance - this.magicPointsLostToEssence);
   }
 
   // ---- Current Edge — fluctuating in-session pool, separate from the
