@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSocket } from '@hooks/useSocket';
-import ConfirmationModal from '@components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 
 function formatDate(iso) {
   try {

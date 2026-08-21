@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ConfirmationModal from '@components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 import './sharedNoteCard.css';
 
 function formatTimestamp(ms) {

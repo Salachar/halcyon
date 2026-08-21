@@ -2,10 +2,11 @@ import { useState } from 'react';
 
 import { Section, Panel, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
-import { useCharacterManager } from '@hooks/useCharacterManager';
 import AttributeBox from '@components/AttributeBox';
 import SkillRow from '@components/SkillRow';
-import GearList from './GearList';
+import GearList from '@components/GearList';
+import NetworkPanel from '@components/NetworkPanel';
+import EssenceAdjustmentModal from '@components/EssenceAdjustmentModal';
 import Edge from '@components/Edge';
 import ConditionMonitor from '@components/ConditionMonitor';
 import QualityCard from '@components/QualityCard';
@@ -14,8 +15,12 @@ import QualityAdvancementModal from '@components/QualityAdvancementModal';
 import StatusBadge from '@components/StatusBadge';
 import NumberEntryModal from '@components/NumberEntryModal';
 import QuickAdjustModal from '@components/QuickAdjustModal';
+
+import { useCharacterManager } from '@hooks/useCharacterManager';
+
 import { SKILL_IDS } from '@data/character/skills';
 import { QUALITIES } from '@data/character/qualities';
+
 import { getIncompleteSections, isSectionComplete } from '@utils/creationProgress';
 
 import './characterSheet.css';
@@ -36,6 +41,7 @@ export default function CharacterSheet({ character }) {
   const { touch } = useCharacterManager();
   const [karmaModalOpen, setKarmaModalOpen] = useState(false);
   const [nuyenModalOpen, setNuyenModalOpen] = useState(false);
+  const [essenceModalOpen, setEssenceModalOpen] = useState(false);
   const [qualityModalOpen, setQualityModalOpen] = useState(false);
 
   const handleNameChange = (e) => {
@@ -113,7 +119,10 @@ export default function CharacterSheet({ character }) {
               <button className="sr-icon-btn" style={{ marginLeft: '0.5rem' }} onClick={() => setKarmaModalOpen(true)}>+</button>
             </span>
             <span>Skill Points Remaining: <strong>{character.skillPointsRemaining}</strong></span>
-            <span>Essence: <strong>{character.essence.toFixed(2)}</strong> / 6</span>
+            <span>
+              Essence: <strong>{character.essence.toFixed(2)}</strong> / 6
+              <button className="sr-icon-btn" style={{ marginLeft: '0.5rem' }} onClick={() => setEssenceModalOpen(true)}>+</button>
+            </span>
           </div>
 
           <ConditionMonitor character={character} />
@@ -138,6 +147,12 @@ export default function CharacterSheet({ character }) {
         onClose={() => setNuyenModalOpen(false)}
       />
 
+      <EssenceAdjustmentModal
+        character={character}
+        open={essenceModalOpen}
+        onClose={() => setEssenceModalOpen(false)}
+      />
+
       <CollapsibleSection
         id="sheet-skills"
         title="Skills"
@@ -160,6 +175,12 @@ export default function CharacterSheet({ character }) {
       <CollapsibleSection id="sheet-gear" title="Gear" defaultOpen>
         <Section>
           <GearList character={character} />
+        </Section>
+      </CollapsibleSection>
+
+      <CollapsibleSection id="sheet-pan" title="Personal Area Network" defaultOpen>
+        <Section>
+          <NetworkPanel character={character} />
         </Section>
       </CollapsibleSection>
 

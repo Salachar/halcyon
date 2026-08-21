@@ -24,8 +24,8 @@
 // single number with no notion of what kind of test it's for.
 
 import { METATYPES } from '@data/character/metatypes';
-import { ALL_GEAR } from '@data/gear';
-import { isGradeable, resolveEssenceCost } from '@utils/augmentationEconomy';
+import GearManager from './GearManager';
+import MatrixManager from './MatrixManager';
 
 const CORE_ATTRIBUTES = [
   'body', 'agility', 'reaction', 'strength',
@@ -55,7 +55,9 @@ class Character {
   _mentorSpiritId = null; // matches MENTOR_SPIRITS ids
   _mentorSpiritAdvantage = null; // 'magician' | 'adept' — Mystic Adept's one-time permanent choice
 
-  _gear = {}; // { [itemId]: { quantity, config } } — itemId matches GEAR ids, config is { rating } | { capacity } | { units } depending on the item, resolved and locked in at purchase time (see the Purchase Modal conversation — not recomputed live like a Pool)
+  // Gear (instance-keyed), PAN, and Essence all live on GearManager —
+  // see that file for why. This is a real, persistent composed instance,
+  // not a stateless data-holder Character reaches into directly.
   _nuyen = 0;
   _karma = 0;
 
@@ -101,7 +103,8 @@ class Character {
     this._mentorSpiritId = data.mentorSpiritId || null;
     this._mentorSpiritAdvantage = data.mentorSpiritAdvantage || null;
 
-    this._gear = data.gear || {};
+    this.gearManager = new GearManager(data.gearManager || {});
+    this.matrixManager = new MatrixManager(data.matrixManager || {});
     this._nuyen = typeof data.nuyen === 'number' ? data.nuyen : 0;
     this._karma = typeof data.karma === 'number' ? data.karma : 0;
 
@@ -162,21 +165,14 @@ class Character {
     this._magicResonance = value;
   }
 
-  // ---- Essence — computed from installed cyberware/bioware, not
-  // stored. Starts at 6 (the RAW baseline) and walks every gear entry,
-  // resolving each against ALL_GEAR + its saved grade. Rounded to 2
-  // decimals to avoid float-accumulation artifacts (0.1 + 0.2 !== 0.3
-  // territory) before anything downstream reads it, including the
-  // whole-integer threshold check below.
+  // ---- Essence — a thin pass-through to GearManager, which actually
+  // owns the computation (it needs to walk the gear collection it holds,
+  // plus manual adjustments — see GearManager for the real logic).
+  // Stays on Character because "how much Essence do I have" is a
+  // genuinely character-level question, even though it's gear-derived.
 
   get essence() {
-    let essence = 6;
-    Object.entries(this._gear).forEach(([itemId, entry]) => {
-      const item = ALL_GEAR[itemId];
-      if (!item || !isGradeable(item)) return;
-      essence -= resolveEssenceCost(item, entry.config) * entry.quantity;
-    });
-    return Math.max(0, Math.round(essence * 100) / 100);
+    return this.gearManager.essence;
   }
 
   // How many whole-integer Essence thresholds have been crossed below 6
@@ -285,24 +281,6 @@ class Character {
   get mentorSpiritAdvantage() { return this._mentorSpiritAdvantage; }
   set mentorSpiritAdvantage(value) { this._mentorSpiritAdvantage = value; }
 
-  // ---- Gear / Inventory ----
-
-  get gear() { return this._gear; }
-
-  addGear(itemId, config = {}, quantity = 1) {
-    if (this._gear[itemId]) {
-      this._gear[itemId].quantity += quantity;
-    } else {
-      this._gear[itemId] = { quantity, config };
-    }
-  }
-
-  removeGear(itemId, quantity = 1) {
-    if (!this._gear[itemId]) return;
-    this._gear[itemId].quantity -= quantity;
-    if (this._gear[itemId].quantity <= 0) delete this._gear[itemId];
-  }
-
   // ---- Economy ----
 
   get nuyen() { return this._nuyen; }
@@ -381,7 +359,8 @@ class Character {
       complexForms: this.complexForms,
       mentorSpiritId: this.mentorSpiritId,
       mentorSpiritAdvantage: this.mentorSpiritAdvantage,
-      gear: this.gear,
+      gearManager: this.gearManager.toJSON(),
+      matrixManager: this.matrixManager.toJSON(),
       nuyen: this.nuyen,
       karma: this.karma,
       priorities: this.priorities,

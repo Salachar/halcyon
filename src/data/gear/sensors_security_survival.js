@@ -13,23 +13,47 @@
 // it's loaded into (Single Sensor / Sensor Array). They're exported as
 // reference constants instead of gear items, since "buying" one really
 // means configuring an already-purchased sensor housing.
+//
+// `wireless: true` marks items whose readings/function only matter
+// because they transmit somewhere (AR display, alert, remote read,
+// RFID access), not just "has Capacity" or "is electronic." Auditory/
+// Sensor housings are wireless as a family — the Sensor Package table
+// itself groups them with RFID/headware/commlinks as the same
+// compatible-device family the PAN rules describe. Security devices and
+// Breaking/Entering tools are split by whether they manipulate an
+// electronic/RFID signal (wireless) or are purely mechanical (not).
+// Survival Gear has no wireless items at all — every item there is
+// mechanical/chemical/consumable. See the PAN conversation for the
+// full per-item reasoning.
 
 function sensorHousing(overrides) {
   return { category: 'sensor_housing', legality: null, ...overrides };
 }
+function sensorHousingWireless(overrides) {
+  return sensorHousing({ wireless: true, ...overrides });
+}
 function security(overrides) {
   return { category: 'security', legality: null, ...overrides };
+}
+function securityWireless(overrides) {
+  return security({ wireless: true, ...overrides });
 }
 function tool(overrides) {
   return { category: 'tool', legality: null, ...overrides };
 }
+function toolWireless(overrides) {
+  return tool({ wireless: true, ...overrides });
+}
 function survival(overrides) {
   return { category: 'survival', legality: null, ...overrides };
+}
+function survivalWireless(overrides) {
+  return survival({ wireless: true, ...overrides });
 }
 
 // ---- Auditory Devices ----
 
-const directional_microphone = sensorHousing({
+const directional_microphone = sensorHousingWireless({
   id: 'directional_microphone',
   label: 'Directional Microphone',
   cost: null,
@@ -42,7 +66,7 @@ const directional_microphone = sensorHousing({
   },
 });
 
-const earbuds = sensorHousing({
+const earbuds = sensorHousingWireless({
   id: 'earbuds',
   label: 'Earbuds',
   cost: null,
@@ -55,7 +79,7 @@ const earbuds = sensorHousing({
   },
 });
 
-const headphones = sensorHousing({
+const headphones = sensorHousingWireless({
   id: 'headphones',
   label: 'Headphones',
   cost: null,
@@ -68,7 +92,7 @@ const headphones = sensorHousing({
   },
 });
 
-const laser_mic = sensorHousing({
+const laser_mic = sensorHousingWireless({
   id: 'laser_mic',
   label: 'Laser Mic',
   cost: null,
@@ -81,7 +105,7 @@ const laser_mic = sensorHousing({
   },
 });
 
-const omnidirectional_mic = sensorHousing({
+const omnidirectional_mic = sensorHousingWireless({
   id: 'omnidirectional_mic',
   label: 'Omnidirectional Mic',
   cost: null,
@@ -94,7 +118,7 @@ const omnidirectional_mic = sensorHousing({
   },
 });
 
-const audio_enhancement = sensorHousing({
+const audio_enhancement = sensorHousingWireless({
   id: 'audio_enhancement',
   label: 'Audio Enhancement',
   cost: 500,
@@ -106,7 +130,7 @@ const audio_enhancement = sensorHousing({
   },
 });
 
-const select_sound_filter_device = sensorHousing({
+const select_sound_filter_device = sensorHousingWireless({
   id: 'select_sound_filter_device',
   label: 'Select Sound Filter (Device)',
   cost: null,
@@ -120,7 +144,7 @@ const select_sound_filter_device = sensorHousing({
   },
 });
 
-const spatial_recognizer_device = sensorHousing({
+const spatial_recognizer_device = sensorHousingWireless({
   id: 'spatial_recognizer_device',
   label: 'Spatial Recognizer (Device)',
   cost: 1000,
@@ -134,7 +158,7 @@ const spatial_recognizer_device = sensorHousing({
 
 // ---- Sensors ----
 
-const handheld_housing = sensorHousing({
+const handheld_housing = sensorHousingWireless({
   id: 'handheld_housing',
   label: 'Handheld Housing',
   cost: null,
@@ -147,7 +171,7 @@ const handheld_housing = sensorHousing({
   },
 });
 
-const wall_mounted_housing = sensorHousing({
+const wall_mounted_housing = sensorHousingWireless({
   id: 'wall_mounted_housing',
   label: 'Wall-Mounted Housing',
   cost: null,
@@ -160,7 +184,7 @@ const wall_mounted_housing = sensorHousing({
   },
 });
 
-const sensor_array = sensorHousing({
+const sensor_array = sensorHousingWireless({
   id: 'sensor_array',
   label: 'Sensor Array',
   cost: null,
@@ -173,7 +197,7 @@ const sensor_array = sensorHousing({
   },
 });
 
-const single_sensor = sensorHousing({
+const single_sensor = sensorHousingWireless({
   id: 'single_sensor',
   label: 'Single Sensor',
   cost: null,
@@ -241,7 +265,7 @@ const key_lock = security({
   },
 });
 
-const maglock = security({
+const maglock = securityWireless({
   id: 'maglock',
   label: 'Maglock',
   cost: null,
@@ -264,7 +288,7 @@ const keypad = security({
   stats: {},
 });
 
-const card_reader = security({
+const card_reader = securityWireless({
   id: 'card_reader',
   label: 'Card Reader',
   cost: 50,
@@ -284,7 +308,7 @@ const biometric_reader = security({
   stats: {},
 });
 
-const metal_restraints = security({
+const metal_restraints = securityWireless({
   id: 'metal_restraints',
   label: 'Metal Restraints',
   cost: 20,
@@ -357,7 +381,7 @@ const chisel_wrecking_bar = tool({
   stats: {},
 });
 
-const keycard_copier = tool({
+const keycard_copier = toolWireless({
   id: 'keycard_copier',
   label: 'Keycard Copier',
   cost: 600,
@@ -378,7 +402,7 @@ const lockpick_set = tool({
   stats: {},
 });
 
-const maglock_passkey = tool({
+const maglock_passkey = toolWireless({
   id: 'maglock_passkey',
   label: 'Maglock Passkey',
   cost: null,
@@ -428,7 +452,7 @@ const monofilament_chainsaw = tool({
   },
 });
 
-const sequencer = tool({
+const sequencer = toolWireless({
   id: 'sequencer',
   label: 'Sequencer',
   cost: null,
@@ -657,7 +681,7 @@ const microwire = survival({
   stats: {},
 });
 
-const myomeric_rope = survival({
+const myomeric_rope = survivalWireless({
   id: 'myomeric_rope',
   label: 'Myomeric Rope',
   cost: null,

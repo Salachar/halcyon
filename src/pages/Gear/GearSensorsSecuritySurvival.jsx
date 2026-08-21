@@ -1,34 +1,67 @@
+import { useState } from 'react';
+
 import { Section, GearTable, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
+import PurchaseModal from '@components/PurchaseModal';
+import { useCharacterManager } from '@hooks/useCharacterManager';
+import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost, formatCapacity } from '@utils/gearFormat';
-import { gearByTag } from './gearTags';
+import { gearByTag } from '@utils/gearTags';
 import { SENSOR_PACKAGE_MAX_RATING, SENSOR_FUNCTIONS } from '@data/gear/sensors_security_survival';
+import './gearBuyButton.css';
 
-const basicColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const housingColumns = [
-  { label: 'Device', render: (i) => i.label },
-  { label: 'Capacity', render: formatCapacity },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const securityColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Structure', render: (i) => i.stats.structure ?? '—' },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const toolColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'DV', render: (i) => i.stats.damageValue ?? '—' },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
+export default function GearSensorsSecuritySurvival({ character }) {
+  const [purchaseItem, setPurchaseItem] = useState(null);
+  const { touch } = useCharacterManager();
 
-export default function GearSensorsSecuritySurvival() {
+  const buyColumn = {
+    label: '',
+    render: (item) => {
+      const owned = character?.gearManager?.countOf(item.id) ?? 0;
+      const affordable = canAffordItem(character, item);
+      return (
+        <div className="sr-gear-buy-cell">
+          <button
+            className={affordable ? 'sr-buy-btn' : 'sr-buy-btn sr-buy-btn--unaffordable'}
+            onClick={() => setPurchaseItem(item)}
+            title={`Buy ${item.label}`}
+          >
+            $
+          </button>
+          {owned > 0 && <span className="sr-gear-owned-badge">×{owned}</span>}
+        </div>
+      );
+    },
+  };
+
+  const basicColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const housingColumns = [
+    { label: 'Device', render: (i) => i.label },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const securityColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Structure', render: (i) => i.stats.structure ?? '—' },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const toolColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'DV', render: (i) => i.stats.damageValue ?? '—' },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+
   return (
     <>
       <CollapsibleSection id="gear-sss-auditory" title="Auditory Devices">
@@ -72,6 +105,24 @@ export default function GearSensorsSecuritySurvival() {
           <GearTable items={gearByTag('grapple_gun_family')} columns={basicColumns} />
         </Section>
       </CollapsibleSection>
+
+      {purchaseItem && (
+        <PurchaseModal
+          item={purchaseItem}
+          character={character}
+          onClose={() => setPurchaseItem(null)}
+          onPurchase={(purchase) => {
+            commitPurchase(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+          onFreeGrab={(purchase) => {
+            commitFreeGrab(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+        />
+      )}
     </>
   );
 }

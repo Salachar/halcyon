@@ -25,3 +25,10 @@
   justify-content: center;
   line-height: 1;
 }
+
+/* "At a glance" unaffordable state — heuristic (default config), the
+   real gate lives in PurchaseModal. Combined selector for specificity
+   over the shared .sr-buy-btn rule, not !important. */
+.sr-buy-btn.sr-buy-btn--unaffordable {
+  opacity: 0.4;
+}

@@ -5,7 +5,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import ShareIcon from '@mui/icons-material/IosShare';
 
-import ConfirmationModal from '@components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 
 import './noteCard.css';
 

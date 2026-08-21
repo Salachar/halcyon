@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import ConfirmationModal from '@components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 import ConnectionModal from '@components/Connection/ConnectionModal';
 import { useSocket } from '@hooks/useSocket';
 

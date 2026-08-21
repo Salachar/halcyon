@@ -1,4 +1,4 @@
-// Combines all 7 gear category files into one lookup. Lives at
+// Combines all 8 gear category files into one lookup. Lives at
 // src/data/gear/index.js alongside the category files themselves.
 //
 // ALL_GEAR is keyed by id (same reasoning as every individual category
@@ -13,6 +13,7 @@ import { GEAR_AUGMENTATIONS } from './augmentations';
 import { GEAR_SENSORS_SECURITY_SURVIVAL } from './sensors_security_survival';
 import { GEAR_ARMOR_ELECTRONICS } from './armor_electronics';
 import { GEAR_FIREARMS_EXPLOSIVES } from './firearms_explosives';
+import { GEAR_MATRIX_DEVICES } from './matrix_devices';
 
 export {
   GEAR_MELEE_THROWN,
@@ -22,6 +23,7 @@ export {
   GEAR_SENSORS_SECURITY_SURVIVAL,
   GEAR_ARMOR_ELECTRONICS,
   GEAR_FIREARMS_EXPLOSIVES,
+  GEAR_MATRIX_DEVICES,
 };
 
 export const ALL_GEAR = {
@@ -32,6 +34,7 @@ export const ALL_GEAR = {
   ...GEAR_SENSORS_SECURITY_SURVIVAL,
   ...GEAR_ARMOR_ELECTRONICS,
   ...GEAR_FIREARMS_EXPLOSIVES,
+  ...GEAR_MATRIX_DEVICES,
 };
 
 export const ALL_GEAR_IDS = Object.keys(ALL_GEAR);

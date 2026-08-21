@@ -22,6 +22,13 @@
 // rather than duplicated onto every item — though since it's genuinely
 // shared across two files, it may want to move to a shared gear-utils
 // file once we're wiring this into an actual purchase flow.
+//
+// `wireless: true` marks real PAN nodes among these implants — Matrix
+// hardware and image/sound-link tech that has a wireless-marked
+// external accessory twin in GEAR_ARMOR_ELECTRONICS.js. Most bodyware
+// and sensory-booster items are physical/biological with no networked
+// component, so they're deliberately left unmarked. See the PAN
+// conversation for the full per-item reasoning — not repeated here.
 
 export const AUGMENTATION_GRADES = {
   standard: {
@@ -60,13 +67,19 @@ export const AUGMENTATION_GRADES = {
 function biotech(overrides) {
   return { category: 'biotech', legality: null, ...overrides };
 }
+function biotechWireless(overrides) {
+  return biotech({ wireless: true, ...overrides });
+}
 function headware(overrides) {
   return { category: 'cyberware', legality: null, ...overrides };
+}
+function headwareWireless(overrides) {
+  return headware({ wireless: true, ...overrides });
 }
 
 // ---- Biotech Basics ----
 
-const biomonitor = biotech({
+const biomonitor = biotechWireless({
   id: 'biomonitor',
   label: 'Biomonitor',
   cost: 300,
@@ -207,7 +220,7 @@ const tranq_patch = biotech({
   },
 });
 
-const trauma_patch = biotech({
+const trauma_patch = biotechWireless({
   id: 'trauma_patch',
   label: 'Trauma Patch',
   cost: 500,
@@ -219,7 +232,7 @@ const trauma_patch = biotech({
 
 // ---- Headware ----
 
-const commlink_implant = headware({
+const commlink_implant = headwareWireless({
   id: 'commlink_implant',
   label: 'Commlink (Implant)',
   cost: 2000,
@@ -247,7 +260,7 @@ const control_rig = headware({
   },
 });
 
-const cortex_kink_bomb = headware({
+const cortex_kink_bomb = headwareWireless({
   id: 'cortex_kink_bomb',
   label: 'Cortex Kink Bomb',
   cost: 10000,
@@ -261,7 +274,7 @@ const cortex_kink_bomb = headware({
   },
 });
 
-const cortex_microbomb = headware({
+const cortex_microbomb = headwareWireless({
   id: 'cortex_microbomb',
   label: 'Cortex Microbomb',
   cost: 25000,
@@ -275,7 +288,7 @@ const cortex_microbomb = headware({
   },
 });
 
-const cortex_area_bomb = headware({
+const cortex_area_bomb = headwareWireless({
   id: 'cortex_area_bomb',
   label: 'Cortex Area Bomb',
   cost: 40000,
@@ -289,7 +302,7 @@ const cortex_area_bomb = headware({
   },
 });
 
-const cyberdeck_implant = headware({
+const cyberdeck_implant = headwareWireless({
   id: 'cyberdeck_implant',
   label: 'Cyberdeck (Implant)',
   cost: 5000,
@@ -303,7 +316,7 @@ const cyberdeck_implant = headware({
   },
 });
 
-const cyberjacks = headware({
+const cyberjacks = headwareWireless({
   id: 'cyberjacks',
   label: 'Cyberjacks',
   cost: null,
@@ -353,7 +366,7 @@ const olfactory_booster = headware({
   },
 });
 
-const simrig_implant = headware({
+const simrig_implant = headwareWireless({
   id: 'simrig_implant',
   label: 'Simrig (Implant)',
   cost: 4000,
@@ -394,7 +407,7 @@ const taste_booster = headware({
   },
 });
 
-const tooth_compartment = headware({
+const tooth_compartment = headwareWireless({
   id: 'tooth_compartment',
   label: 'Tooth Compartment',
   cost: 800,
@@ -436,8 +449,12 @@ const voice_modulator = headware({
 
 // ---- Eyeware ----
 // Cybereyes basic don't scale linearly — 5 real items, not a formula.
+// All wireless — image link is the exact tech marked wireless on
+// external glasses/goggles in GEAR_ARMOR_ELECTRONICS.js. Retinal
+// Duplication is the one exception — a passive biometric payload read
+// by an external scanner, not a networked device itself.
 
-const cybereyes_basic_1 = headware({
+const cybereyes_basic_1 = headwareWireless({
   id: 'cybereyes_basic_1',
   label: 'Cybereyes, Basic (Rating 1)',
   cost: 1000,
@@ -450,7 +467,7 @@ const cybereyes_basic_1 = headware({
   },
 });
 
-const cybereyes_basic_2 = headware({
+const cybereyes_basic_2 = headwareWireless({
   id: 'cybereyes_basic_2',
   label: 'Cybereyes, Basic (Rating 2)',
   cost: 4000,
@@ -463,7 +480,7 @@ const cybereyes_basic_2 = headware({
   },
 });
 
-const cybereyes_basic_3 = headware({
+const cybereyes_basic_3 = headwareWireless({
   id: 'cybereyes_basic_3',
   label: 'Cybereyes, Basic (Rating 3)',
   cost: 6000,
@@ -476,7 +493,7 @@ const cybereyes_basic_3 = headware({
   },
 });
 
-const cybereyes_basic_4 = headware({
+const cybereyes_basic_4 = headwareWireless({
   id: 'cybereyes_basic_4',
   label: 'Cybereyes, Basic (Rating 4)',
   cost: 10000,
@@ -489,7 +506,7 @@ const cybereyes_basic_4 = headware({
   },
 });
 
-const cybereyes_basic_5 = headware({
+const cybereyes_basic_5 = headwareWireless({
   id: 'cybereyes_basic_5',
   label: 'Cybereyes, Basic (Rating 5)',
   cost: 16000,
@@ -502,7 +519,7 @@ const cybereyes_basic_5 = headware({
   },
 });
 
-const flare_compensation = headware({
+const flare_compensation = headwareWireless({
   id: 'flare_compensation',
   label: 'Flare Compensation',
   cost: 1000,
@@ -515,7 +532,7 @@ const flare_compensation = headware({
   },
 });
 
-const image_link_implant = headware({
+const image_link_implant = headwareWireless({
   id: 'image_link_implant',
   label: 'Image Link (Implant)',
   cost: 800,
@@ -527,7 +544,7 @@ const image_link_implant = headware({
   },
 });
 
-const low_light_vision_implant = headware({
+const low_light_vision_implant = headwareWireless({
   id: 'low_light_vision_implant',
   label: 'Low-Light Vision (Implant)',
   cost: 1500,
@@ -540,7 +557,7 @@ const low_light_vision_implant = headware({
   },
 });
 
-const ocular_drone = headware({
+const ocular_drone = headwareWireless({
   id: 'ocular_drone',
   label: 'Ocular Drone',
   cost: 6000,
@@ -569,7 +586,7 @@ const retinal_duplication = headware({
   },
 });
 
-const smartlink_implant = headware({
+const smartlink_implant = headwareWireless({
   id: 'smartlink_implant',
   label: 'Smartlink (Implant)',
   cost: 4000,
@@ -583,7 +600,7 @@ const smartlink_implant = headware({
   },
 });
 
-const thermographic_vision_implant = headware({
+const thermographic_vision_implant = headwareWireless({
   id: 'thermographic_vision_implant',
   label: 'Thermographic Vision (Implant)',
   cost: 2000,
@@ -596,7 +613,7 @@ const thermographic_vision_implant = headware({
   },
 });
 
-const vision_enhancement_implant = headware({
+const vision_enhancement_implant = headwareWireless({
   id: 'vision_enhancement_implant',
   label: 'Vision Enhancement (Implant)',
   cost: 4000,
@@ -609,7 +626,7 @@ const vision_enhancement_implant = headware({
   },
 });
 
-const vision_magnification_implant = headware({
+const vision_magnification_implant = headwareWireless({
   id: 'vision_magnification_implant',
   label: 'Vision Magnification (Implant)',
   cost: 2000,
@@ -623,9 +640,12 @@ const vision_magnification_implant = headware({
 });
 
 // ---- Earware ----
-// Cyberears basic also don't scale linearly — 5 real items.
+// Cyberears basic also don't scale linearly — 5 real items. Wireless
+// for the same reason as Cybereyes (sound link = the marked-wireless
+// external tech); the four remaining earware items are physical/
+// neurological effects with no networked component.
 
-const cyberears_basic_1 = headware({
+const cyberears_basic_1 = headwareWireless({
   id: 'cyberears_basic_1',
   label: 'Cyberears, Basic (Rating 1)',
   cost: 1000,
@@ -638,7 +658,7 @@ const cyberears_basic_1 = headware({
   },
 });
 
-const cyberears_basic_2 = headware({
+const cyberears_basic_2 = headwareWireless({
   id: 'cyberears_basic_2',
   label: 'Cyberears, Basic (Rating 2)',
   cost: 3000,
@@ -651,7 +671,7 @@ const cyberears_basic_2 = headware({
   },
 });
 
-const cyberears_basic_3 = headware({
+const cyberears_basic_3 = headwareWireless({
   id: 'cyberears_basic_3',
   label: 'Cyberears, Basic (Rating 3)',
   cost: 4500,
@@ -664,7 +684,7 @@ const cyberears_basic_3 = headware({
   },
 });
 
-const cyberears_basic_4 = headware({
+const cyberears_basic_4 = headwareWireless({
   id: 'cyberears_basic_4',
   label: 'Cyberears, Basic (Rating 4)',
   cost: 7500,
@@ -677,7 +697,7 @@ const cyberears_basic_4 = headware({
   },
 });
 
-const cyberears_basic_5 = headware({
+const cyberears_basic_5 = headwareWireless({
   id: 'cyberears_basic_5',
   label: 'Cyberears, Basic (Rating 5)',
   cost: 11000,
@@ -690,7 +710,7 @@ const cyberears_basic_5 = headware({
   },
 });
 
-const audio_enhancement_implant = headware({
+const audio_enhancement_implant = headwareWireless({
   id: 'audio_enhancement_implant',
   label: 'Audio Enhancement (Implant)',
   cost: 4000,
@@ -729,7 +749,7 @@ const damper = headware({
   },
 });
 
-const select_sound_filter = headware({
+const select_sound_filter = headwareWireless({
   id: 'select_sound_filter',
   label: 'Select Sound Filter',
   cost: null,
@@ -744,7 +764,7 @@ const select_sound_filter = headware({
   },
 });
 
-const sound_link_implant = headware({
+const sound_link_implant = headwareWireless({
   id: 'sound_link_implant',
   label: 'Sound Link (Implant)',
   cost: 1000,
@@ -756,7 +776,7 @@ const sound_link_implant = headware({
   },
 });
 
-const spatial_recognizer = headware({
+const spatial_recognizer = headwareWireless({
   id: 'spatial_recognizer',
   label: 'Spatial Recognizer',
   cost: 4000,
@@ -770,6 +790,8 @@ const spatial_recognizer = headware({
 });
 
 // ---- Bodyware ----
+// All physical/biological modifications — no networked component in
+// any of these, so none are marked wireless.
 
 const bone_lacing_plastic = headware({
   id: 'bone_lacing_plastic',

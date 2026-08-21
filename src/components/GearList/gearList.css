@@ -1,7 +1,4 @@
 .sr-gear-list-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   padding: 0.5rem 0.9rem;
   background-color: var(--sr-bg-panel-solid);
   border: 1px solid var(--sr-hairline);
@@ -13,6 +10,12 @@
 }
 .sr-gear-list-row:hover {
   border-color: var(--sr-blue-dim);
+}
+
+.sr-gear-list-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .sr-gear-list-identity {
@@ -32,9 +35,15 @@
   margin-top: 0.1rem;
 }
 
-.sr-gear-list-quantity {
-  font-size: 0.85rem;
-  color: var(--sr-text-muted);
+.sr-gear-list-mounts {
+  font-size: 0.7rem;
+  color: var(--sr-text-dim);
+  margin-top: 0.1rem;
+}
+
+.sr-gear-list-actions {
+  display: flex;
+  gap: 0.4rem;
   flex-shrink: 0;
 }
 
@@ -42,4 +51,24 @@
   font-size: 0.85rem;
   color: var(--sr-text-dim);
   font-style: italic;
+}
+
+.sr-gear-list-attachments {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  padding-left: 1rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-gear-list-attachment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+
+.sr-gear-list-attachment-name {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
 }

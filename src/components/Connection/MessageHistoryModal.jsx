@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameMessages } from '@context/GameMessagesContext';
-import Modal from '@components/Modal/Modal';
+import Modal from '@components/Modal';
 import './messageHistoryModal.css';
 
 const TYPE_COLOR = {

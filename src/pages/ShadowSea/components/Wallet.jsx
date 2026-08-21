@@ -14,7 +14,7 @@ import { getWallet, saveWallet } from '@utils/localStorage';
 import { searchAllItems } from '@data';
 import CharacterManager from '@data/characterManager';
 
-import ConfirmationModal from '@components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 
 // ─── TerminalWallet ───────────────────────────────────────────────────────────
 

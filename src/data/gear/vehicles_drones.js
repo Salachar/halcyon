@@ -13,15 +13,29 @@
 //    (Federated Boeing Commuter/Osprey X, Nissan Samurai/Oni) — every
 //    stat differs between them, so those got split into two real items
 //    rather than forced into one row with slash-separated stats.
+//
+// `wireless: true` is set for EVERY vehicle and drone here, unlike the
+// other gear files — this isn't an item-by-item judgment call. Every
+// entry carries `pilot`/`sensor` stats, meaning it's inherently a
+// Matrix-connected node by what it fundamentally is (autonomous Pilot
+// control, sensor readings, rigger operability), not something that
+// happens to have a networked feature. Drones are the textbook example
+// of "devices slaved for remote operation" in the Matrix rules. Vehicle
+// Modifications is the one section with real per-item calls: Rigger
+// Interface is the literal DNI-connection mod (wireless); the weapon
+// mounts are physical hardware (not); Manual Operation is explicitly
+// the non-networked alternative (not).
 
 const V = (overrides) => ({
   category: 'vehicle',
   legality: null,
+  wireless: true,
   ...overrides,
 });
 const D = (overrides) => ({
   category: 'drone',
   legality: null,
+  wireless: true,
   ...overrides,
 });
 
@@ -1072,6 +1086,8 @@ const ares_black_sky = D({
 });
 
 // ---- Vehicle Modifications ----
+// Not built from V()/D() — these attach to a vehicle rather than being
+// one, so no automatic wireless. Judged individually instead.
 
 const rigger_interface = {
   id: 'rigger_interface',
@@ -1080,6 +1096,7 @@ const rigger_interface = {
   cost: 1000,
   availability: 2,
   legality: null,
+  wireless: true,
   description: "Lets a rigger jump in and feel like the vehicle rather than remote-controlling it. All drones include one standard; vehicles need it installed separately unless noted.",
   tags: ['vehicle_mod'],
   stats: {},

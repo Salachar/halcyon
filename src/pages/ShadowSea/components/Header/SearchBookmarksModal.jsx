@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 
-import Modal from '@components/Modal/Modal';
+import Modal from '@components/Modal';
 import SearchResultRow from './SearchResultRow';
 import { searchIndex_filter } from '@utils/commands';
 

@@ -1,7 +1,13 @@
+import { useState } from 'react';
+
 import { Section, GearTable } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
+import PurchaseModal from '@components/PurchaseModal';
+import { useCharacterManager } from '@hooks/useCharacterManager';
+import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost } from '@utils/gearFormat';
-import { gearByTag } from './gearTags';
+import { gearByTag } from '@utils/gearTags';
+import './gearBuyButton.css';
 
 function formatHandling(i) {
   const h = i.stats.handling;
@@ -14,27 +20,52 @@ function formatSeats(i) {
   return String(s);
 }
 
-const vehicleColumns = [
-  { label: 'Vehicle', render: (i) => i.label },
-  { label: 'Handling', render: formatHandling },
-  { label: 'Accel', render: (i) => i.stats.acceleration },
-  { label: 'Speed Int.', render: (i) => i.stats.speedInterval },
-  { label: 'Top Speed', render: (i) => i.stats.topSpeed },
-  { label: 'Body', render: (i) => i.stats.body },
-  { label: 'Armor', render: (i) => i.stats.armor },
-  { label: 'Pilot', render: (i) => i.stats.pilot },
-  { label: 'Sensor', render: (i) => i.stats.sensor },
-  { label: 'Seats', render: formatSeats },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const modColumns = [
-  { label: 'Modification', render: (i) => i.label },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
+export default function GearVehiclesDrones({ character }) {
+  const [purchaseItem, setPurchaseItem] = useState(null);
+  const { touch } = useCharacterManager();
 
-export default function GearVehiclesDrones() {
+  const buyColumn = {
+    label: '',
+    render: (item) => {
+      const owned = character?.gearManager?.countOf(item.id) ?? 0;
+      const affordable = canAffordItem(character, item);
+      return (
+        <div className="sr-gear-buy-cell">
+          <button
+            className={affordable ? 'sr-buy-btn' : 'sr-buy-btn sr-buy-btn--unaffordable'}
+            onClick={() => setPurchaseItem(item)}
+            title={`Buy ${item.label}`}
+          >
+            $
+          </button>
+          {owned > 0 && <span className="sr-gear-owned-badge">×{owned}</span>}
+        </div>
+      );
+    },
+  };
+
+  const vehicleColumns = [
+    { label: 'Vehicle', render: (i) => i.label },
+    { label: 'Handling', render: formatHandling },
+    { label: 'Accel', render: (i) => i.stats.acceleration },
+    { label: 'Speed Int.', render: (i) => i.stats.speedInterval },
+    { label: 'Top Speed', render: (i) => i.stats.topSpeed },
+    { label: 'Body', render: (i) => i.stats.body },
+    { label: 'Armor', render: (i) => i.stats.armor },
+    { label: 'Pilot', render: (i) => i.stats.pilot },
+    { label: 'Sensor', render: (i) => i.stats.sensor },
+    { label: 'Seats', render: formatSeats },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const modColumns = [
+    { label: 'Modification', render: (i) => i.label },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+
   return (
     <>
       <CollapsibleSection id="gear-veh-bikes" title="Bikes">
@@ -83,6 +114,24 @@ export default function GearVehiclesDrones() {
       <CollapsibleSection id="gear-veh-mods" title="Vehicle Modifications">
         <GearTable items={gearByTag('vehicle_mod')} columns={modColumns} />
       </CollapsibleSection>
+
+      {purchaseItem && (
+        <PurchaseModal
+          item={purchaseItem}
+          character={character}
+          onClose={() => setPurchaseItem(null)}
+          onPurchase={(purchase) => {
+            commitPurchase(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+          onFreeGrab={(purchase) => {
+            commitFreeGrab(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+        />
+      )}
     </>
   );
 }

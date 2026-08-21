@@ -28,15 +28,31 @@
 //    Periscope, Smartgun System) but are priced differently — these are
 //    the weapon-mount-specific versions. Suffixed `_weapon_accessory`
 //    to avoid id collisions; genuinely different SKUs, not duplicates.
+// 6. `wireless: true` marks weapons/accessories with a real electronic/
+//    networked component — smartgun systems specifically, plus a couple
+//    of explicit cases (wireless capacitors, wireless-triggered coating,
+//    an Airburst Link's own wireless requirement). Mechanical accessories
+//    (laser sights, gas-vent systems, stocks, tripods/bipods) stay
+//    unmarked — no data component. See the PAN conversation for the
+//    full per-item reasoning.
 
 function firearm(overrides) {
   return { category: 'firearm', legality: 'licensed', skill: 'firearms', ...overrides };
 }
+function firearmWireless(overrides) {
+  return firearm({ wireless: true, ...overrides });
+}
 function exoticFirearm(overrides) {
   return { category: 'firearm', legality: 'licensed', skill: 'exotic_weapons', ...overrides };
 }
+function exoticFirearmWireless(overrides) {
+  return exoticFirearm({ wireless: true, ...overrides });
+}
 function weaponAccessory(overrides) {
   return { category: 'weapon_accessory', legality: null, ...overrides };
+}
+function weaponAccessoryWireless(overrides) {
+  return weaponAccessory({ wireless: true, ...overrides });
 }
 function explosiveItem(overrides) {
   return { category: 'explosive', legality: 'illegal', ...overrides };
@@ -65,7 +81,7 @@ const defiance_super_shock = firearm({
   },
 });
 
-const yamaha_pulsar_i = firearm({
+const yamaha_pulsar_i = firearmWireless({
   id: 'yamaha_pulsar_i',
   label: 'Yamaha Pulsar I',
   cost: 325,
@@ -84,7 +100,7 @@ const yamaha_pulsar_i = firearm({
   },
 });
 
-const yamaha_pulsar_ii = firearm({
+const yamaha_pulsar_ii = firearmWireless({
   id: 'yamaha_pulsar_ii',
   label: 'Yamaha Pulsar II',
   cost: 350,
@@ -107,7 +123,7 @@ const yamaha_pulsar_ii = firearm({
 // HOLD-OUTS — can't take accessories or modifications
 // ============================================================================
 
-const fichetti_tiffani_needler = firearm({
+const fichetti_tiffani_needler = firearmWireless({
   id: 'fichetti_tiffani_needler',
   label: 'Fichetti Tiffani Needler',
   cost: 435,
@@ -183,7 +199,7 @@ const ares_light_fire_70 = firearm({
   },
 });
 
-const ares_light_fire_75 = firearm({
+const ares_light_fire_75 = firearmWireless({
   id: 'ares_light_fire_75',
   label: 'Ares Light Fire 75',
   cost: 400,
@@ -295,7 +311,7 @@ const ruger_redhawk = firearm({
 // MACHINE PISTOLS — top and barrel mounts
 // ============================================================================
 
-const ares_crusader_ii = firearm({
+const ares_crusader_ii = firearmWireless({
   id: 'ares_crusader_ii',
   label: 'Ares Crusader II',
   cost: 520,
@@ -353,7 +369,7 @@ const steyr_tmp = firearm({
 // HEAVY PISTOLS — top and barrel mounts
 // ============================================================================
 
-const ares_predator_vi = firearm({
+const ares_predator_vi = firearmWireless({
   id: 'ares_predator_vi',
   label: 'Ares Predator VI',
   cost: 750,
@@ -425,7 +441,7 @@ const colt_government_2076 = firearm({
   },
 });
 
-const colt_manhunter = firearm({
+const colt_manhunter = firearmWireless({
   id: 'colt_manhunter',
   label: 'Colt Manhunter',
   cost: 500,
@@ -537,7 +553,7 @@ const fn_p93_praetor = firearm({
   },
 });
 
-const hk_227 = firearm({
+const hk_227 = firearmWireless({
   id: 'hk_227',
   label: 'HK-227',
   cost: 825,
@@ -555,7 +571,7 @@ const hk_227 = firearm({
   },
 });
 
-const ingram_smartgun_xi = firearm({
+const ingram_smartgun_xi = firearmWireless({
   id: 'ingram_smartgun_xi',
   label: 'Ingram Smartgun XI',
   cost: 750,
@@ -573,7 +589,7 @@ const ingram_smartgun_xi = firearm({
   },
 });
 
-const sck_model_100 = firearm({
+const sck_model_100 = firearmWireless({
   id: 'sck_model_100',
   label: 'SCK Model 100',
   cost: 725,
@@ -707,7 +723,7 @@ const ak_97 = firearm({
   },
 });
 
-const ares_alpha = firearm({
+const ares_alpha = firearmWireless({
   id: 'ares_alpha',
   label: 'Ares Alpha',
   cost: 3400,
@@ -773,7 +789,7 @@ const fn_har = firearm({
   },
 });
 
-const yamaha_raiden = firearm({
+const yamaha_raiden = firearmWireless({
   id: 'yamaha_raiden',
   label: 'Yamaha Raiden',
   cost: 3200,
@@ -851,7 +867,7 @@ const cavalier_arms_crockett_ebr = firearm({
   },
 });
 
-const ranger_arms_sm5 = firearm({
+const ranger_arms_sm5 = firearmWireless({
   id: 'ranger_arms_sm5',
   label: 'Ranger Arms SM-5',
   cost: 13200,
@@ -906,7 +922,7 @@ const ruger_101 = firearm({
   },
 });
 
-const barret_model_122 = firearm({
+const barret_model_122 = firearmWireless({
   id: 'barret_model_122',
   label: 'Barret Model 122',
   cost: 15200,
@@ -990,7 +1006,7 @@ const rpk_hmg = firearm({
   },
 });
 
-const panther_xxl = firearm({
+const panther_xxl = firearmWireless({
   id: 'panther_xxl',
   label: 'Panther XXL',
   cost: 10000,
@@ -1071,7 +1087,7 @@ const parashield_dart_rifle = exoticFirearm({
 // LAUNCHERS — Exotic Weapons skill; fire minigrenades or missiles/rockets
 // ============================================================================
 
-const ares_antioch_ii = exoticFirearm({
+const ares_antioch_ii = exoticFirearmWireless({
   id: 'ares_antioch_ii',
   label: 'Ares Antioch II',
   cost: 5900,
@@ -1143,7 +1159,7 @@ const aztechnology_striker = exoticFirearm({
   },
 });
 
-const onotari_interceptor = exoticFirearm({
+const onotari_interceptor = exoticFirearmWireless({
   id: 'onotari_interceptor',
   label: 'Onotari Interceptor',
   cost: 9000,
@@ -1165,7 +1181,7 @@ const onotari_interceptor = exoticFirearm({
 // ACCESSORIES — most attach to a mount (top/barrel/underbarrel), one per mount
 // ============================================================================
 
-const airburst_link = weaponAccessory({
+const airburst_link = weaponAccessoryWireless({
   id: 'airburst_link',
   label: 'Airburst Link',
   mount: null,
@@ -1231,7 +1247,7 @@ const weapon_hidden_arm_slide = weaponAccessory({
   stats: {},
 });
 
-const imaging_scope_weapon_accessory = weaponAccessory({
+const imaging_scope_weapon_accessory = weaponAccessoryWireless({
   id: 'imaging_scope_weapon_accessory',
   label: 'Imaging Scope (Weapon Accessory)',
   mount: 'top',
@@ -1255,7 +1271,7 @@ const laser_sight_weapon_accessory = weaponAccessory({
   stats: {},
 });
 
-const periscope_weapon_accessory = weaponAccessory({
+const periscope_weapon_accessory = weaponAccessoryWireless({
   id: 'periscope_weapon_accessory',
   label: 'Periscope (Weapon Accessory)',
   mount: 'top',
@@ -1302,7 +1318,7 @@ const silencer_suppressor_weapon_accessory = weaponAccessory({
   stats: {},
 });
 
-const smart_firing_platform = weaponAccessory({
+const smart_firing_platform = weaponAccessoryWireless({
   id: 'smart_firing_platform',
   label: 'Smart Firing Platform',
   mount: 'underbarrel',
@@ -1313,7 +1329,7 @@ const smart_firing_platform = weaponAccessory({
   stats: {},
 });
 
-const smartgun_system_internal = weaponAccessory({
+const smartgun_system_internal = weaponAccessoryWireless({
   id: 'smartgun_system_internal',
   label: 'Smartgun System, Internal',
   mount: null,
@@ -1325,7 +1341,7 @@ const smartgun_system_internal = weaponAccessory({
   stats: {},
 });
 
-const smartgun_system_external = weaponAccessory({
+const smartgun_system_external = weaponAccessoryWireless({
   id: 'smartgun_system_external',
   label: 'Smartgun System, External',
   mount: 'top or underbarrel',

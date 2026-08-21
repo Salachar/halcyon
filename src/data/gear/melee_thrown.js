@@ -14,6 +14,15 @@
 //    Attack Rating, overriding close_combat's normal attribute pairing.
 //    `attributeOverride` on stats is new — optional, only present when
 //    an item breaks its skill's default attribute.
+//
+// `wireless: true` is rare in this category — most of it is just
+// physical objects. Three items explicitly name "wireless signal" as an
+// activation option (alongside a manual one) for their extend/retract
+// mechanism; one (Combat/Survival Knife) bundles an optional GPS
+// monitor into its survival variant, sharing the same id as the plain
+// version. Stun Baton and Shock Gloves were considered and NOT marked —
+// both have an electric-discharge function, but neither description
+// mentions wireless activation, unlike the three below.
 
 // ---- Blades ----
 
@@ -36,6 +45,7 @@ const combat_survival_knife = {
   cost: 220,
   availability: 2,
   legality: null,
+  wireless: true, // survival variant's GPS monitor — see file header note
   description: 'Simple, chisel-pointed for armor penetration, carbon-coated to avoid reflections. The survival variant adds a GPS monitor, mini-multitool, and micro-lighter in the handle — same combat stats either way. Thrown max range 20m.',
   tags: ['blade'],
   stats: { damageValue: '3P', attackRatings: [8, 2, null, null, null], skill: 'close_combat' },
@@ -48,6 +58,7 @@ const forearm_snap_blades = {
   cost: 185,
   availability: 3,
   legality: null,
+  wireless: true,
   description: 'Three blades that extend/retract via muscle command or wireless signal.',
   tags: ['blade'],
   stats: { damageValue: '3P', attackRatings: [6, null, null, null, null], skill: 'close_combat' },
@@ -122,6 +133,7 @@ const extendable_baton = {
   cost: 52,
   availability: 2,
   legality: null,
+  wireless: true,
   description: 'Telescopes out via wrist-flick or wireless signal. Concealability threshold 4 retracted, 2 extended.',
   tags: ['club'],
   stats: { damageValue: '2S', attackRatings: [5, null, null, null, null], skill: 'close_combat' },
@@ -170,6 +182,7 @@ const telescoping_staff = {
   cost: 250,
   availability: 2,
   legality: null,
+  wireless: true,
   description: 'Collapses down to stun-baton or sword size; extends/retracts via twist-lock or wireless signal.',
   tags: ['club'],
   stats: { damageValue: '4S', attackRatings: [8, null, null, null, null], skill: 'close_combat' },

@@ -1,40 +1,74 @@
+import { useState } from 'react';
+
 import { Section, GearTable, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
+import PurchaseModal from '@components/PurchaseModal';
+import { useCharacterManager } from '@hooks/useCharacterManager';
+import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost, formatCapacity } from '@utils/gearFormat';
-import { gearByTag } from './gearTags';
+import { gearByTag } from '@utils/gearTags';
+import './gearBuyButton.css';
 
-const basicColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const armorColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Defense Rating', render: (i) => (i.stats.defenseRating != null ? `+${i.stats.defenseRating}` : '—') },
-  { label: 'Capacity', render: formatCapacity },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const deviceColumns = [
-  { label: 'Device', render: (i) => i.label },
-  { label: 'Device Rating', render: (i) => i.stats.deviceRating ?? '—' },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const opticalColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Capacity', render: formatCapacity },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
-const idColumns = [
-  { label: 'Item', render: (i) => i.label },
-  { label: 'Max Value', render: (i) => (i.stats.maxValue != null ? `${i.stats.maxValue.toLocaleString()}¥` : '—') },
-  { label: 'Avail', render: formatAvailability },
-  { label: 'Cost', render: formatCost },
-];
+export default function GearArmorElectronics({ character }) {
+  const [purchaseItem, setPurchaseItem] = useState(null);
+  const { touch } = useCharacterManager();
 
-export default function GearArmorElectronics() {
+  const buyColumn = {
+    label: '',
+    render: (item) => {
+      const owned = character?.gearManager?.countOf(item.id) ?? 0;
+      const affordable = canAffordItem(character, item);
+      return (
+        <div className="sr-gear-buy-cell">
+          <button
+            className={affordable ? 'sr-buy-btn' : 'sr-buy-btn sr-buy-btn--unaffordable'}
+            onClick={() => setPurchaseItem(item)}
+            title={`Buy ${item.label}`}
+          >
+            $
+          </button>
+          {owned > 0 && <span className="sr-gear-owned-badge">×{owned}</span>}
+        </div>
+      );
+    },
+  };
+
+  const basicColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const armorColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Defense Rating', render: (i) => (i.stats.defenseRating != null ? `+${i.stats.defenseRating}` : '—') },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const deviceColumns = [
+    { label: 'Device', render: (i) => i.label },
+    { label: 'Device Rating', render: (i) => i.stats.deviceRating ?? '—' },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const opticalColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+  const idColumns = [
+    { label: 'Item', render: (i) => i.label },
+    { label: 'Max Value', render: (i) => (i.stats.maxValue != null ? `${i.stats.maxValue.toLocaleString()}¥` : '—') },
+    { label: 'Avail', render: formatAvailability },
+    { label: 'Cost', render: formatCost },
+    buyColumn,
+  ];
+
   return (
     <>
       <CollapsibleSection id="gear-ae-clothing" title="Clothing">
@@ -50,11 +84,6 @@ export default function GearArmorElectronics() {
         <Section title="Helmets & Shields">
           <GearTable items={gearByTag('helmet_shield')} columns={armorColumns} />
         </Section>
-      </CollapsibleSection>
-
-      <CollapsibleSection id="gear-ae-decks" title="Commlinks & Cyberdecks">
-        <GearTable items={gearByTag('commlink_deck')} columns={basicColumns} />
-        <Callout title="Deferred" variant="note">Full pricing lives in the Matrix chapter — not yet built.</Callout>
       </CollapsibleSection>
 
       <CollapsibleSection id="gear-ae-accessories" title="Electronics Accessories">
@@ -87,6 +116,24 @@ export default function GearArmorElectronics() {
           <GearTable items={gearByTag('visual_enhancement')} columns={opticalColumns} />
         </Section>
       </CollapsibleSection>
+
+      {purchaseItem && (
+        <PurchaseModal
+          item={purchaseItem}
+          character={character}
+          onClose={() => setPurchaseItem(null)}
+          onPurchase={(purchase) => {
+            commitPurchase(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+          onFreeGrab={(purchase) => {
+            commitFreeGrab(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+        />
+      )}
     </>
   );
 }

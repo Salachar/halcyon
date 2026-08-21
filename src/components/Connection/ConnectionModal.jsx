@@ -3,7 +3,7 @@ import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import SignalWifi1BarIcon from '@mui/icons-material/SignalWifi1Bar';
 
-import Modal from '@components/Modal/Modal';
+import Modal from '@components/Modal';
 import { useSocket } from '@hooks/useSocket';
 import './connectionModal.css';
 

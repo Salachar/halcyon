@@ -2,11 +2,12 @@ import { useState } from 'react';
 
 import { Section, GearTable, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
+
 import { formatAvailability, formatCost, formatEssence, formatCapacity, formatDamageValue, formatAttackRatings } from '@utils/gearFormat';
-import { gearByTag } from './gearTags';
-import { commitPurchase } from './gearPurchase';
+import { gearByTag } from '@utils/gearTags';
+import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { useCharacterManager } from '@hooks/useCharacterManager';
-import PurchaseModal from './PurchaseModal';
+import PurchaseModal from '@components/PurchaseModal';
 import './gearBuyButton.css';
 
 export default function GearCyberwareBioware({ character }) {
@@ -16,11 +17,18 @@ export default function GearCyberwareBioware({ character }) {
   const buyColumn = {
     label: '',
     render: (item) => {
-      const owned = character?.gear?.[item.id];
+      const owned = character?.gearManager?.countOf(item.id) ?? 0;
+      const affordable = canAffordItem(character, item);
       return (
         <div className="sr-gear-buy-cell">
-          <button className="sr-buy-btn" onClick={() => setPurchaseItem(item)} title={`Buy ${item.label}`}>$</button>
-          {owned && <span className="sr-gear-owned-badge">×{owned.quantity}</span>}
+          <button
+            className={affordable ? 'sr-buy-btn' : 'sr-buy-btn sr-buy-btn--unaffordable'}
+            onClick={() => setPurchaseItem(item)}
+            title={`Buy ${item.label}`}
+          >
+            $
+          </button>
+          {owned > 0 && <span className="sr-gear-owned-badge">×{owned}</span>}
         </div>
       );
     },
@@ -86,6 +94,11 @@ export default function GearCyberwareBioware({ character }) {
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);
+            touch();
+            setPurchaseItem(null);
+          }}
+          onFreeGrab={(purchase) => {
+            commitFreeGrab(character, purchaseItem, purchase);
             touch();
             setPurchaseItem(null);
           }}

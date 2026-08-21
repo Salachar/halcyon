@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import Header from './components/Header/Header';
 import List from './components/List';
-import ConfirmationModal from '@components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 
 import {
   SHADOWSEA_PASSWORDS_KEY,

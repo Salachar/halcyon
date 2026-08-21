@@ -8,9 +8,9 @@ import { CollapsibleSection } from '@components/CollapsibleSection';
 import AttributeInfo from '@components/AttributeInfo';
 import MetatypeTable from '@components/MetatypeTable';
 
-import PriorityGrid from './PriorityGrid';
-import MagicTypeTable from './MagicTypeTable';
-import AttributeSpend from './AttributeSpend';
+import PriorityGrid from '@components/PriorityGrid';
+import MagicTypeTable from '@components/MagicTypeTable';
+import AttributeSpend from '@components/AttributeSpend';
 import './creationModal.css';
 
 const CORE_ATTRS = ['body', 'agility', 'reaction', 'strength', 'willpower', 'logic', 'intuition', 'charisma', 'edge'];

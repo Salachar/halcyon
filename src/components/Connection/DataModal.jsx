@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import Modal from '@components/Modal/Modal';
+import Modal from '@components/Modal';
 import ConnectionModal from '@components/Connection/ConnectionModal';
 import ConfirmationModal from '@components/ConfirmationModal';
 import { useSocket } from '@hooks/useSocket';
