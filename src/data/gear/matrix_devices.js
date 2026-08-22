@@ -7,11 +7,18 @@
 // they're carrying. That's the actual reason this needed its own file
 // instead of fitting the usual costPerRating shape.
 
+// Verified against 09a-matrix-basics-and-actions.md (Commlinks/Cyberdecks
+// tables, pp. ~170-184): all 12 items' Device Rating, D/F or A/S,
+// Program Slots, Availability, and Cost are exact matches to source —
+// no stat corrections needed. No "Wireless Bonus:" text exists for these
+// items in source; they ARE the wireless connectivity, not an accessory
+// with an optional bonus, so `wireless: true` alone is correct and
+// complete as-is.
 function commlinkDevice(overrides) {
-  return { wireless: true, category: 'commlink', legality: null, tags: ['commlink'], ...overrides };
+  return { wireless: true, category: 'commlink', legality: null, image: null, tags: ['commlink'], ...overrides };
 }
 function cyberdeckDevice(overrides) {
-  return { wireless: true, category: 'cyberdeck', legality: 'illegal', tags: ['cyberdeck'], ...overrides };
+  return { wireless: true, category: 'cyberdeck', legality: 'illegal', image: null, tags: ['cyberdeck'], ...overrides };
 }
 
 const meta_link = commlinkDevice({

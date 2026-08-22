@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { isConfigurable, configLabel, configRange, resolveCost, defaultConfig } from '@utils/gearPurchase';
-import { isGradeable, resolveEssenceCost } from '@utils/augmentationEconomy';
+import { isGradeable, resolveEssenceCost, needsInstallChoice } from '@utils/augmentationEconomy';
 import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
 import ConfirmationModal from '@components/ConfirmationModal';
 
@@ -17,10 +17,11 @@ function capitalize(word) {
 //
 // `initialConfig` lets a caller override the starting rating/capacity
 // (used by the cyberlimb Enhance flow to open pre-filled at "next
-// rating" instead of the item's raw minimum) — omit it for normal use.
+// rating" rather than the item's raw minimum) — omit it for normal use.
 export default function PurchaseModal({ item, character, initialConfig, onPurchase, onFreeGrab, onClose }) {
   const configurable = isConfigurable(item);
   const gradeable = isGradeable(item);
+  const installChoice = needsInstallChoice(item);
   const [config, setConfig] = useState(() => initialConfig || defaultConfig(item));
   const [freeGrabConfirmOpen, setFreeGrabConfirmOpen] = useState(false);
 
@@ -35,9 +36,10 @@ export default function PurchaseModal({ item, character, initialConfig, onPurcha
 
   const [min, max] = configRange(item);
 
-  // Explicit, not Object.keys(config)[0] — config can now carry both a
-  // rating/capacity/units key AND a grade key on gradeable items, so
-  // grabbing "the first key" is no longer a safe way to find this one.
+  // Explicit, not Object.keys(config)[0] — config can now carry a
+  // rating/capacity/units key AND a grade key AND an installLocation
+  // key on affected items, so grabbing "the first key" is no longer a
+  // safe way to find this one.
   const configKey = 'rating' in config ? 'rating' : 'capacity' in config ? 'capacity' : 'units' in config ? 'units' : null;
 
   const purchase = { itemId: item.id, ...config };
@@ -82,6 +84,25 @@ export default function PurchaseModal({ item, character, initialConfig, onPurcha
                   <option key={grade} value={grade}>{capitalize(grade)}</option>
                 ))}
               </select>
+            </div>
+          )}
+
+          {installChoice && (
+            <div className="sr-modal-config">
+              <label className="sr-modal-config-label">Install Into</label>
+              <select
+                className="sr-number-input"
+                value={config.installLocation || 'flesh'}
+                onChange={(e) => setConfig((c) => ({ ...c, installLocation: e.target.value }))}
+              >
+                <option value="flesh">Flesh (costs Essence)</option>
+                <option value="cyberlimb">Cyberlimb (costs Capacity)</option>
+              </select>
+              {config.installLocation === 'cyberlimb' && (
+                <p className="sr-modal-hint">
+                  No Essence charged. Attach to a specific limb after purchase — that step checks the limb's remaining Capacity.
+                </p>
+              )}
             </div>
           )}
 

@@ -3,6 +3,50 @@
 // established in GEAR_MELEE_THROWN.js (damageValue, attackRatings,
 // skill), extended with `modes` and `ammo` for real guns.
 //
+// RE-CHECKED against 13b-gear-firearms-explosives.md (Gear Part 2, pp.
+// 251-264) in full as part of the wireless-bonus/capacity verification
+// pass. This file was flagged "already done" going into that pass, but
+// like melee_thrown.js, the full source read found it was NOT actually
+// complete — and by a much wider margin. Two systemic misses, both
+// corrected below:
+//
+// A. THE UNIVERSAL FIREARM BONUS. The very first line of this chapter
+//    states: "Wireless bonus (all firearms): every modern gun is
+//    wireless-equipped with a digital ammo counter and loaded-ammo-type
+//    ARO; with DNI, gain a bonus Minor Action on any turn you eject a
+//    clip or change fire modes." That's not a per-item callout to hunt
+//    for — it's a blanket rule covering every Taser/Hold-out/Pistol/
+//    SMG/Shotgun/Rifle/Machine Gun/Assault Cannon in the chapter. The
+//    original pass only set `wireless: true` on specific standout
+//    weapons (smartgun-equipped ones, a couple of explicit cases),
+//    missing that the base bonus applies universally. Fixed by moving
+//    `wireless: true` + the universal bonus text into the `firearm()`
+//    factory itself, so every true-firearm item gets it by default;
+//    `firearmWireless()` is now a no-op alias kept only so existing call
+//    sites don't need touching. Individual weapons with genuinely
+//    ADDITIONAL bonus text beyond the universal one (Defiance Super
+//    Shock, Yamaha Pulsar I/II, Fichetti Tiffani Needler, Colt America
+//    L36, Ruger Redhawk) have that extra text appended in their own
+//    `stats.wirelessBonus`, which the factory concatenates with the
+//    universal text automatically.
+//    NOTE: `exoticFirearm()` was deliberately NOT given this same
+//    treatment — it's shared between two source subsections (Special
+//    Weapons and Launchers) with their own separate, non-overlapping
+//    blanket bonuses, so folding the ammo-counter text in there would
+//    misapply it. Those items are handled individually instead.
+// B. WHOLE SECTIONS with a blanket "Wireless bonus (all X):" line were
+//    missed entirely, not just specific items within them: ALL 5 base
+//    Grenades (link-trigger-via-commlink-ARO bonus), ALL 5 Rockets/
+//    Missiles (link-trigger-without-DNI bonus), and ALL 5 Launchers
+//    (their own link-trigger-without-DNI bonus). Plus 13 of the ~19
+//    Accessories were individually missing real per-item Wireless Bonus
+//    text (several missing `wireless: true` outright): Bipod,
+//    Concealable Holster, Gyro Mount, Hidden Arm Slide, Imaging Scope,
+//    Laser Sight, Periscope, Silencer/Suppressor, Smart Firing Platform,
+//    Smartgun System (Internal + External), Spare Clip, Tripod. Flash-
+//    Pak and Detonator Cap were also missing their own specific bonus
+//    text. All fixed below — see each item for its added text.
+//
 // New wrinkles:
 //
 // 1. Integrated weapons — Ares Alpha and Yamaha Raiden each have a
@@ -28,34 +72,51 @@
 //    Periscope, Smartgun System) but are priced differently — these are
 //    the weapon-mount-specific versions. Suffixed `_weapon_accessory`
 //    to avoid id collisions; genuinely different SKUs, not duplicates.
-// 6. `wireless: true` marks weapons/accessories with a real electronic/
-//    networked component — smartgun systems specifically, plus a couple
-//    of explicit cases (wireless capacitors, wireless-triggered coating,
-//    an Airburst Link's own wireless requirement). Mechanical accessories
-//    (laser sights, gas-vent systems, stocks, tripods/bipods) stay
-//    unmarked — no data component. See the PAN conversation for the
-//    full per-item reasoning.
+// 6. CAPACITY FIELD SPLIT (this pass): Imaging Scope, Periscope, and
+//    Smartgun System (External) are optical/device housings providing
+//    Capacity for vision enhancements — same pool as their counterparts
+//    in armor_electronics.js — so their `capacity` fields are now
+//    `deviceCapacityProvided`.
+
+const UNIVERSAL_FIREARM_WIRELESS_BONUS = 'Every modern gun is wireless-equipped with a digital ammo counter and loaded-ammo-type ARO; with DNI, gain a bonus Minor Action on any turn you eject a clip or change fire modes.';
 
 function firearm(overrides) {
-  return { category: 'firearm', legality: 'licensed', skill: 'firearms', ...overrides };
+  const { stats = {}, ...rest } = overrides;
+  return {
+    category: 'firearm',
+    legality: 'licensed',
+    skill: 'firearms',
+    wireless: true,
+    image: null,
+    ...rest,
+    stats: {
+      ...stats,
+      wirelessBonus: stats.wirelessBonus
+        ? `${UNIVERSAL_FIREARM_WIRELESS_BONUS} ${stats.wirelessBonus}`
+        : UNIVERSAL_FIREARM_WIRELESS_BONUS,
+    },
+  };
 }
 function firearmWireless(overrides) {
-  return firearm({ wireless: true, ...overrides });
+  // firearm() now sets wireless: true unconditionally (see note above) —
+  // this wrapper is a no-op alias kept so existing call sites work
+  // unchanged.
+  return firearm({ ...overrides });
 }
 function exoticFirearm(overrides) {
-  return { category: 'firearm', legality: 'licensed', skill: 'exotic_weapons', ...overrides };
+  return { category: 'firearm', legality: 'licensed', skill: 'exotic_weapons', image: null, ...overrides };
 }
 function exoticFirearmWireless(overrides) {
   return exoticFirearm({ wireless: true, ...overrides });
 }
 function weaponAccessory(overrides) {
-  return { category: 'weapon_accessory', legality: null, ...overrides };
+  return { category: 'weapon_accessory', legality: null, image: null, ...overrides };
 }
 function weaponAccessoryWireless(overrides) {
   return weaponAccessory({ wireless: true, ...overrides });
 }
 function explosiveItem(overrides) {
-  return { category: 'explosive', legality: 'illegal', ...overrides };
+  return { category: 'explosive', legality: 'illegal', image: null, ...overrides };
 }
 
 // ============================================================================
@@ -78,6 +139,7 @@ const defiance_super_shock = firearm({
       capacity: 4,
       container: 'm',
     },
+    wirelessBonus: 'A hit reveals the target\u2019s general Condition Monitor status.',
   },
 });
 
@@ -97,6 +159,7 @@ const yamaha_pulsar_i = firearmWireless({
       capacity: 4,
       container: 'm',
     },
+    wirelessBonus: 'A hit reveals the target\u2019s general Condition Monitor status.',
   },
 });
 
@@ -116,6 +179,7 @@ const yamaha_pulsar_ii = firearmWireless({
       capacity: 4,
       container: 'm',
     },
+    wirelessBonus: 'A hit reveals the target\u2019s general Condition Monitor status.',
   },
 });
 
@@ -138,6 +202,7 @@ const fichetti_tiffani_needler = firearmWireless({
       capacity: 4,
       container: 'c',
     },
+    wirelessBonus: 'Change the coating\u2019s color as a Minor Action; a camo pattern raises visual Concealability threshold by 1.',
   },
 });
 
@@ -268,6 +333,7 @@ const colt_america_l36 = firearm({
       capacity: 11,
       container: 'c',
     },
+    wirelessBonus: 'Alter ownership data with a Minor Action.',
   },
 });
 
@@ -304,6 +370,7 @@ const ruger_redhawk = firearm({
       capacity: 8,
       container: 'cy',
     },
+    wirelessBonus: 'Bonus Minor Action when switching firing mode.',
   },
 });
 
@@ -1047,7 +1114,7 @@ const ares_super_squirt = exoticFirearm({
   },
 });
 
-const parashield_dart_pistol = exoticFirearm({
+const parashield_dart_pistol = exoticFirearmWireless({
   id: 'parashield_dart_pistol',
   label: 'Parashield DART Pistol',
   cost: 510,
@@ -1062,10 +1129,11 @@ const parashield_dart_pistol = exoticFirearm({
       capacity: 5,
       container: 'c',
     },
+    wirelessBonus: 'Reports hit/injection success and a (low-fidelity, Device Rating 1) heart-rate/pulse readout.',
   },
 });
 
-const parashield_dart_rifle = exoticFirearm({
+const parashield_dart_rifle = exoticFirearmWireless({
   id: 'parashield_dart_rifle',
   label: 'Parashield DART Rifle',
   cost: 710,
@@ -1080,12 +1148,21 @@ const parashield_dart_rifle = exoticFirearm({
       capacity: 6,
       container: 'm',
     },
+    wirelessBonus: 'Reports hit/injection success and a (low-fidelity, Device Rating 1) heart-rate/pulse readout.',
   },
 });
 
 // ============================================================================
 // LAUNCHERS — Exotic Weapons skill; fire minigrenades or missiles/rockets
+// All 5 launchers share a blanket "Wireless bonus (all launchers, via
+// wireless-active ordnance): wireless link trigger available even
+// without DNI." Ares Antioch II's own description already covers this
+// (its "secondary wireless-activation trigger" IS the blanket bonus, so
+// no separate additional text); Aztechnology Striker and Onotari
+// Interceptor each have a further bonus stacked on top.
 // ============================================================================
+
+const LAUNCHER_WIRELESS_BONUS = 'Wireless link trigger available even without DNI.';
 
 const ares_antioch_ii = exoticFirearmWireless({
   id: 'ares_antioch_ii',
@@ -1102,10 +1179,11 @@ const ares_antioch_ii = exoticFirearmWireless({
       capacity: 8,
       container: 'm',
     },
+    wirelessBonus: LAUNCHER_WIRELESS_BONUS,
   },
 });
 
-const armtech_mgl6 = exoticFirearm({
+const armtech_mgl6 = exoticFirearmWireless({
   id: 'armtech_mgl6',
   label: 'ArmTech MGL-6',
   cost: 1800,
@@ -1120,10 +1198,11 @@ const armtech_mgl6 = exoticFirearm({
       capacity: 6,
       container: 'c',
     },
+    wirelessBonus: LAUNCHER_WIRELESS_BONUS,
   },
 });
 
-const armtech_mgl12 = exoticFirearm({
+const armtech_mgl12 = exoticFirearmWireless({
   id: 'armtech_mgl12',
   label: 'ArmTech MGL-12',
   cost: 5000,
@@ -1138,10 +1217,11 @@ const armtech_mgl12 = exoticFirearm({
       capacity: 12,
       container: 'c',
     },
+    wirelessBonus: LAUNCHER_WIRELESS_BONUS,
   },
 });
 
-const aztechnology_striker = exoticFirearm({
+const aztechnology_striker = exoticFirearmWireless({
   id: 'aztechnology_striker',
   label: 'Aztechnology Striker',
   cost: 7000,
@@ -1156,6 +1236,7 @@ const aztechnology_striker = exoticFirearm({
       capacity: 1,
       container: 'ml',
     },
+    wirelessBonus: `${LAUNCHER_WIRELESS_BONUS} +1 dice pool if Matrix-connected (and no other bonus-applying system is active).`,
   },
 });
 
@@ -1174,6 +1255,7 @@ const onotari_interceptor = exoticFirearmWireless({
       capacity: 2,
       container: 'ml',
     },
+    wirelessBonus: `${LAUNCHER_WIRELESS_BONUS} The smartlink bonus applies, but the safety interlock can't be disabled this way.`,
   },
 });
 
@@ -1192,7 +1274,7 @@ const airburst_link = weaponAccessoryWireless({
   stats: {},
 });
 
-const bipod = weaponAccessory({
+const bipod = weaponAccessoryWireless({
   id: 'bipod',
   label: 'Bipod',
   mount: 'underbarrel',
@@ -1200,10 +1282,12 @@ const bipod = weaponAccessory({
   availability: 1,
   description: '+2 Attack Rating when deployed prone/sitting.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: '+3 Attack Rating instead of +2 when deployed.',
+  },
 });
 
-const concealable_holster = weaponAccessory({
+const concealable_holster = weaponAccessoryWireless({
   id: 'concealable_holster',
   label: 'Concealable Holster',
   mount: null,
@@ -1211,7 +1295,9 @@ const concealable_holster = weaponAccessory({
   availability: 1,
   description: '+1 Concealability threshold. Pistols (incl. machine pistols) and tasers only.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'An additional +1 Concealability threshold via active color/shape-shifting.',
+  },
 });
 
 const gas_vent_system = weaponAccessory({
@@ -1225,7 +1311,7 @@ const gas_vent_system = weaponAccessory({
   stats: {},
 });
 
-const weapon_gyro_mount = weaponAccessory({
+const weapon_gyro_mount = weaponAccessoryWireless({
   id: 'weapon_gyro_mount',
   label: 'Gyro Mount (Weapon)',
   mount: 'underbarrel',
@@ -1233,10 +1319,12 @@ const weapon_gyro_mount = weaponAccessory({
   availability: 3,
   description: 'Heavy harness for a rifle/MG; negates SA/BF penalties, +3 AR on Full-Auto, lowers medium/heavy MG Strength requirements to 2+/4+.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Quick-release exit becomes a Minor Action instead of a Major Action.',
+  },
 });
 
-const weapon_hidden_arm_slide = weaponAccessory({
+const weapon_hidden_arm_slide = weaponAccessoryWireless({
   id: 'weapon_hidden_arm_slide',
   label: 'Hidden Arm Slide',
   mount: null,
@@ -1244,7 +1332,9 @@ const weapon_hidden_arm_slide = weaponAccessory({
   availability: 2,
   description: 'Holds a Hold-out/Light Pistol/Taser under clothing; Minor Action + gesture draws it, granting bonus Edge on first use and +1 Concealability.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Bonus Minor Action when activating.',
+  },
 });
 
 const imaging_scope_weapon_accessory = weaponAccessoryWireless({
@@ -1256,11 +1346,12 @@ const imaging_scope_weapon_accessory = weaponAccessoryWireless({
   description: 'Micro camera + vision magnification, Capacity 3. Needs Take Aim to benefit; denies the target Edge from a higher Defense Rating.',
   tags: ['weapon_accessory'],
   stats: {
-    capacity: 3,
+    deviceCapacityProvided: 3,
+    wirelessBonus: 'Shareable "line of sight" feed with the team.',
   },
 });
 
-const laser_sight_weapon_accessory = weaponAccessory({
+const laser_sight_weapon_accessory = weaponAccessoryWireless({
   id: 'laser_sight_weapon_accessory',
   label: 'Laser Sight (Weapon Accessory)',
   mount: 'top or underbarrel',
@@ -1268,7 +1359,9 @@ const laser_sight_weapon_accessory = weaponAccessory({
   availability: 1,
   description: '+1 Attack Rating (not cumulative with smartlink).',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: '+2 Attack Rating instead of +1, plus a bonus Minor Action on activation/deactivation.',
+  },
 });
 
 const periscope_weapon_accessory = weaponAccessoryWireless({
@@ -1280,7 +1373,8 @@ const periscope_weapon_accessory = weaponAccessoryWireless({
   description: 'Fire around corners; reduces the Cover IV penalty to -1. Upgradeable with vision enhancements, Capacity 3.',
   tags: ['weapon_accessory'],
   stats: {
-    capacity: 3,
+    deviceCapacityProvided: 3,
+    wirelessBonus: 'Reduces the Cover IV penalty to 0 instead of -1.',
   },
 });
 
@@ -1306,7 +1400,7 @@ const shock_pads = weaponAccessory({
   stats: {},
 });
 
-const silencer_suppressor_weapon_accessory = weaponAccessory({
+const silencer_suppressor_weapon_accessory = weaponAccessoryWireless({
   id: 'silencer_suppressor_weapon_accessory',
   label: 'Silencer/Suppressor (Weapon Accessory)',
   mount: 'barrel',
@@ -1315,7 +1409,9 @@ const silencer_suppressor_weapon_accessory = weaponAccessory({
   legality: 'illegal',
   description: 'Not compatible with revolvers/shotguns; +2 threshold to notice the use/locate the firer.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'An AR alert if someone nearby reacts to the muffled shot.',
+  },
 });
 
 const smart_firing_platform = weaponAccessoryWireless({
@@ -1326,8 +1422,12 @@ const smart_firing_platform = weaponAccessoryWireless({
   availability: 5,
   description: 'A robotic tripod mounting one smartgun weapon, fired by its own pilot (DR 3, Targeting autosoft Rating 3). Negates SA/BF penalties, +3 AR on Full-Auto.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Can be fired remotely via an implanted smartlink in VR, substituting your own dice pools.',
+  },
 });
+
+const SMARTGUN_SYSTEM_WIRELESS_BONUS = '+1 dice pool, plus a bonus Minor Action on Reload Smartgun/Change Device Mode.';
 
 const smartgun_system_internal = weaponAccessoryWireless({
   id: 'smartgun_system_internal',
@@ -1338,7 +1438,9 @@ const smartgun_system_internal = weaponAccessoryWireless({
   legality: 'licensed',
   description: 'Camera + rangefinder; via DNI, switch modes/eject clips/fire without a trigger pull, and fire from cover without Attack penalties. With a smartlink, +2 Attack Rating across all ranges. Adds to the weapon price rather than being bought standalone.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: SMARTGUN_SYSTEM_WIRELESS_BONUS,
+  },
 });
 
 const smartgun_system_external = weaponAccessoryWireless({
@@ -1351,11 +1453,12 @@ const smartgun_system_external = weaponAccessoryWireless({
   description: 'As the internal version; mounts via an Engineering + Logic (4, 1 hour) Extended test. Camera has Capacity 1 for vision enhancements.',
   tags: ['weapon_accessory'],
   stats: {
-    capacity: 1,
+    deviceCapacityProvided: 1,
+    wirelessBonus: SMARTGUN_SYSTEM_WIRELESS_BONUS,
   },
 });
 
-const spare_clip = weaponAccessory({
+const spare_clip = weaponAccessoryWireless({
   id: 'spare_clip',
   label: 'Spare Clip',
   mount: null,
@@ -1363,7 +1466,9 @@ const spare_clip = weaponAccessory({
   availability: 2,
   description: 'An unloaded magazine for a specific weapon.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Live ammo count even without a smartgun system.',
+  },
 });
 
 const speed_loader = weaponAccessory({
@@ -1377,7 +1482,7 @@ const speed_loader = weaponAccessory({
   stats: {},
 });
 
-const tripod = weaponAccessory({
+const tripod = weaponAccessoryWireless({
   id: 'tripod',
   label: 'Tripod',
   mount: 'underbarrel',
@@ -1385,7 +1490,9 @@ const tripod = weaponAccessory({
   availability: 2,
   description: 'Negates SA/BF penalties, +3 AR on Full-Auto when deployed kneeling/sitting.',
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Free Minor Action on fold/deploy/remove.',
+  },
 });
 
 // ============================================================================
@@ -1624,17 +1731,21 @@ const ammo_shotgun_regular = {
 // GRENADES — arm after 5m travel, damage decreases GZ -> Close -> Near
 // ============================================================================
 
+const GRENADE_WIRELESS_BONUS = 'Wireless link trigger usable via commlink ARO even without DNI.';
+
 const grenade_stun = explosiveItem({
   id: 'grenade_stun',
   label: 'Grenade, Stun',
   cost: 100,
   availability: 4,
   legality: 'licensed',
+  wireless: true,
   description: 'Flash-bang; anyone in the Blast also gets Blinded I, Deafened I, and Dazed.',
   tags: ['grenade'],
   stats: {
     damageValue: '10S/8S/6S',
     blast: 15,
+    wirelessBonus: GRENADE_WIRELESS_BONUS,
   },
 });
 
@@ -1643,11 +1754,13 @@ const grenade_fragmentation = explosiveItem({
   label: 'Grenade, Fragmentation',
   cost: 150,
   availability: 4,
+  wireless: true,
   description: 'Classic wide-area shrapnel grenade.',
   tags: ['grenade'],
   stats: {
     damageValue: '16P/12P/8P',
     blast: 20,
+    wirelessBonus: GRENADE_WIRELESS_BONUS,
   },
 });
 
@@ -1656,11 +1769,13 @@ const grenade_high_explosive = explosiveItem({
   label: 'Grenade, High Explosive',
   cost: 150,
   availability: 4,
+  wireless: true,
   description: 'Powerful blast over a smaller area than Fragmentation.',
   tags: ['grenade'],
   stats: {
     damageValue: '16P/10P/4P',
     blast: 15,
+    wirelessBonus: GRENADE_WIRELESS_BONUS,
   },
 });
 
@@ -1669,9 +1784,12 @@ const grenade_gas = explosiveItem({
   label: 'Grenade, Gas',
   cost: 50,
   availability: 4,
+  wireless: true,
   description: 'Any chemical/toxin payload; cloud lasts ~10 rounds. Cost is the grenade shell plus 20 doses of chemical payload.',
   tags: ['grenade'],
-  stats: {},
+  stats: {
+    wirelessBonus: GRENADE_WIRELESS_BONUS,
+  },
 });
 
 const grenade_smoke = explosiveItem({
@@ -1679,9 +1797,12 @@ const grenade_smoke = explosiveItem({
   label: 'Grenade, Smoke/Thermal Smoke',
   cost: 50,
   availability: 4,
+  wireless: true,
   description: 'Obscures vision — Blinded I (acting through the smoke) or Blinded II (acting from within it); lasts ~10 rounds.',
   tags: ['grenade'],
-  stats: {},
+  stats: {
+    wirelessBonus: GRENADE_WIRELESS_BONUS,
+  },
 });
 
 const flash_pak = explosiveItem({
@@ -1690,11 +1811,13 @@ const flash_pak = explosiveItem({
   cost: 125,
   availability: 4,
   legality: 'licensed',
+  wireless: true,
   description: 'A 10x10x2cm strobing device (not a grenade proper). Anyone using standard vision in range gets Blinded (worse with low-light, better with flare compensation, no effect on thermographic/ultrasound). 10 charges, 1/round used.',
   tags: ['grenade'],
   stats: {
     damageValue: 'BIII/BII/BI',
     blast: 10,
+    wirelessBonus: 'Can spare a subscribed/paired character from the effect, and recharges by induction at 1 charge/hour.',
   },
 });
 
@@ -1702,16 +1825,20 @@ const flash_pak = explosiveItem({
 // ROCKETS AND MISSILES — arm after 10m travel
 // ============================================================================
 
+const ROCKET_WIRELESS_BONUS = 'Wireless link trigger without DNI.';
+
 const rocket_anti_vehicle = explosiveItem({
   id: 'rocket_anti_vehicle',
   label: 'Anti-Vehicle Rocket',
   cost: 2800,
   availability: 5,
+  wireless: true,
   description: 'Shaped-charge warhead for burning/punching through vehicles/barriers; smaller blast than HE, +2 Attack Rating vs. vehicles.',
   tags: ['rocket'],
   stats: {
     damageValue: '12P/8P/4P',
     blast: 10,
+    wirelessBonus: ROCKET_WIRELESS_BONUS,
   },
 });
 
@@ -1720,11 +1847,13 @@ const rocket_fragmentation = explosiveItem({
   label: 'Fragmentation Rocket',
   cost: 2000,
   availability: 5,
+  wireless: true,
   description: 'Anti-personnel shrapnel; poor against structures/vehicles.',
   tags: ['rocket'],
   stats: {
     damageValue: '16P/12P/8P',
     blast: 30,
+    wirelessBonus: ROCKET_WIRELESS_BONUS,
   },
 });
 
@@ -1733,11 +1862,13 @@ const rocket_high_explosive = explosiveItem({
   label: 'High Explosive Rocket',
   cost: 2100,
   availability: 5,
+  wireless: true,
   description: 'Heavy damage in a small area, grenade-like but larger.',
   tags: ['rocket'],
   stats: {
     damageValue: '16P/10P/4P',
     blast: 20,
+    wirelessBonus: ROCKET_WIRELESS_BONUS,
   },
 });
 
@@ -1746,9 +1877,12 @@ const rocket_gas = explosiveItem({
   label: 'Gas Rocket',
   cost: 750,
   availability: 4,
+  wireless: true,
   description: 'As the Gas grenade, delivered at range. Cost is the rocket plus a 100-dose payload.',
   tags: ['rocket'],
-  stats: {},
+  stats: {
+    wirelessBonus: ROCKET_WIRELESS_BONUS,
+  },
 });
 
 const rocket_smoke = explosiveItem({
@@ -1756,9 +1890,12 @@ const rocket_smoke = explosiveItem({
   label: 'Smoke/Thermal Smoke Rocket',
   cost: 1200,
   availability: 4,
+  wireless: true,
   description: 'As the Smoke grenade, delivered at range.',
   tags: ['rocket'],
-  stats: {},
+  stats: {
+    wirelessBonus: ROCKET_WIRELESS_BONUS,
+  },
 });
 
 export const MISSILE_VARIANT_MODIFIER = {
@@ -1839,9 +1976,12 @@ const detonator_cap = explosiveItem({
   label: 'Detonator Cap',
   cost: 75,
   availability: 4,
+  wireless: true,
   description: 'Inserted into an explosive mass, set off by programmable timer or radio signal. Setting the timer is a Major Action.',
   tags: ['conventional_explosive'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Set the timer as a Minor Action instead of a Major Action, plus a Minor Action DNI-linked "detonate" command.',
+  },
 });
 
 export const GEAR_FIREARMS_EXPLOSIVES = {

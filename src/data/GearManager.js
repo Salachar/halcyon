@@ -11,7 +11,7 @@
 // compatibility shim, no dual API on Character itself.
 
 import { ALL_GEAR } from '@data/gear';
-import { isGradeable, resolveEssenceCost } from '@utils/augmentationEconomy';
+import { isGradeable, resolveEssenceCost, resolveDeviceRating } from '@utils/augmentationEconomy';
 
 // Small, fixed vocabulary — easy to expand later, just strings in an
 // array. Not meant to be exhaustive Matrix mechanics, just common
@@ -27,14 +27,14 @@ class GearManager {
   _gear = {}; // { [instanceId]: { itemId, config, attachedTo: instanceId | null } }
   _pan = { masterId: null, slaved: [] }; // instance ids, not item ids — same reason gear moved to instances
   _deviceStatus = {}; // { [instanceId]: string[] } — narrative-only, see toggleDeviceStatus below
-  _matrixDamage = 0; // current damage on whichever device is Primary — see matrixMonitorMax below for the max
+  _deviceDamage = {}; // { [instanceId]: number } — Matrix Condition Monitor damage, per device
   _essenceAdjustments = []; // [{ amount, note }] — manual, stacks with the automatic gear-based deduction
 
   constructor(data = {}) {
     this._gear = data.gear || {};
     this._pan = data.pan || { masterId: null, slaved: [] };
     this._deviceStatus = data.deviceStatus || {};
-    this._matrixDamage = typeof data.matrixDamage === 'number' ? data.matrixDamage : 0;
+    this._deviceDamage = data.deviceDamage || {};
     this._essenceAdjustments = data.essenceAdjustments || [];
   }
 
@@ -71,6 +71,12 @@ class GearManager {
       const nextStatus = { ...this._deviceStatus };
       delete nextStatus[instanceId];
       this._deviceStatus = nextStatus;
+    }
+
+    if (this._deviceDamage[instanceId] != null) {
+      const nextDamage = { ...this._deviceDamage };
+      delete nextDamage[instanceId];
+      this._deviceDamage = nextDamage;
     }
   }
 
@@ -152,30 +158,39 @@ class GearManager {
   }
 
   // ---- Matrix Condition Monitor ----
-  // Belongs here, not on Character — its max is derived from whichever
-  // device is currently Primary (Device Rating/2 rounded up + 8, same
-  // formula shape as Physical/Stun, just keyed to Device Rating instead
-  // of Body/Willpower), so it's genuinely tied to PAN state, not a fixed
-  // per-attribute value. Swapping Primary devices changes the max; the
-  // damage value itself persists across that swap. Technomancers don't
-  // have one at all — their Matrix damage lands on Stun directly, no
-  // extra plumbing needed since that track already exists. Returns 0
-  // when there's no Primary device or it lacks a Device Rating —
-  // callers should treat 0 as "don't show this," same as Dice treating
-  // null as "don't render a roller."
+  // Per-device, not one shared value tied to the Primary — confirmed
+  // against the actual reference: each device in a PAN carries its own
+  // independent damage track, sized off its own Device Rating (rating/2
+  // rounded up + 8, same formula shape as Physical/Stun). A commlink
+  // being Primary and a slaved sensor tag are two separate tracks, not
+  // one. Technomancers don't have this at all — their Matrix damage
+  // lands on Stun directly, no extra plumbing needed since that track
+  // already exists. Device Rating now resolves via resolveDeviceRating
+  // (augmentationEconomy.js) rather than a flat stat read — accounts
+  // for grade (Delta-grade cyberware really is DR 5, not stuck at a
+  // flat number) and covers every wireless item generally, not just
+  // ones with an explicit deviceRating in source. Returns 0 for
+  // anything that isn't a real PAN node at all — callers should treat
+  // 0 as "don't show this," same as Dice treating null as "don't
+  // render a roller."
 
-  get matrixMonitorMax() {
-    const masterId = this._pan.masterId;
-    if (!masterId || !this._gear[masterId]) return 0;
-    const item = ALL_GEAR[this._gear[masterId].itemId];
-    const deviceRating = item?.stats?.deviceRating;
+  matrixMonitorMaxFor(instanceId) {
+    const entry = this._gear[instanceId];
+    if (!entry) return 0;
+    const item = ALL_GEAR[entry.itemId];
+    if (!item) return 0;
+    const deviceRating = resolveDeviceRating(item, entry.config);
     if (deviceRating == null) return 0;
     return Math.ceil(deviceRating / 2) + 8;
   }
 
-  get matrixDamage() { return this._matrixDamage; }
-  set matrixDamage(value) {
-    this._matrixDamage = Math.max(0, Math.min(this.matrixMonitorMax, value));
+  getDeviceDamage(instanceId) {
+    return this._deviceDamage[instanceId] || 0;
+  }
+
+  setDeviceDamage(instanceId, value) {
+    const max = this.matrixMonitorMaxFor(instanceId);
+    this._deviceDamage = { ...this._deviceDamage, [instanceId]: Math.max(0, Math.min(max, value)) };
   }
 
   // ---- Essence ----
@@ -210,7 +225,7 @@ class GearManager {
       gear: this._gear,
       pan: this._pan,
       deviceStatus: this._deviceStatus,
-      matrixDamage: this._matrixDamage,
+      deviceDamage: this._deviceDamage,
       essenceAdjustments: this._essenceAdjustments,
     };
   }

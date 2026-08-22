@@ -1,6 +1,9 @@
 // Auditory Devices, Sensors, Security & Survival Gear catalog.
 // Same envelope as GEAR.js.
 //
+// Verified against 13d-gear-sensors-security-survival.md (Gear Part 4,
+// pp. 275-281) in full, front to back.
+//
 // New wrinkle here: several items are priced per unit of length rather
 // than per unit or per rating (Microwire is 50¥ per 100m, Myomeric rope
 // 200¥ per 10m). Modeled as `costPerUnit` + `unitLength` rather than a
@@ -22,30 +25,44 @@
 // compatible-device family the PAN rules describe. Security devices and
 // Breaking/Entering tools are split by whether they manipulate an
 // electronic/RFID signal (wireless) or are purely mechanical (not).
-// Survival Gear has no wireless items at all — every item there is
-// mechanical/chemical/consumable. See the PAN conversation for the
-// full per-item reasoning.
+// CORRECTION (this pass): the line below used to claim Survival Gear
+// has NO wireless items at all. That was wrong — it was written from
+// the condensed descriptions, not the source prose, which is exactly
+// the blind spot this whole project pass exists to catch. Gas Mask,
+// Gecko Tape Gloves, and Hazmat Suit all have real "Wireless bonus:"
+// text in source and are now marked `wireless: true` accordingly. See
+// the PAN conversation for the rest of the per-item reasoning.
+//
+// CAPACITY FIELD SPLIT (this pass): per the project-wide convention,
+// all Capacity here — auditory device housings, audio enhancements,
+// sensor housings, and the sensor array/single sensor's own capacity
+// cost — falls into the same "electronics/optical" pool established in
+// armor_electronics.js (that file's capacity-split note explicitly
+// groups sensor housings into the same pool as glasses/goggles), so it
+// uses the same `deviceCapacityProvided[Range]` (housings) /
+// `deviceCapacityUsed[PerRating]` (things installed into them) fields,
+// not a separate audio-specific pool.
 
 function sensorHousing(overrides) {
-  return { category: 'sensor_housing', legality: null, ...overrides };
+  return { category: 'sensor_housing', legality: null, image: null, ...overrides };
 }
 function sensorHousingWireless(overrides) {
   return sensorHousing({ wireless: true, ...overrides });
 }
 function security(overrides) {
-  return { category: 'security', legality: null, ...overrides };
+  return { category: 'security', legality: null, image: null, ...overrides };
 }
 function securityWireless(overrides) {
   return security({ wireless: true, ...overrides });
 }
 function tool(overrides) {
-  return { category: 'tool', legality: null, ...overrides };
+  return { category: 'tool', legality: null, image: null, ...overrides };
 }
 function toolWireless(overrides) {
   return tool({ wireless: true, ...overrides });
 }
 function survival(overrides) {
-  return { category: 'survival', legality: null, ...overrides };
+  return { category: 'survival', legality: null, image: null, ...overrides };
 }
 function survivalWireless(overrides) {
   return survival({ wireless: true, ...overrides });
@@ -62,7 +79,7 @@ const directional_microphone = sensorHousingWireless({
   description: 'Eavesdrops up to 100m away, must be pointed at the target. Solid objects/loud sound interfere.',
   tags: ['auditory'],
   stats: {
-    capacityRange: [1, 6],
+    deviceCapacityProvidedRange: [1, 6],
   },
 });
 
@@ -75,7 +92,7 @@ const earbuds = sensorHousingWireless({
   description: 'Hard to spot, near-indistinguishable from standard commlink/music-player earbuds.',
   tags: ['auditory'],
   stats: {
-    capacityRange: [1, 3],
+    deviceCapacityProvidedRange: [1, 3],
   },
 });
 
@@ -88,7 +105,7 @@ const headphones = sensorHousingWireless({
   description: 'Full headset, bulkier but more Capacity.',
   tags: ['auditory'],
   stats: {
-    capacityRange: [1, 6],
+    deviceCapacityProvidedRange: [1, 6],
   },
 });
 
@@ -101,7 +118,7 @@ const laser_mic = sensorHousingWireless({
   description: 'Bounces a laser off a solid surface (like a windowpane) to read vibrations as sound. Max range 100m.',
   tags: ['auditory'],
   stats: {
-    capacityRange: [1, 6],
+    deviceCapacityProvidedRange: [1, 6],
   },
 });
 
@@ -114,7 +131,7 @@ const omnidirectional_mic = sensorHousingWireless({
   description: 'Standard pickup, usually built into/linked with a commlink. Micro version is Capacity 1 only, max range 5m.',
   tags: ['auditory'],
   stats: {
-    capacityRange: [1, 6],
+    deviceCapacityProvidedRange: [1, 6],
   },
 });
 
@@ -126,7 +143,7 @@ const audio_enhancement = sensorHousingWireless({
   description: 'Hear beyond normal frequency range, fine nuance discrimination, block distracting noise. +1 dice pool on aural Perception tests.',
   tags: ['auditory'],
   stats: {
-    capacity: 1,
+    deviceCapacityUsed: 1,
   },
 });
 
@@ -140,7 +157,7 @@ const select_sound_filter_device = sensorHousingWireless({
   tags: ['auditory'],
   stats: {
     ratingRange: [1, 3],
-    capacityPerRating: 1,
+    deviceCapacityUsedPerRating: 1,
   },
 });
 
@@ -149,10 +166,12 @@ const spatial_recognizer_device = sensorHousingWireless({
   label: 'Spatial Recognizer (Device)',
   cost: 1000,
   availability: 2,
+  wireless: true,
   description: "Pinpoints a sound's source; use-it-or-lose-it bonus Edge on the relevant Perception test. Standalone version — see also the implanted headware version.",
   tags: ['auditory'],
   stats: {
-    capacity: 2,
+    deviceCapacityUsed: 2,
+    wirelessBonus: '+1 dice pool on source-finding tests (stacks with other modifiers).',
   },
 });
 
@@ -167,7 +186,7 @@ const handheld_housing = sensorHousingWireless({
   description: 'Portable sensor housing.',
   tags: ['sensor'],
   stats: {
-    capacityRange: [1, 3],
+    deviceCapacityProvidedRange: [1, 3],
   },
 });
 
@@ -180,10 +199,14 @@ const wall_mounted_housing = sensorHousingWireless({
   description: 'Fixed sensor housing.',
   tags: ['sensor'],
   stats: {
-    capacityRange: [1, 6],
+    deviceCapacityProvidedRange: [1, 6],
   },
 });
 
+// Capacity column in source literally reads "Rating" for the array —
+// its Capacity-cost (as installed in a housing) equals its own chosen
+// Rating, not a separate fixed number. New flag mirrors the existing
+// availabilityEqualsRating pattern used elsewhere in the catalog.
 const sensor_array = sensorHousingWireless({
   id: 'sensor_array',
   label: 'Sensor Array',
@@ -194,6 +217,7 @@ const sensor_array = sensorHousingWireless({
   tags: ['sensor'],
   stats: {
     ratingRange: [2, 8],
+    deviceCapacityUsedEqualsRating: true,
   },
 });
 
@@ -206,10 +230,11 @@ const single_sensor = sensorHousingWireless({
   description: 'One sensor function (see SENSOR_FUNCTIONS for the available list and max ranges).',
   tags: ['sensor'],
   stats: {
-    capacity: 1,
+    deviceCapacityUsed: 1,
     ratingRange: [1, 8],
   },
 });
+
 
 // Reference data, not purchasable items — see file header note.
 
@@ -413,6 +438,7 @@ const maglock_passkey = toolWireless({
   tags: ['breaking_entering'],
   stats: {
     ratingRange: [1, 4],
+    wirelessBonus: '+1 to its effective rating.',
   },
 });
 
@@ -463,6 +489,7 @@ const sequencer = toolWireless({
   tags: ['breaking_entering'],
   stats: {
     ratingRange: [1, 6],
+    wirelessBonus: '+1 to its effective rating.',
   },
 });
 
@@ -494,10 +521,12 @@ const thermite_burning_bar = tool({
   cost: 500,
   availability: 5,
   legality: 'licensed',
+  wireless: true,
   description: 'Melts through iron/steel/plasteel. Too slow/careful to use as a weapon except against someone already incapacitated.',
   tags: ['industrial_chemical'],
   stats: {
     damageValue: '10P(fire)',
+    wirelessBonus: 'Can be activated/deactivated wirelessly.',
   },
 });
 
@@ -546,34 +575,40 @@ const flashlight = survival({
   stats: {},
 });
 
-const gas_mask = survival({
+const gas_mask = survivalWireless({
   id: 'gas_mask',
   label: 'Gas Mask',
   cost: 200,
   availability: 1,
   description: "Full-face air-supplied re-breather, immunity to Inhalation-vector toxins. 1-hour clean air (40¥ refills). Can't combine with a regular respirator.",
   tags: ['survival'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Analyzes and reports on the surrounding (unbreathed) air.',
+  },
 });
 
-const gecko_tape_gloves = survival({
+const gecko_tape_gloves = survivalWireless({
   id: 'gecko_tape_gloves',
   label: 'Gecko Tape Gloves',
   cost: 250,
   availability: 3,
   description: 'Microscopic-hair dry adhesive set enabling assisted climbing on nearly any surface. Useless when wet.',
   tags: ['survival'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Can temporarily neutralize the adhesive to avoid self-sticking while donning/doffing.',
+  },
 });
 
-const hazmat_suit = survival({
+const hazmat_suit = survivalWireless({
   id: 'hazmat_suit',
   label: 'Hazmat Suit',
   cost: 3000,
   availability: 3,
   description: 'Full-body, 4-hour internal air, full chemical seal, blocks Contact/Inhalation toxins. Standard sensor slot (often a Geiger counter, bought separately).',
   tags: ['survival'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Environmental analysis and reporting.',
+  },
 });
 
 const light_stick = survival({

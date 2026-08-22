@@ -62,12 +62,53 @@ function StatusExpand({ expanded, status, onToggle }) {
   );
 }
 
+// Per-device Matrix Condition Monitor — confirmed as a real, independent
+// track per device (not one shared value), sized off that device's own
+// Device Rating. Renders nothing if the device has no Device Rating
+// (matrixMonitorMaxFor returns 0) or the character is a technomancer
+// (their Matrix damage already lands on Stun, no device track exists).
+function DeviceMatrixTrack({ character, instanceId, touch }) {
+  const isTechnomancer = character.magicType === 'technomancer';
+  const max = character.gearManager.matrixMonitorMaxFor(instanceId);
+  if (isTechnomancer || max === 0) return null;
+
+  const damage = character.gearManager.getDeviceDamage(instanceId);
+
+  const handleChange = (value) => {
+    character.gearManager.setDeviceDamage(instanceId, value);
+    touch();
+  };
+
+  return (
+    <div className="sr-pan-mcm">
+      <div className="sr-pan-mcm-head">
+        <span className="sr-pan-mcm-label">Matrix Condition Monitor</span>
+        <span className="sr-pan-mcm-count">{damage}/{max}</span>
+      </div>
+      <div className="sr-pan-mcm-rows">
+        {Array.from({ length: max }, (_, i) => {
+          const filled = i < damage;
+          const isLastFilled = filled && i === damage - 1;
+          return (
+            <button
+              key={i}
+              className={filled ? 'sr-pan-mcm-box sr-pan-mcm-box--filled' : 'sr-pan-mcm-box'}
+              onClick={() => handleChange(isLastFilled ? damage - 1 : i + 1)}
+              title={`Mark up to box ${i + 1}`}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // One row in the Slaved or Slavable list. `secondaryLabel`/`onSecondary`
 // is "Slave" in the slavable list, "Unslave" in the slaved list — same
-// row shape, different action available. Status marking only appears
-// on things actually networked (this row only renders it when
-// `showStatus` is true, i.e. never for slavable/unconnected devices —
-// a hacker targets what's connected, not a spare commlink in a pocket).
+// row shape, different action available. Status marking and the Matrix
+// CM track only appear on things actually networked (`showStatus` true)
+// — never for slavable/unconnected devices, since neither a hack nor
+// Matrix damage can reach something that isn't plugged in yet.
 function PanDeviceRow({ character, instanceId, entry, showStatus, onPromote, secondaryLabel, onSecondary, expandedId, setExpandedId, touch }) {
   const item = ALL_GEAR[entry.itemId];
   if (!item) return null;
@@ -94,6 +135,9 @@ function PanDeviceRow({ character, instanceId, entry, showStatus, onPromote, sec
               <span className="sr-pan-row-stat">FW <strong>{stats.firewall ?? '—'}</strong></span>
             </div>
           )}
+          {stats.wirelessBonus && showStatus && (
+            <div className="sr-pan-row-bonus">Wireless bonus: {stats.wirelessBonus}</div>
+          )}
           {showStatus && <StatusBadges status={status} />}
         </div>
         <div className="sr-pan-row-actions">
@@ -105,20 +149,18 @@ function PanDeviceRow({ character, instanceId, entry, showStatus, onPromote, sec
         </div>
       </div>
       {showStatus && <StatusExpand expanded={expanded} status={status} onToggle={handleToggleStatus} />}
+      {showStatus && <DeviceMatrixTrack character={character} instanceId={instanceId} touch={touch} />}
     </div>
   );
 }
 
 // PAN — a single Primary device up top (name, real A/S/D/F with dashes
-// for whatever it lacks, Remote Device Limit from its Data Processing),
-// then two lists: Slaved (networked now) and Slavable (owned, wireless,
-// not yet networked — commlinks/decks always sort first in both). No
-// Slaved-PAN nesting, no redundant Persona-as-Master row — dissolved
-// into this single flat structure per the redesign. The Matrix
-// Condition Monitor lives here too, since its max is derived from
-// whichever device is currently Primary, not a fixed attribute —
-// hidden entirely for technomancers, whose Matrix damage already lands
-// on their ordinary Stun track.
+// for whatever it lacks, Remote Device Limit from its Data Processing,
+// its own Matrix Condition Monitor), then two lists: Slaved (networked
+// now, each with its own independent CM track) and Slavable (owned,
+// wireless, not yet networked — commlinks/decks always sort first in
+// both). No Slaved-PAN nesting, no redundant Persona-as-Master row —
+// dissolved into this single flat structure per the redesign.
 export default function NetworkPanel({ character }) {
   const { touch } = useCharacterManager();
   const [expandedId, setExpandedId] = useState(null);
@@ -154,16 +196,10 @@ export default function NetworkPanel({ character }) {
     character.gearManager.toggleDeviceStatus(instanceId, statusKey);
     touch();
   };
-  const handleMatrixDamageChange = (value) => {
-    character.gearManager.matrixDamage = value;
-    touch();
-  };
 
-  const isTechnomancer = character.magicType === 'technomancer';
-  const matrixMax = character.gearManager.matrixMonitorMax;
-  const matrixDamage = character.gearManager.matrixDamage;
   const primaryStatus = pan.masterId ? character.gearManager.getDeviceStatus(pan.masterId) : [];
   const primaryExpanded = expandedId === pan.masterId;
+  const primaryBonus = primaryItem?.stats?.wirelessBonus;
 
   return (
     <div className="sr-pan">
@@ -188,6 +224,8 @@ export default function NetworkPanel({ character }) {
             Remote Device Limit: <strong>{primaryItem.stats?.dataProcessing ?? 0}</strong>
           </div>
 
+          {primaryBonus && <div className="sr-pan-row-bonus">Wireless bonus: {primaryBonus}</div>}
+
           <StatusBadges status={primaryStatus} />
           <StatusExpand
             expanded={primaryExpanded}
@@ -195,28 +233,7 @@ export default function NetworkPanel({ character }) {
             onToggle={(key) => handleToggleStatus(pan.masterId, key)}
           />
 
-          {!isTechnomancer && matrixMax > 0 && (
-            <div className="sr-pan-mcm">
-              <div className="sr-pan-mcm-head">
-                <span className="sr-pan-mcm-label">Matrix Condition Monitor</span>
-                <span className="sr-pan-mcm-count">{matrixDamage}/{matrixMax}</span>
-              </div>
-              <div className="sr-pan-mcm-rows">
-                {Array.from({ length: matrixMax }, (_, i) => {
-                  const filled = i < matrixDamage;
-                  const isLastFilled = filled && i === matrixDamage - 1;
-                  return (
-                    <button
-                      key={i}
-                      className={filled ? 'sr-pan-mcm-box sr-pan-mcm-box--filled' : 'sr-pan-mcm-box'}
-                      onClick={() => handleMatrixDamageChange(isLastFilled ? matrixDamage - 1 : i + 1)}
-                      title={`Mark up to box ${i + 1}`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <DeviceMatrixTrack character={character} instanceId={pan.masterId} touch={touch} />
         </div>
       ) : (
         <p className="sr-pan-hint">No Primary device set — promote a commlink or cyberdeck from the Slavable list below.</p>

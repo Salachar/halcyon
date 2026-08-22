@@ -41,6 +41,32 @@
   margin-top: 0.1rem;
 }
 
+/* Capacity summary — real provided/used numbers, unlike the mount
+   summary above which stays purely informational. --over swaps to red
+   the same way .sr-buy-btn--unaffordable or .sr-pan-status-badge use
+   color to flag a state without a separate icon system. */
+.sr-gear-list-capacity {
+  font-size: 0.7rem;
+  color: var(--sr-text-dim);
+  margin-top: 0.1rem;
+}
+.sr-gear-list-capacity--over {
+  color: var(--sr-red);
+  font-weight: 700;
+}
+
+.sr-gear-list-details {
+  font-size: 0.7rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.1rem;
+}
+
+.sr-gear-list-wireless {
+  font-size: 0.7rem;
+  color: var(--sr-blue-bright);
+  margin-top: 0.1rem;
+}
+
 .sr-gear-list-actions {
   display: flex;
   gap: 0.4rem;

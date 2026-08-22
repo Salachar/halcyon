@@ -1,6 +1,9 @@
 // Biotech Basics + Headware/Eyeware/Earware/Bodyware catalog.
 // Same envelope as GEAR.js.
 //
+// Verified against 13e-gear-biotech-headware-eyeware-earware-bodyware.md
+// (Gear Part 5, pp. 281-288) in full, front to back.
+//
 // Two new wrinkles this category needed:
 //
 // 1. DocWagon contracts are subscriptions, not one-time purchases —
@@ -8,11 +11,19 @@
 //    flat number, since "cost >= character.nuyen" doesn't make sense
 //    for a recurring service.
 // 2. Several "Rating 1-5" item families (Cybereyes/Cyberears basic,
-//    Wired Reflexes) do NOT scale linearly — cost and Capacity jump
-//    unevenly per rating (e.g. cybereyes cost 1000/4000/6000/10000/16000,
-//    not a clean multiplier). Those are modeled as separate real items
-//    per rating rather than forced into a costPerRating formula that
-//    would just be wrong.
+//    Wired Reflexes, and now Cyberjacks too) do NOT scale linearly —
+//    cost and Capacity/Essence jump unevenly per rating (e.g. cybereyes
+//    cost 1000/4000/6000/10000/16000, not a clean multiplier). Those
+//    are modeled as separate real items per rating rather than forced
+//    into a costPerRating formula that would just be wrong.
+//    CORRECTION (this pass): Cyberjacks was previously a stub with
+//    `cost: null, availability: null` and a comment saying its stats
+//    "live on the Matrix gear table (not yet built)." That table DOES
+//    exist (09a-matrix-basics-and-actions.md, Cyberjacks table) and was
+//    read during the matrix_devices.js pass — Cyberjacks is genuinely
+//    non-linear (Essence 1/1.5/2/2.3/2.6/3, cost jumps from +20,000 to
+//    +70,000 between steps), so it's now 6 real rating items, same
+//    pattern as Cybereyes/Cyberears/Wired Reflexes.
 //
 // Also worth flagging: the Grade system (standard/alphaware/betaware/
 // deltaware/used — multiplies Essence/cost/Availability) applies
@@ -25,10 +36,36 @@
 //
 // `wireless: true` marks real PAN nodes among these implants — Matrix
 // hardware and image/sound-link tech that has a wireless-marked
-// external accessory twin in GEAR_ARMOR_ELECTRONICS.js. Most bodyware
-// and sensory-booster items are physical/biological with no networked
-// component, so they're deliberately left unmarked. See the PAN
-// conversation for the full per-item reasoning — not repeated here.
+// external accessory twin in GEAR_ARMOR_ELECTRONICS.js.
+// CORRECTION (this pass): the line that used to be here claimed "most
+// bodyware and sensory-booster items are physical/biological with no
+// networked component, so they're deliberately left unmarked." That
+// was wrong for the same reason the other files' blind spots were
+// wrong — it was written from condensed descriptions, not the source
+// prose. Olfactory Booster, Taste Booster, Skilljack, and Voice
+// Modulator (headware) and Fingertip Compartment, Internal Air Tank,
+// Reaction Enhancers, Skillwires, Smuggling Compartment, and all 4
+// Wired Reflexes ratings (bodyware) all have real "Wireless bonus:"
+// text in source and are now marked `wireless: true` accordingly. See
+// the PAN conversation for the rest of the per-item reasoning.
+//
+// CAPACITY FIELD SPLIT (this pass): per the project-wide convention,
+// Capacity here is the cyberware pool (Essence-adjacent) — Cybereyes
+// Basic and Cyberears Basic (by rating) are the housings and use
+// `cyberwareCapacityProvided`; the bracketed `[N]` values throughout
+// this file (Flare Compensation [1], Smartlink [3], Audio Enhancement
+// [1], Fingertip Compartment [1], etc.) are the consumer side and use
+// `cyberwareCapacityUsed[PerRating]`.
+// FLAG: several bracketed-Capacity headware/bodyware items (Commlink
+// implant [2], Cortex bombs [1]/[2]/[3], Cyberdeck implant [4],
+// Ultrasound sensor [2], Fingertip Compartment [1], Grapple Gun
+// Implant [4], Internal Air Tank [Rating]) aren't obviously consuming
+// Cybereyes/Cyberears/cyberlimb capacity the way vision/audio
+// enhancements are — the source never names what "houses" that
+// capacity for them. Filed as `cyberwareCapacityUsed` for consistency,
+// but this may actually be a distinct "headware slot" or "bodyware
+// slot" pool the app doesn't model yet. Needs a decision, not guessed
+// here.
 
 export const AUGMENTATION_GRADES = {
   standard: {
@@ -65,13 +102,13 @@ export const AUGMENTATION_GRADES = {
 // as a real content gap, not solving it here.
 
 function biotech(overrides) {
-  return { category: 'biotech', legality: null, ...overrides };
+  return { category: 'biotech', legality: null, image: null, ...overrides };
 }
 function biotechWireless(overrides) {
   return biotech({ wireless: true, ...overrides });
 }
 function headware(overrides) {
-  return { category: 'cyberware', legality: null, ...overrides };
+  return { category: 'cyberware', legality: null, image: null, ...overrides };
 }
 function headwareWireless(overrides) {
   return headware({ wireless: true, ...overrides });
@@ -86,7 +123,9 @@ const biomonitor = biotechWireless({
   availability: 2,
   description: 'Tracks heart rate/blood pressure/temperature, analyzes blood/sweat/skin samples. Worn or integrated into clothing/commlinks.',
   tags: ['biotech'],
-  stats: {},
+  stats: {
+    wirelessBonus: 'Shares data with designated devices, and can auto-alert DocWagon/ambulance services at set thresholds.',
+  },
 });
 
 const docwagon_basic = biotech({
@@ -151,7 +190,7 @@ const disposable_syringe = biotech({
   stats: {},
 });
 
-const medkit = biotech({
+const medkit = biotechWireless({
   id: 'medkit',
   label: 'Medkit',
   cost: null,
@@ -161,6 +200,7 @@ const medkit = biotech({
   tags: ['biotech'],
   stats: {
     ratingRange: [1, 6],
+    wirelessBonus: '+1 dice pool on healing tests.',
   },
 });
 
@@ -241,7 +281,7 @@ const commlink_implant = headwareWireless({
   tags: ['headware'],
   stats: {
     essenceCost: 0.2,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -270,7 +310,7 @@ const cortex_kink_bomb = headwareWireless({
   tags: ['headware'],
   stats: {
     essenceCost: 0,
-    capacity: 1,
+    cyberwareCapacityUsed: 1,
   },
 });
 
@@ -284,7 +324,7 @@ const cortex_microbomb = headwareWireless({
   tags: ['headware'],
   stats: {
     essenceCost: 0,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -298,7 +338,7 @@ const cortex_area_bomb = headwareWireless({
   tags: ['headware'],
   stats: {
     essenceCost: 0,
-    capacity: 3,
+    cyberwareCapacityUsed: 3,
   },
 });
 
@@ -312,18 +352,112 @@ const cyberdeck_implant = headwareWireless({
   tags: ['headware'],
   stats: {
     essenceCost: 0.4,
-    capacity: 4,
+    cyberwareCapacityUsed: 4,
   },
 });
 
-const cyberjacks = headwareWireless({
-  id: 'cyberjacks',
-  label: 'Cyberjacks',
-  cost: null,
-  availability: null,
-  description: "Harness brain processing power for Matrix protocols/encryption. Provide Data Processing/Firewall ratings decks no longer have natively, double as a standard datajack, and enable special Matrix Edge Actions. Full stats live on the Matrix gear table (not yet built).",
+// Cyberjacks do NOT scale linearly (Essence 1/1.5/2/2.3/2.6/3, cost
+// jumps unevenly) — 6 real rating items, verified against
+// 09a-matrix-basics-and-actions.md's Cyberjacks table (pp. ~170-184).
+// D/F and VR Init Dice Bonus are Matrix-facing stats (mirrors the
+// commlink/cyberdeck shape in matrix_devices.js) layered onto a
+// cyberware item, since a Cyberjack is headware that also functions as
+// a datajack and grants Matrix Edge Actions.
+
+const cyberjack_1 = headwareWireless({
+  id: 'cyberjack_1',
+  label: 'Cyberjack (Rating 1)',
+  cost: 45000,
+  availability: 3,
+  legality: 'licensed',
+  description: 'An invasive brain implant that interfaces more smoothly with a cyberdeck than a plain datajack, offering better speed/response. Doubles as a standard datajack and enables special Matrix Edge Actions.',
   tags: ['headware'],
-  stats: {},
+  stats: {
+    essenceCost: 1,
+    dataProcessing: 4,
+    firewall: 3,
+    vrInitiativeDiceBonus: 1,
+  },
+});
+
+const cyberjack_2 = headwareWireless({
+  id: 'cyberjack_2',
+  label: 'Cyberjack (Rating 2)',
+  cost: 65000,
+  availability: 3,
+  legality: 'licensed',
+  description: 'An invasive brain implant that interfaces more smoothly with a cyberdeck than a plain datajack, offering better speed/response. Doubles as a standard datajack and enables special Matrix Edge Actions.',
+  tags: ['headware'],
+  stats: {
+    essenceCost: 1.5,
+    dataProcessing: 5,
+    firewall: 4,
+    vrInitiativeDiceBonus: 1,
+  },
+});
+
+const cyberjack_3 = headwareWireless({
+  id: 'cyberjack_3',
+  label: 'Cyberjack (Rating 3)',
+  cost: 80000,
+  availability: 3,
+  legality: 'licensed',
+  description: 'An invasive brain implant that interfaces more smoothly with a cyberdeck than a plain datajack, offering better speed/response. Doubles as a standard datajack and enables special Matrix Edge Actions.',
+  tags: ['headware'],
+  stats: {
+    essenceCost: 2,
+    dataProcessing: 6,
+    firewall: 5,
+    vrInitiativeDiceBonus: 1,
+  },
+});
+
+const cyberjack_4 = headwareWireless({
+  id: 'cyberjack_4',
+  label: 'Cyberjack (Rating 4)',
+  cost: 95000,
+  availability: 4,
+  legality: 'licensed',
+  description: 'An invasive brain implant that interfaces more smoothly with a cyberdeck than a plain datajack, offering better speed/response. Doubles as a standard datajack and enables special Matrix Edge Actions.',
+  tags: ['headware'],
+  stats: {
+    essenceCost: 2.3,
+    dataProcessing: 7,
+    firewall: 6,
+    vrInitiativeDiceBonus: 2,
+  },
+});
+
+const cyberjack_5 = headwareWireless({
+  id: 'cyberjack_5',
+  label: 'Cyberjack (Rating 5)',
+  cost: 140000,
+  availability: 5,
+  legality: 'licensed',
+  description: 'An invasive brain implant that interfaces more smoothly with a cyberdeck than a plain datajack, offering better speed/response. Doubles as a standard datajack and enables special Matrix Edge Actions.',
+  tags: ['headware'],
+  stats: {
+    essenceCost: 2.6,
+    dataProcessing: 8,
+    firewall: 7,
+    vrInitiativeDiceBonus: 2,
+  },
+});
+
+const cyberjack_6 = headwareWireless({
+  id: 'cyberjack_6',
+  label: 'Cyberjack (Rating 6)',
+  cost: 210000,
+  availability: 6,
+  legality: 'licensed',
+  description: 'An invasive brain implant that interfaces more smoothly with a cyberdeck than a plain datajack, offering better speed/response. Doubles as a standard datajack and enables special Matrix Edge Actions.',
+  tags: ['headware'],
+  stats: {
+    essenceCost: 3,
+    dataProcessing: 9,
+    firewall: 8,
+    vrInitiativeDiceBonus: 2,
+  },
 });
 
 const datajack = headware({
@@ -352,7 +486,7 @@ const datalock = headware({
   },
 });
 
-const olfactory_booster = headware({
+const olfactory_booster = headwareWireless({
   id: 'olfactory_booster',
   label: 'Olfactory Booster',
   cost: null,
@@ -363,6 +497,7 @@ const olfactory_booster = headware({
   stats: {
     ratingRange: [1, 3],
     essenceCost: 0.2,
+    wirelessBonus: '+rating dice pool on scent Perception tests.',
   },
 });
 
@@ -379,7 +514,7 @@ const simrig_implant = headwareWireless({
   },
 });
 
-const skilljack = headware({
+const skilljack = headwareWireless({
   id: 'skilljack',
   label: 'Skilljack',
   cost: null,
@@ -390,10 +525,11 @@ const skilljack = headware({
   stats: {
     ratingRange: [1, 6],
     essencePerRating: 0.1,
+    wirelessBonus: 'The running-skills cap is raised to (rating x 4), and skilljack-sourced skills can be Edge-boosted.',
   },
 });
 
-const taste_booster = headware({
+const taste_booster = headwareWireless({
   id: 'taste_booster',
   label: 'Taste Booster',
   cost: null,
@@ -404,6 +540,7 @@ const taste_booster = headware({
   stats: {
     ratingRange: [1, 3],
     essenceCost: 0.2,
+    wirelessBonus: '+rating dice pool on taste Perception tests.',
   },
 });
 
@@ -428,11 +565,11 @@ const ultrasound_sensor = headware({
   tags: ['headware'],
   stats: {
     essenceCost: 0.3,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
-const voice_modulator = headware({
+const voice_modulator = headwareWireless({
   id: 'voice_modulator',
   label: 'Voice Modulator',
   cost: null,
@@ -444,6 +581,7 @@ const voice_modulator = headware({
   stats: {
     ratingRange: [1, 3],
     essenceCost: 0.2,
+    wirelessBonus: '+rating dice pool on sound-based Con tests.',
   },
 });
 
@@ -462,8 +600,9 @@ const cybereyes_basic_1 = headwareWireless({
   description: '20/20 vision both eyes, image link, built-in camera, plus enhancement Capacity.',
   tags: ['eyeware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityProvided: 1,
   },
 });
 
@@ -475,8 +614,9 @@ const cybereyes_basic_2 = headwareWireless({
   description: '20/20 vision both eyes, image link, built-in camera, plus enhancement Capacity.',
   tags: ['eyeware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.2,
-    capacity: 4,
+    cyberwareCapacityProvided: 4,
   },
 });
 
@@ -488,8 +628,9 @@ const cybereyes_basic_3 = headwareWireless({
   description: '20/20 vision both eyes, image link, built-in camera, plus enhancement Capacity.',
   tags: ['eyeware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.3,
-    capacity: 8,
+    cyberwareCapacityProvided: 8,
   },
 });
 
@@ -501,8 +642,9 @@ const cybereyes_basic_4 = headwareWireless({
   description: '20/20 vision both eyes, image link, built-in camera, plus enhancement Capacity.',
   tags: ['eyeware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.4,
-    capacity: 12,
+    cyberwareCapacityProvided: 12,
   },
 });
 
@@ -514,8 +656,9 @@ const cybereyes_basic_5 = headwareWireless({
   description: '20/20 vision both eyes, image link, built-in camera, plus enhancement Capacity.',
   tags: ['eyeware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.5,
-    capacity: 16,
+    cyberwareCapacityProvided: 16,
   },
 });
 
@@ -528,7 +671,7 @@ const flare_compensation = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityUsed: 1,
   },
 });
 
@@ -553,7 +696,7 @@ const low_light_vision_implant = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -566,7 +709,7 @@ const ocular_drone = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.3,
-    capacity: 6,
+    cyberwareCapacityUsed: 6,
   },
 });
 
@@ -582,7 +725,7 @@ const retinal_duplication = headware({
   stats: {
     ratingRange: [1, 6],
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityUsed: 1,
   },
 });
 
@@ -596,7 +739,7 @@ const smartlink_implant = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.2,
-    capacity: 3,
+    cyberwareCapacityUsed: 3,
   },
 });
 
@@ -609,7 +752,7 @@ const thermographic_vision_implant = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -622,7 +765,7 @@ const vision_enhancement_implant = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -635,7 +778,7 @@ const vision_magnification_implant = headwareWireless({
   tags: ['eyeware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -653,8 +796,9 @@ const cyberears_basic_1 = headwareWireless({
   description: 'Normal-range hearing (like an omnidirectional mic), sound link, enhancement Capacity. Bonus Edge against hearing interference.',
   tags: ['earware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityProvided: 1,
   },
 });
 
@@ -666,8 +810,9 @@ const cyberears_basic_2 = headwareWireless({
   description: 'Normal-range hearing (like an omnidirectional mic), sound link, enhancement Capacity. Bonus Edge against hearing interference.',
   tags: ['earware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.2,
-    capacity: 4,
+    cyberwareCapacityProvided: 4,
   },
 });
 
@@ -679,8 +824,9 @@ const cyberears_basic_3 = headwareWireless({
   description: 'Normal-range hearing (like an omnidirectional mic), sound link, enhancement Capacity. Bonus Edge against hearing interference.',
   tags: ['earware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.3,
-    capacity: 8,
+    cyberwareCapacityProvided: 8,
   },
 });
 
@@ -692,8 +838,9 @@ const cyberears_basic_4 = headwareWireless({
   description: 'Normal-range hearing (like an omnidirectional mic), sound link, enhancement Capacity. Bonus Edge against hearing interference.',
   tags: ['earware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.4,
-    capacity: 12,
+    cyberwareCapacityProvided: 12,
   },
 });
 
@@ -705,8 +852,9 @@ const cyberears_basic_5 = headwareWireless({
   description: 'Normal-range hearing (like an omnidirectional mic), sound link, enhancement Capacity. Bonus Edge against hearing interference.',
   tags: ['earware'],
   stats: {
+    deviceRating: 2, // basic cyberware, no explicit rating in source — FAQ guideline default
     essenceCost: 0.5,
-    capacity: 16,
+    cyberwareCapacityProvided: 16,
   },
 });
 
@@ -719,7 +867,7 @@ const audio_enhancement_implant = headwareWireless({
   tags: ['earware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityUsed: 1,
   },
 });
 
@@ -732,7 +880,7 @@ const balance_augmenter = headware({
   tags: ['earware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 4,
+    cyberwareCapacityUsed: 4,
   },
 });
 
@@ -745,7 +893,7 @@ const damper = headware({
   tags: ['earware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityUsed: 1,
   },
 });
 
@@ -760,7 +908,7 @@ const select_sound_filter = headwareWireless({
   stats: {
     ratingRange: [1, 6],
     essenceCost: 0.1,
-    capacityPerRating: 1,
+    cyberwareCapacityUsedPerRating: 1,
   },
 });
 
@@ -781,11 +929,18 @@ const spatial_recognizer = headwareWireless({
   label: 'Spatial Recognizer',
   cost: 4000,
   availability: 3,
+  // FLAG: the external accessory version of this item (in
+  // sensors_security_survival.js) has an explicit Wireless bonus ("+1
+  // dice pool on source-finding tests"). This Earware chapter only
+  // describes the implant as "the implanted version of the standard
+  // audio enhancement" without restating that bonus text — not adding
+  // it here without confirmation it's meant to carry over, rather than
+  // assuming it does.
   description: 'Implanted audio enhancement.',
   tags: ['earware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 2,
+    cyberwareCapacityUsed: 2,
   },
 });
 
@@ -859,16 +1014,17 @@ const dermal_plating = headware({
   },
 });
 
-const fingertip_compartment = headware({
+const fingertip_compartment = headwareWireless({
   id: 'fingertip_compartment',
   label: 'Fingertip Compartment',
   cost: 3000,
   availability: 2,
-  description: 'Hollowed fingertip, holds micro-items. Concealability threshold 8. Popular for hiding a monofilament whip.',
+  description: 'Hollowed fingertip, holds micro-items. Concealability threshold 8. Popular for hiding a monofilament whip (fingertip as control weight).',
   tags: ['bodyware'],
   stats: {
     essenceCost: 0.1,
-    capacity: 1,
+    cyberwareCapacityUsed: 1,
+    wirelessBonus: 'Insert/retrieve (and whip-spooling, if hiding a monofilament whip) becomes a Minor Action instead of a Major Action.',
   },
 });
 
@@ -881,11 +1037,11 @@ const grapple_gun_implant = headware({
   tags: ['bodyware'],
   stats: {
     essenceCost: 0.5,
-    capacity: 4,
+    cyberwareCapacityUsed: 4,
   },
 });
 
-const internal_air_tank = headware({
+const internal_air_tank = headwareWireless({
   id: 'internal_air_tank',
   label: 'Internal Air Tank',
   cost: null,
@@ -896,7 +1052,8 @@ const internal_air_tank = headware({
   stats: {
     ratingRange: [1, 4],
     essenceCost: 0.25,
-    capacityPerRating: 1,
+    cyberwareCapacityUsedPerRating: 1,
+    wirelessBonus: 'Activation/deactivation gains an extra Minor Action, and air level/purity is always known.',
   },
 });
 
@@ -915,7 +1072,7 @@ const muscle_replacement = headware({
   },
 });
 
-const reaction_enhancers = headware({
+const reaction_enhancers = headwareWireless({
   id: 'reaction_enhancers',
   label: 'Reaction Enhancers',
   cost: null,
@@ -927,10 +1084,11 @@ const reaction_enhancers = headware({
   stats: {
     ratingRange: [1, 4],
     essencePerRating: 0.3,
+    wirelessBonus: 'Becomes compatible with a wireless-enabled Wired Reflexes system.',
   },
 });
 
-const skillwires = headware({
+const skillwires = headwareWireless({
   id: 'skillwires',
   label: 'Skillwires',
   cost: null,
@@ -941,10 +1099,11 @@ const skillwires = headware({
   stats: {
     ratingRange: [1, 6],
     essencePerRating: 0.1,
+    wirelessBonus: '+1 dice pool on all skillwire-driven skill uses.',
   },
 });
 
-const smuggling_compartment_bodyware = headware({
+const smuggling_compartment_bodyware = headwareWireless({
   id: 'smuggling_compartment_bodyware',
   label: 'Smuggling Compartment (Bodyware)',
   cost: 7500,
@@ -953,68 +1112,74 @@ const smuggling_compartment_bodyware = headware({
   tags: ['bodyware'],
   stats: {
     essenceCost: 0.2,
+    wirelessBonus: 'Insert/retrieve becomes a Minor Action instead of a Major Action.',
   },
 });
 
 // Wired Reflexes 1-4 do NOT scale linearly (cost roughly quadruples per
 // step, Availability jumps from L to I at rating 3) — 4 real items.
 
-const wired_reflexes_1 = headware({
+const wired_reflexes_1 = headwareWireless({
   id: 'wired_reflexes_1',
   label: 'Wired Reflexes 1',
   cost: 40000,
   availability: 3,
   legality: 'licensed',
-  description: 'Invasive neural/adrenaline boosters. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
+  description: 'Invasive neural/adrenaline boosters, toggled manually (Major Action) or wirelessly. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
   tags: ['bodyware'],
   stats: {
     essenceCost: 1,
+    wirelessBonus: 'Becomes compatible with wireless-enabled Reaction Enhancers, and toggling on/off becomes a Minor Action instead of a Major Action.',
   },
 });
 
-const wired_reflexes_2 = headware({
+const wired_reflexes_2 = headwareWireless({
   id: 'wired_reflexes_2',
   label: 'Wired Reflexes 2',
   cost: 150000,
   availability: 3,
   legality: 'licensed',
-  description: 'Invasive neural/adrenaline boosters. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
+  description: 'Invasive neural/adrenaline boosters, toggled manually (Major Action) or wirelessly. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
   tags: ['bodyware'],
   stats: {
     essenceCost: 2,
+    wirelessBonus: 'Becomes compatible with wireless-enabled Reaction Enhancers, and toggling on/off becomes a Minor Action instead of a Major Action.',
   },
 });
 
-const wired_reflexes_3 = headware({
+const wired_reflexes_3 = headwareWireless({
   id: 'wired_reflexes_3',
   label: 'Wired Reflexes 3',
   cost: 250000,
   availability: 4,
   legality: 'illegal',
-  description: 'Invasive neural/adrenaline boosters. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
+  description: 'Invasive neural/adrenaline boosters, toggled manually (Major Action) or wirelessly. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
   tags: ['bodyware'],
   stats: {
     essenceCost: 3,
+    wirelessBonus: 'Becomes compatible with wireless-enabled Reaction Enhancers, and toggling on/off becomes a Minor Action instead of a Major Action.',
   },
 });
 
-const wired_reflexes_4 = headware({
+const wired_reflexes_4 = headwareWireless({
   id: 'wired_reflexes_4',
   label: 'Wired Reflexes 4',
   cost: 400000,
   availability: 6,
   legality: 'illegal',
-  description: 'Invasive neural/adrenaline boosters. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
+  description: 'Invasive neural/adrenaline boosters, toggled manually (Major Action) or wirelessly. Each rating: +1 Reaction (and Initiative Score) and +1 Initiative Die while active. Incompatible with other Reaction/Initiative augmentations.',
   tags: ['bodyware'],
   stats: {
     essenceCost: 4,
+    wirelessBonus: 'Becomes compatible with wireless-enabled Reaction Enhancers, and toggling on/off becomes a Minor Action instead of a Major Action.',
   },
 });
 
 export const GEAR_AUGMENTATIONS = {
   biomonitor, docwagon_basic, docwagon_gold, docwagon_platinum, docwagon_super_platinum,
   disposable_syringe, medkit, medkit_supplies, antidote_patch, chem_patch, stim_patch, tranq_patch, trauma_patch,
-  commlink_implant, control_rig, cortex_kink_bomb, cortex_microbomb, cortex_area_bomb, cyberdeck_implant, cyberjacks,
+  commlink_implant, control_rig, cortex_kink_bomb, cortex_microbomb, cortex_area_bomb, cyberdeck_implant,
+  cyberjack_1, cyberjack_2, cyberjack_3, cyberjack_4, cyberjack_5, cyberjack_6,
   datajack, datalock, olfactory_booster, simrig_implant, skilljack, taste_booster, tooth_compartment, ultrasound_sensor, voice_modulator,
   cybereyes_basic_1, cybereyes_basic_2, cybereyes_basic_3, cybereyes_basic_4, cybereyes_basic_5,
   flare_compensation, image_link_implant, low_light_vision_implant, ocular_drone, retinal_duplication,

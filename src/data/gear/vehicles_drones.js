@@ -3,6 +3,12 @@
 // category — every item just fills the same vehicle stat block, no
 // per-item variance the way weapon DV notation had.
 //
+// Verified against 13g-gear-vehicles-drones.md (Gear Part 7/Final, pp.
+// 294-304) in full. Every stat on every vehicle/drone item already
+// matched source exactly except the one gap noted below — a strong
+// contrast to earlier files, and expected given this chapter's tables
+// are the most uniform in the book.
+//
 // Two irregularities in the source table worth flagging:
 //
 // 1. A few rows list "X/Y" for Seats (GMC Bulldog, Ares Roadmaster, Ares
@@ -13,6 +19,13 @@
 //    (Federated Boeing Commuter/Osprey X, Nissan Samurai/Oni) — every
 //    stat differs between them, so those got split into two real items
 //    rather than forced into one row with slash-separated stats.
+//    CORRECTION (this pass): a THIRD such row was missed — Proteus
+//    Lamprey/Sea Snake lists Availability as "2/4", and the prose
+//    explicitly calls the Availability-4 version the military "Sea
+//    Snake" variant (same stats otherwise). The original build kept
+//    this as one item with a description footnote instead of splitting
+//    it like the other two dual-vehicle rows — added `proteus_sea_snake`
+//    as a real second item to match the established pattern.
 //
 // `wireless: true` is set for EVERY vehicle and drone here, unlike the
 // other gear files — this isn't an item-by-item judgment call. Every
@@ -25,17 +38,33 @@
 // Interface is the literal DNI-connection mod (wireless); the weapon
 // mounts are physical hardware (not); Manual Operation is explicitly
 // the non-networked alternative (not).
+// Full-text search confirms this chapter has no "Wireless bonus:" text
+// anywhere — the one "wireless" mention (Proteus Lamprey's "wireless
+// doesn't reach that deep") is a limitation, not a bonus, so nothing to
+// add there.
+//
+// WEAPON MOUNT CAPACITY (this pass, per brief investigation ask):
+// previously informational-only. The source states vehicles can carry
+// mounts up to (unaugmented Body / 3, rounded down), and a heavy mount
+// "counts as 2 mounts" — both are crisp, computable rules, not vague
+// prose, so they're now modeled: `mountSlotsUsed` on each mount item,
+// plus an exported `VEHICLE_WEAPON_MOUNT_RULES` reference constant
+// (same pattern as SENSOR_PACKAGE_MAX_RATING in
+// sensors_security_survival.js) carrying the max-mounts formula and
+// each mount type's carry capacity/fire arc.
 
 const V = (overrides) => ({
   category: 'vehicle',
   legality: null,
   wireless: true,
+  image: null,
   ...overrides,
 });
 const D = (overrides) => ({
   category: 'drone',
   legality: null,
   wireless: true,
+  image: null,
   ...overrides,
 });
 
@@ -414,7 +443,27 @@ const proteus_lamprey = V({
   label: 'Proteus Lamprey/Sea Snake',
   cost: 15000,
   availability: 2,
-  description: '4-passenger underwater sea-sled; passengers use their own scuba gear or built-in systems (doubles cost, 16 metahuman-hours of air total). Military "Sea Snake" variant (Availability 4) used for spec-ops aquatic insertion — same stats otherwise. Manned depth limit 100m; drone-loaded models reach 200m.',
+  description: '4-passenger underwater sea-sled; passengers use their own scuba gear or built-in systems (doubles cost, 16 metahuman-hours of air total). Each seat can swap for a small-drone rack, or two seats for a medium drone. Manned depth limit 100m; drone-loaded models reach 200m on tether/remote (wireless doesn\'t reach that deep). Civilian model — see also the military Sea Snake variant.',
+  tags: ['submarine'],
+  stats: {
+    handling: { onRoad: 3 },
+    acceleration: 13,
+    speedInterval: 10,
+    topSpeed: 60,
+    body: 2,
+    armor: 1,
+    pilot: 2,
+    sensor: 1,
+    seats: 4,
+  },
+});
+
+const proteus_sea_snake = V({
+  id: 'proteus_sea_snake',
+  label: 'Proteus Sea Snake',
+  cost: 15000,
+  availability: 4,
+  description: 'Military variant of the Proteus Lamprey, used for spec-ops aquatic insertion — identical stats, higher Availability. Passengers use their own scuba gear or built-in systems (doubles cost, 16 metahuman-hours of air total). Each seat can swap for a small-drone rack, or two seats for a medium drone. Manned depth limit 100m; drone-loaded models reach 200m on tether/remote (wireless doesn\'t reach that deep).',
   tags: ['submarine'],
   stats: {
     handling: { onRoad: 3 },
@@ -1097,6 +1146,7 @@ const rigger_interface = {
   availability: 2,
   legality: null,
   wireless: true,
+  image: null,
   description: "Lets a rigger jump in and feel like the vehicle rather than remote-controlling it. All drones include one standard; vehicles need it installed separately unless noted.",
   tags: ['vehicle_mod'],
   stats: {},
@@ -1109,9 +1159,12 @@ const standard_weapon_mount = {
   cost: 2500,
   availability: 4,
   legality: 'illegal',
+  image: null,
   description: 'Holds an assault rifle or smaller plus 250 rounds. Vehicles can carry mounts up to (unaugmented Body / 3, rounded down).',
   tags: ['vehicle_mod'],
-  stats: {},
+  stats: {
+    mountSlotsUsed: 1,
+  },
 };
 
 const heavy_weapon_mount = {
@@ -1121,9 +1174,12 @@ const heavy_weapon_mount = {
   cost: 5000,
   availability: 5,
   legality: 'illegal',
+  image: null,
   description: 'Counts as 2 mounts. Holds anything plus 500 belted rounds or up to (Body) rockets/missiles.',
   tags: ['vehicle_mod'],
-  stats: {},
+  stats: {
+    mountSlotsUsed: 2,
+  },
 };
 
 const manual_operation = {
@@ -1131,11 +1187,30 @@ const manual_operation = {
   label: 'Manual Operation',
   category: 'vehicle_mod',
   cost: 500,
+  // Source lists Availability as "+1" — a modifier on top of whatever
+  // weapon mount it's added to, not a flat number. `null` alone would
+  // look like an unknown/malformed value; using availabilityModifier
+  // instead makes the relationship explicit.
   availability: null,
+  availabilityModifier: 1,
   legality: null,
+  image: null,
   description: 'Adds manual operation to a weapon mount. Vehicles only, not drones.',
   tags: ['vehicle_mod'],
   stats: {},
+};
+
+// Reference data, not a purchasable item — see file header note.
+// Captures the weapon-mount capacity system requested by this pass's
+// investigation: how many mounts a vehicle can carry, and what each
+// mount type holds/how it fires.
+export const VEHICLE_WEAPON_MOUNT_RULES = {
+  maxMountsFormula: 'floor(unaugmented Body / 3)',
+  fireArc: '90 degrees, both horizontal and vertical; fires remotely unless Manual Operation is added (vehicles only, not drones)',
+  mounts: {
+    standard: { slotsUsed: 1, holds: 'Assault Rifle or smaller, plus 250 rounds' },
+    heavy: { slotsUsed: 2, holds: 'Anything, plus 500 belted rounds or up to (Body) rockets/missiles' },
+  },
 };
 
 export const GEAR_VEHICLES_DRONES = {
@@ -1143,7 +1218,7 @@ export const GEAR_VEHICLES_DRONES = {
   chrysler_nissan_jackrabbit, honda_spirit, eurocar_westwind_x80, hyundai_shin_hyung, ford_americar, saeder_krupp_bentley_concordat, mitsubishi_nightsky,
   toyota_gopher, gmc_bulldog_step_van, range_rover_2080, ares_roadmaster,
   samuvani_criscraft_otter, aztechnology_sunrunner, gmc_riverine,
-  proteus_lamprey, ynt_delfin,
+  proteus_lamprey, proteus_sea_snake, ynt_delfin,
   artemis_nightwing, cessna_c750, mct_sikorsky_bell_seahawk,
   ares_dragon, mct_sikorsky_bell_wolfhound, northrup_wasp,
   ares_venture, gmc_banshee, federated_boeing_commuter, federated_boeing_osprey_x,

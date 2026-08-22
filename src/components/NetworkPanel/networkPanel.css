@@ -172,7 +172,12 @@
   gap: 0.3rem;
   margin-top: 0.25rem;
 }
-.sr-pan-status-badge {
+
+.sr-pan-row-bonus {
+  font-size: 0.72rem;
+  color: var(--sr-amber);
+  margin-top: 0.2rem;
+}.sr-pan-status-badge {
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;

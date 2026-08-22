@@ -1,4 +1,4 @@
-import { isGradeable, gradeCostMultiplier, resolveEssenceCost } from '@utils/augmentationEconomy';
+import { isGradeable, gradeCostMultiplier, resolveEssenceCost, needsInstallChoice } from '@utils/augmentationEconomy';
 
 // Cost resolution for the purchase flow — same branching shape as
 // formatCost in gearFormat.js, but returns a real number instead of a
@@ -52,6 +52,11 @@ export function resolveCost(item, config = {}) {
 // defaultConfig accepts an optional starting rating/capacity override —
 // used by the cyberlimb Enhance flow, which needs to open pre-filled at
 // "next rating" rather than the item's raw minimum.
+//
+// installLocation defaults to 'flesh' for items with an install choice
+// — the conservative default (full Essence charged), so the player has
+// to explicitly opt into "cyberlimb" rather than accidentally getting a
+// free Essence pass by not touching the field.
 export function defaultConfig(item, overrideStart) {
   const config = {};
   const ratingRange = item.ratingRange || item.stats?.ratingRange;
@@ -60,6 +65,7 @@ export function defaultConfig(item, overrideStart) {
   else if (capacityRange) config.capacity = overrideStart ?? capacityRange[0];
   else if (item.costPerUnit != null) config.units = 1;
   if (isGradeable(item)) config.grade = 'standard';
+  if (needsInstallChoice(item)) config.installLocation = 'flesh';
   return config;
 }
 
@@ -69,6 +75,11 @@ export function defaultConfig(item, overrideStart) {
 // not a guarantee every rating/grade combo is affordable. No character
 // selected = don't dim anything, same "reference works without a
 // character" rule the whole Gear tab already follows.
+//
+// defaultConfig's 'flesh' default here is deliberately the stricter
+// case for this heuristic too — Essence-charged, not Capacity-charged
+// — so this errs toward under-promising affordability rather than
+// over-promising it if the player would've actually picked cyberlimb.
 export function canAffordItem(character, item) {
   if (!character) return true;
 
