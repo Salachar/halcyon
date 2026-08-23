@@ -5,9 +5,8 @@ import { useCharacterManager } from '@hooks/useCharacterManager';
 import CyberlimbEnhanceModal from '@components/CyberlimbEnhanceModal';
 import WeaponAttachModal from '@components/WeaponAttachModal';
 import CapacityAttachModal from '@components/CapacityAttachModal';
-import { computeCapacity, isHousingFor, isConsumerFor } from '@utils/gearCapacity';
-import { isGradeable, resolveEssenceCost } from '@utils/augmentationEconomy';
-import { formatDamageValue, formatAttackRatings } from '@utils/gearFormat';
+import { computeCapacity, isHousingFor } from '@utils/gearCapacity';
+import { formatItemDetails } from '@utils/gearFormat';
 
 import './gearList.css';
 
@@ -65,50 +64,16 @@ function CapacitySummary({ housingItem, housingConfig, attachments, pool }) {
 // Capacity" on a not-yet-attached consumer's own row, so a player can
 // tell what it'll cost before they attach it, and on nested attachment
 // rows so the breakdown under a housing is visible per-item, not just
-// as one aggregate number on the parent.
-function consumedCapacityLabel(item, config) {
-  const pools = ['armor', 'device', 'cyberware'];
-  for (const pool of pools) {
-    if (!isConsumerFor(item, pool)) continue;
-    const stats = item.stats || {};
-    const perRatingKey = `${pool}CapacityUsedPerRating`;
-    if (stats[perRatingKey] != null) {
-      const rating = config?.rating ?? 1;
-      return `Uses ${stats[perRatingKey] * rating} Capacity`;
-    }
-    return `Uses ${stats[`${pool}CapacityUsed`]} Capacity`;
-  }
-  return null;
-}
-
-// General per-row detail line — Essence, weapon combat stats, and
-// Wireless Bonus, whichever apply. Previously only Rating/Grade/config
-// showed on a row; everything else about what an owned item actually
-// does was invisible unless you already knew the catalog by heart.
+// as one aggregate number on the parent. Now sourced from
+// formatItemDetails (gearFormat.js) — extracted there so Market and
+// this sheet view can never drift apart on what counts as "relevant
+// detail" for an item, even though the two stay separate layouts.
 function ItemDetails({ item, config }) {
-  const stats = item.stats || {};
-  const parts = [];
-
-  if (isGradeable(item)) {
-    parts.push(`Essence ${resolveEssenceCost(item, config).toFixed(2)}`);
-  }
-  if (stats.damageValue || stats.damageValueFormula) {
-    parts.push(`DV ${formatDamageValue(item)}`);
-  }
-  if (stats.attackRatings || stats.attackRatingsFormula) {
-    parts.push(`AR ${formatAttackRatings(item)}`);
-  }
-  if (stats.deviceRating != null) {
-    parts.push(`DR ${stats.deviceRating}`);
-  }
-
-  const capacityLabel = consumedCapacityLabel(item, config);
-  if (capacityLabel) parts.push(capacityLabel);
-
+  const { line, wirelessBonus } = formatItemDetails(item, config);
   return (
     <>
-      {parts.length > 0 && <div className="sr-gear-list-details">{parts.join(' · ')}</div>}
-      {stats.wirelessBonus && <div className="sr-gear-list-wireless">Wireless: {stats.wirelessBonus}</div>}
+      {line && <div className="sr-gear-list-details">{line}</div>}
+      {wirelessBonus && <div className="sr-gear-list-wireless">Wireless: {wirelessBonus}</div>}
     </>
   );
 }
@@ -172,7 +137,8 @@ export default function GearList({ character }) {
         const isArmorHousing = isHousingFor(item, 'armor');
         const isDeviceHousing = isHousingFor(item, 'device');
         const isCyberwareHousing = isHousingFor(item, 'cyberware');
-        const attachments = (isFirearm || isArmorHousing || isDeviceHousing || isCyberwareHousing)
+        const isMatrixHousing = isHousingFor(item, 'matrix');
+        const attachments = (isFirearm || isArmorHousing || isDeviceHousing || isCyberwareHousing || isMatrixHousing)
           ? character.gearManager.attachmentsOf(instanceId)
           : [];
         const mounts = isFirearm && attachments.length > 0 ? mountSummary(attachments) : null;
@@ -197,6 +163,9 @@ export default function GearList({ character }) {
                 )}
                 {isCyberwareHousing && (
                   <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="cyberware" />
+                )}
+                {isMatrixHousing && (
+                  <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="matrix" />
                 )}
               </div>
 
@@ -227,6 +196,11 @@ export default function GearList({ character }) {
               {isCyberwareHousing && (
                 <div className="sr-gear-list-actions">
                   <button className="sr-btn sr-btn--secondary" onClick={() => setAttachHousingContext({ instanceId, pool: 'cyberware' })}>Attach</button>
+                </div>
+              )}
+              {isMatrixHousing && (
+                <div className="sr-gear-list-actions">
+                  <button className="sr-btn sr-btn--secondary" onClick={() => setAttachHousingContext({ instanceId, pool: 'matrix' })}>Attach</button>
                 </div>
               )}
 

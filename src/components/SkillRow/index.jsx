@@ -2,7 +2,7 @@ import { SKILLS } from '@data/character/skills';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import Dice from '@components/Dice';
 
-import { buildSkillPool, karmaCost, hasAptitude } from './skillEconomy';
+import { buildSkillPool, karmaCost, hasAptitude } from '@utils/skillEconomy';
 import './skillRow.css';
 
 function capitalize(word) {

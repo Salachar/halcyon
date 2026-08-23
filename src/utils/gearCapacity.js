@@ -49,11 +49,24 @@ function resolveUsedByOne(consumerItem, consumerConfig, pool) {
  * @param {object} housingItem - the resolved catalog item for the housing (ALL_GEAR[...])
  * @param {object} housingConfig - the housing INSTANCE's own purchase config (entry.config) — needed to resolve Range-based provided capacity
  * @param {Array<{item: object, config: object}>} attachments - resolved catalog items + purchase config for each thing currently attached to this housing
- * @param {'cyberware'|'armor'|'device'} pool
+ * @param {'cyberware'|'armor'|'device'|'matrix'} pool
  * @returns {{ provided: number, used: number, overCapacity: boolean, remaining: number }}
  */
 export function computeCapacity(housingItem, housingConfig, attachments, pool) {
-  const provided = resolveProvided(housingItem, housingConfig, pool);
+  const baseProvided = resolveProvided(housingItem, housingConfig, pool);
+  // Housing-scoped provided-capacity bonus — Virtual Machine's "+2
+  // Program Slots" is a real effect but scoped to just the device it's
+  // loaded into, not the whole PAN the way Toolbox's Data Processing
+  // bonus is (see compositePersonaStats in panGrouping.js for that
+  // global version). No wireless/effectively-wireless check needed
+  // here — a Program doesn't have an on/off state the way a wireless
+  // accessory does, it's either loaded (present in `attachments`) or
+  // it isn't.
+  const providedBonus = attachments.reduce((sum, { item }) => {
+    const bonus = item?.stats?.deviceModifiers?.[`${pool}CapacityProvided`];
+    return sum + (bonus || 0);
+  }, 0);
+  const provided = baseProvided + providedBonus;
   const used = attachments.reduce(
     (sum, { item, config }) => sum + resolveUsedByOne(item, config, pool),
     0

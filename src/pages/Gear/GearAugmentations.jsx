@@ -9,6 +9,7 @@ import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurcha
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import PurchaseModal from '@components/PurchaseModal';
 import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
+import { resolveDeviceRating } from '@utils/augmentationEconomy';
 
 import './gearBuyButton.css';
 
@@ -46,6 +47,7 @@ export default function GearAugmentations({ character }) {
     { label: 'Item', render: (i) => i.label },
     { label: 'Essence', render: formatEssence },
     { label: 'Capacity', render: formatCapacity },
+    { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,

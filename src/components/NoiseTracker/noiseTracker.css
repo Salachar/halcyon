@@ -1,0 +1,75 @@
+.sr-noise-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.sr-noise-label {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sr-noise-effective {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+}
+
+.sr-noise-base-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sr-noise-base-label {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  flex: 1;
+}
+
+.sr-noise-base-row input {
+  width: 4rem;
+}
+
+.sr-noise-auto {
+  font-size: 0.78rem;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.sr-noise-optional-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin: 0.5rem 0 0.3rem;
+}
+
+.sr-noise-optional-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.3rem;
+}
+.sr-noise-optional-row:last-child {
+  margin-bottom: 0;
+}
+
+.sr-noise-optional-label {
+  font-size: 0.82rem;
+  color: var(--sr-text-muted);
+}
+
+.sr-noise-reset-all {
+  margin-top: 0.5rem;
+}

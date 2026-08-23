@@ -7,6 +7,8 @@ import { useCharacterManager } from '@hooks/useCharacterManager';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost, formatCapacity } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
+import { resolveDeviceRating } from '@utils/augmentationEconomy';
+
 import './gearBuyButton.css';
 
 export default function GearArmorElectronics({ character }) {
@@ -49,7 +51,7 @@ export default function GearArmorElectronics({ character }) {
   ];
   const deviceColumns = [
     { label: 'Device', render: (i) => i.label },
-    { label: 'Device Rating', render: (i) => i.stats.deviceRating ?? '—' },
+    { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,

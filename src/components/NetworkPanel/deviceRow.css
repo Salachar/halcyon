@@ -1,0 +1,80 @@
+.sr-pan-row {
+  padding: 0.4rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.4rem;
+  transition: opacity 0.15s ease;
+}
+.sr-pan-row:last-child {
+  margin-bottom: 0;
+}
+.sr-pan-row:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+/* Wireless-off devices dim rather than disappear — scannable at a
+   glance without needing to read every label to know what's live. */
+.sr-pan-row--dim {
+  opacity: 0.55;
+}
+.sr-pan-row--dim:hover {
+  opacity: 0.85;
+}
+
+.sr-pan-row--nested {
+  border-style: dashed;
+}
+
+.sr-pan-row-branch {
+  color: var(--sr-text-dim);
+  margin-right: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.sr-pan-row-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-pan-row-identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.sr-pan-row-name {
+  font-size: 0.85rem;
+  color: var(--sr-text);
+}
+
+.sr-pan-row-stats {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
+}
+.sr-pan-row-stat {
+  font-size: 0.65rem;
+  color: var(--sr-text-dim);
+}
+.sr-pan-row-stat strong {
+  color: var(--sr-text-muted);
+}
+
+.sr-pan-row-bonus {
+  font-size: 0.72rem;
+  color: var(--sr-amber);
+  margin-top: 0.2rem;
+}
+.sr-pan-row-bonus--inactive {
+  color: var(--sr-text-dim);
+  font-style: italic;
+}
+
+.sr-pan-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}

@@ -10,7 +10,7 @@ import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
 // (medkits, DocWagon, patches) is consumables, not augmentation, and
 // grade doesn't apply to it.
 
-const GRADEABLE_CATEGORIES = ['cyberware', 'cyberware_accessory', 'bioware'];
+const GRADEABLE_CATEGORIES = ['cyberware', 'cyberware_accessory', 'bioware', 'cyberjack'];
 
 export function isGradeable(item) {
   return GRADEABLE_CATEGORIES.includes(item.category);

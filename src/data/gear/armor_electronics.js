@@ -201,8 +201,43 @@ const white_noise_generator = electronics_w({ id: 'white_noise_generator', label
 // ---- Software ----
 
 const autosoft = software({ id: 'autosoft', label: 'Autosoft', cost: null, costPerRating: 500, availability: null, availabilityEqualsRating: true, description: 'Drone-operation program. Availability equals the chosen Rating.', tags: ['software'], stats: { ratingRange: [1, 9] } });
-const cyberprogram_basic = software({ id: 'cyberprogram_basic', label: 'Cyberprogram, Basic', cost: 60, availability: 1, description: 'Basic Matrix program.', tags: ['software'], stats: {} });
-const cyberprogram_hacking = software({ id: 'cyberprogram_hacking', label: 'Cyberprogram, Hacking', cost: 250, availability: 4, legality: 'illegal', description: 'Hacking Matrix program.', tags: ['software'], stats: {} });
+
+// const cyberprogram_basic = software({ id: 'cyberprogram_basic', label: 'Cyberprogram, Basic', cost: 60, availability: 1, description: 'Basic Matrix program.', tags: ['software'], stats: {} });
+// const cyberprogram_hacking = software({ id: 'cyberprogram_hacking', label: 'Cyberprogram, Hacking', cost: 250, availability: 4, legality: 'illegal', description: 'Hacking Matrix program.', tags: ['software'], stats: {} });
+// ---- Matrix Programs ----
+// Real named programs, replacing the two generic Cyberprogram stubs
+// above — confirmed against the actual Matrix chapter's Programs
+// section. Flat cost-per-tier confirmed by the stubs' own prior
+// values (60¥/Avail 1/legal for Basic, 250¥/Avail 4/illegal for
+// Hacking) — every program in a tier costs the same, only the effect
+// differs, same shape as the Tac-Apps in matrix_devices.js.
+// matrixCapacityUsed: 1 — each loaded program consumes one Program
+// Slot (now `stats.matrixCapacityProvided` on the housing device),
+// same provider/consumer relationship as every other Capacity pool.
+
+const program_baby_monitor = software({ id: 'program_baby_monitor', label: 'Baby Monitor', cost: 60, availability: 1, description: 'Know your current Overwatch Score without needing an action.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_browse = software({ id: 'program_browse', label: 'Browse', cost: 60, availability: 1, description: 'Matrix Search actions: gain 1 Edge, spend it immediately on that action or it disappears.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_configurator = software({ id: 'program_configurator', label: 'Configurator', cost: 60, availability: 1, description: 'Store an alternate deck configuration; swap to it instead of manually changing two attributes.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_edit = software({ id: 'program_edit', label: 'Edit', cost: 60, availability: 1, description: 'Edit File action: gain 1 Edge, spend it immediately or it vanishes.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_encryption = software({ id: 'program_encryption', label: 'Encryption', cost: 60, availability: 1, description: '+2 dice on the Encrypt File action.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_signal_scrubber = software({ id: 'program_signal_scrubber', label: 'Signal Scrubber', cost: 60, availability: 1, description: 'Reduces Noise by 2.', tags: ['software'], stats: { matrixCapacityUsed: 1, deviceModifiers: { noise: -2 } } });
+const program_toolbox = software({ id: 'program_toolbox', label: 'Toolbox', cost: 60, availability: 1, description: '+1 to Data Processing.', tags: ['software'], stats: { matrixCapacityUsed: 1, deviceModifiers: { dataProcessing: 1 } } });
+const program_virtual_machine = software({ id: 'program_virtual_machine', label: 'Virtual Machine', cost: 60, availability: 1, description: '2 extra program slots; take 1 extra unresisted box of Matrix damage when attacked.', tags: ['software'], stats: { matrixCapacityUsed: 1, deviceModifiers: { matrixCapacityProvided: 2 } } });
+
+const program_armor = software({ id: 'program_armor', label: 'Armor', cost: 250, availability: 4, legality: 'illegal', description: '+2 Defense Rating.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_biofeedback = software({ id: 'program_biofeedback', label: 'Biofeedback', cost: 250, availability: 4, legality: 'illegal', description: 'Matrix attacks cause Stun (cold-sim) or Physical (hot-sim) biofeedback damage. Attack-linked.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_biofeedback_filter = software({ id: 'program_biofeedback_filter', label: 'Biofeedback Filter', cost: 250, availability: 4, legality: 'illegal', description: 'Allows Device Rating or Body to soak Matrix damage.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_blackout = software({ id: 'program_blackout', label: 'Blackout', cost: 250, availability: 4, legality: 'illegal', description: 'Like Biofeedback, but Stun damage only. Attack-linked.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_decryption = software({ id: 'program_decryption', label: 'Decryption', cost: 250, availability: 4, legality: 'illegal', description: '+2 dice on the Crack File action.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_defuse = software({ id: 'program_defuse', label: 'Defuse', cost: 250, availability: 4, legality: 'illegal', description: 'Allows Device Rating or Body to soak Data Bomb damage.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_exploit = software({ id: 'program_exploit', label: 'Exploit', cost: 250, availability: 4, legality: 'illegal', description: "Reduces the hacking target's Defense Rating by 2.", tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_fork = software({ id: 'program_fork', label: 'Fork', cost: 250, availability: 4, legality: 'illegal', description: 'Hit two targets with a single Matrix action, without splitting your dice pool.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_lockdown = software({ id: 'program_lockdown', label: 'Lockdown', cost: 250, availability: 4, legality: 'illegal', description: 'Inflicting Matrix damage also causes link-lock.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_overclock = software({ id: 'program_overclock', label: 'Overclock', cost: 250, availability: 4, legality: 'illegal', description: '+2 dice to a Matrix action, one of which must be the Wild Die.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_stealth = software({ id: 'program_stealth', label: 'Stealth', cost: 250, availability: 4, legality: 'illegal', description: 'Use-it-or-lose-it Edge on Hide actions. Sleaze-linked.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+const program_trace = software({ id: 'program_trace', label: 'Trace', cost: 250, availability: 4, legality: 'illegal', description: 'Use-it-or-lose-it Edge on Trace Icon actions. Sleaze-linked.', tags: ['software'], stats: { matrixCapacityUsed: 1 } });
+
+
 const datasoft = software({ id: 'datasoft', label: 'Datasoft', cost: 120, availability: 2, description: 'A narrow Knowledge-skill database (e.g. one gang instead of all Seattle gangs); used exactly like a Knowledge skill.', tags: ['software'], stats: {} });
 const mapsoft = software({ id: 'mapsoft', label: 'Mapsoft', cost: 100, availability: 2, description: 'Detailed data (streets, listings, topography, census, GPS, environment) for a ~5,000 sq km area, with route-planning.', tags: ['software'], stats: {} });
 const shopsoft = software({ id: 'shopsoft', label: 'Shopsoft', cost: 150, availability: 2, description: 'Comparison-shopping program (pricing, reviews) for a specific goods category; +1 dice pool on Matrix Search tests to buy/sell that category.', tags: ['software'], stats: {} });
@@ -277,7 +312,13 @@ export const GEAR_ARMOR_ELECTRONICS = {
   ar_gloves, electronic_paper, printer, satellite_link, sim_module, sim_module_hot_sim, simrig_accessory, subvocal_mic, trid_projector, trodes,
   standard_tags, datachip, security_stealth_tags, sensor_tags,
   bug_scanner, data_tap, headjammer, jammer_area, jammer_directional, micro_transceiver, tag_eraser, white_noise_generator,
-  autosoft, cyberprogram_basic, cyberprogram_hacking, datasoft, mapsoft, shopsoft, activesofts, knowsofts, linguasofts, tutorsoft,
+  autosoft,
+
+  // cyberprogram_basic, cyberprogram_hacking,
+  program_baby_monitor, program_browse, program_configurator, program_edit, program_encryption, program_signal_scrubber, program_toolbox, program_virtual_machine,
+  program_armor, program_biofeedback, program_biofeedback_filter, program_blackout, program_decryption, program_defuse, program_exploit, program_fork, program_lockdown, program_overclock, program_stealth, program_trace,
+
+  datasoft, mapsoft, shopsoft, activesofts, knowsofts, linguasofts, tutorsoft,
   credstick_standard, credstick_silver, credstick_gold, credstick_platinum, credstick_ebony, fake_sin, fake_license,
   electronics_kit, electronics_shop, electronics_facility,
   binoculars, binoculars_optical, camera, micro_camera, contacts, endoscope, glasses, goggles, imaging_scope, monocle, mage_sight_goggles, periscope,

@@ -1,0 +1,50 @@
+.sr-avatar-modal {
+  max-width: 520px;
+  width: 90vw;
+}
+
+.sr-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.25rem, 1fr));
+  gap: 0.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.sr-avatar-thumb {
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  overflow: hidden;
+  aspect-ratio: 1;
+  cursor: pointer;
+  background: none;
+}
+.sr-avatar-thumb:hover {
+  border-color: var(--sr-blue-dim);
+}
+.sr-avatar-thumb--selected {
+  border-color: var(--sr-blue-bright);
+}
+
+.sr-avatar-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sr-avatar-clear {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px dashed var(--sr-hairline);
+  background-color: var(--sr-bg-base);
+  color: var(--sr-text-dim);
+  font-size: 0.62rem;
+  cursor: pointer;
+}
+.sr-avatar-clear:hover {
+  border-color: var(--sr-blue-dim);
+  color: var(--sr-blue-bright);
+}

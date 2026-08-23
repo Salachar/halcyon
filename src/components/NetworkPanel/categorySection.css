@@ -1,0 +1,28 @@
+.sr-pan-category {
+  margin-bottom: 0.6rem;
+}
+.sr-pan-category:last-child {
+  margin-bottom: 0;
+}
+
+.sr-pan-category-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.3rem;
+  padding-left: 0.2rem;
+  border-left: 3px solid var(--sr-hairline);
+}
+.sr-pan-category-title--cyberware {
+  color: var(--sr-blue-bright);
+  border-left-color: var(--sr-blue-dim);
+}
+.sr-pan-category-title--weapons {
+  color: var(--sr-orange-bright);
+  border-left-color: var(--sr-orange-border);
+}
+.sr-pan-category-title--gear {
+  color: var(--sr-text-muted);
+  border-left-color: var(--sr-hairline);
+}

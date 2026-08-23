@@ -1,0 +1,165 @@
+.sr-pan-stat {
+  text-align: center;
+}
+.sr-pan-stat-label {
+  display: block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sr-text-dim);
+}
+.sr-pan-stat-value {
+  font-weight: 700;
+  color: var(--sr-text);
+  font-size: 0.95rem;
+}
+.sr-pan-stat-value--absent {
+  color: var(--sr-text-dim);
+  font-weight: 400;
+}
+
+.sr-pan-gauge {
+  margin-top: 0.6rem;
+}
+.sr-pan-gauge-label {
+  font-size: 0.72rem;
+  color: var(--sr-text-muted);
+  margin-bottom: 0.25rem;
+}
+.sr-pan-gauge-count {
+  color: var(--sr-amber);
+  font-weight: 700;
+}
+.sr-pan-gauge-track {
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+  overflow: hidden;
+}
+.sr-pan-gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+.sr-pan-gauge-fill--low { background-color: var(--sr-blue-bright); }
+.sr-pan-gauge-fill--mid { background-color: var(--sr-amber); }
+.sr-pan-gauge-fill--high { background-color: var(--sr-orange-bright); }
+.sr-pan-gauge-fill--full { background-color: var(--sr-red); }
+
+.sr-pan-status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+.sr-pan-status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--sr-red);
+  background-color: var(--sr-red-bg);
+  border: 1px solid var(--sr-red-border);
+  cursor: default;
+}
+.sr-pan-status-chip--marked {
+  color: var(--sr-amber);
+  background-color: var(--sr-amber-bg, rgba(255, 190, 60, 0.12));
+  border-color: var(--sr-amber-border, var(--sr-amber));
+}
+.sr-pan-status-chip--bricked { color: var(--sr-red); }
+.sr-pan-status-chip--link-locked {
+  color: var(--sr-orange-bright);
+  background-color: var(--sr-orange-bg, rgba(255, 140, 60, 0.12));
+  border-color: var(--sr-orange-border);
+}
+
+.sr-pan-status-expand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+.sr-pan-status-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  cursor: pointer;
+}
+.sr-pan-status-option input {
+  cursor: pointer;
+}
+
+.sr-pan-wireless-toggle {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--sr-radius);
+  border: 1px solid var(--sr-hairline);
+  background-color: var(--sr-bg-base);
+  color: var(--sr-text-dim);
+  cursor: pointer;
+}
+.sr-pan-wireless-toggle--on {
+  border-color: var(--sr-blue-dim);
+  background-color: var(--sr-blue-bg, rgba(80, 160, 255, 0.12));
+  color: var(--sr-blue-bright);
+}
+
+.sr-pan-capacity {
+  font-size: 0.72rem;
+  color: var(--sr-text-dim);
+  margin-top: 0.2rem;
+}
+.sr-pan-capacity--over {
+  color: var(--sr-red);
+  font-weight: 700;
+}
+
+.sr-pan-mcm {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+.sr-pan-mcm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.3rem;
+}
+.sr-pan-mcm-label {
+  font-size: 0.72rem;
+  color: var(--sr-text-muted);
+}
+.sr-pan-mcm-count {
+  font-size: 0.72rem;
+  color: var(--sr-text-dim);
+}
+.sr-pan-mcm-rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+.sr-pan-mcm-box {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: var(--sr-radius);
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+  cursor: pointer;
+  padding: 0;
+}
+.sr-pan-mcm-box--filled {
+  background-color: var(--sr-orange-bg);
+  border-color: var(--sr-orange-border);
+}

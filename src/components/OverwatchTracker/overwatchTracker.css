@@ -1,0 +1,56 @@
+.sr-os-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.sr-os-label {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sr-os-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+}
+.sr-os-threshold {
+  font-size: 0.9rem;
+  color: var(--sr-text-dim);
+  font-weight: 400;
+}
+
+.sr-os-gauge-track {
+  height: 0.6rem;
+  border-radius: 999px;
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.sr-os-gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+.sr-os-gauge-fill--low { background-color: var(--sr-blue-bright); }
+.sr-os-gauge-fill--mid { background-color: var(--sr-amber); }
+.sr-os-gauge-fill--high { background-color: var(--sr-orange-bright); }
+.sr-os-gauge-fill--full { background-color: var(--sr-red); }
+
+.sr-os-convergence {
+  font-size: 0.82rem;
+  color: var(--sr-red);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.sr-os-controls {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}

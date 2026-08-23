@@ -8,6 +8,8 @@ import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurcha
 import { formatAvailability, formatCost, formatCapacity } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
 import { SENSOR_PACKAGE_MAX_RATING, SENSOR_FUNCTIONS } from '@data/gear/sensors_security_survival';
+import { resolveDeviceRating } from '@utils/augmentationEconomy';
+
 import './gearBuyButton.css';
 
 export default function GearSensorsSecuritySurvival({ character }) {
@@ -43,6 +45,7 @@ export default function GearSensorsSecuritySurvival({ character }) {
   const housingColumns = [
     { label: 'Device', render: (i) => i.label },
     { label: 'Capacity', render: formatCapacity },
+    { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
@@ -50,6 +53,7 @@ export default function GearSensorsSecuritySurvival({ character }) {
   const securityColumns = [
     { label: 'Item', render: (i) => i.label },
     { label: 'Structure', render: (i) => i.stats.structure ?? '—' },
+    { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,

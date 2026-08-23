@@ -1,0 +1,33 @@
+.sr-mcr {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.sr-mcr-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.sr-mcr-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+}
+
+.sr-mcr-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+}
+
+.sr-mcr-formula {
+  font-size: 0.68rem;
+  color: var(--sr-text-dim);
+}
+
+.sr-mcr-hint {
+  font-size: 0.85rem;
+  color: var(--sr-text-dim);
+  font-style: italic;
+}

@@ -1,0 +1,26 @@
+.sr-pan-stats-block {
+  padding: 0.75rem 1rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  margin-bottom: 1rem;
+}
+
+.sr-pan-header-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 1rem;
+}
+
+.sr-pan-header-role {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sr-orange-bright);
+}
+
+.sr-pan-header-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}

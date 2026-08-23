@@ -1,0 +1,8 @@
+.sr-pan-matrix-devices {
+  margin-bottom: 0.6rem;
+}
+
+.sr-pan-category-title--matrix {
+  color: var(--sr-amber);
+  border-left-color: var(--sr-amber);
+}

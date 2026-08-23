@@ -13,21 +13,41 @@
 import { ALL_GEAR } from '@data/gear';
 import { isGradeable, resolveEssenceCost, resolveDeviceRating } from '@utils/augmentationEconomy';
 
-// Small, fixed vocabulary — easy to expand later, just strings in an
-// array. Not meant to be exhaustive Matrix mechanics, just common
-// narrative states worth a quick visual flag.
+// Real SR6 Matrix terminology, replacing the earlier invented vocab
+// (Targeted/Hacked/Disabled/Jammed) — this app isn't shipped yet, so
+// this is a straight correction, not a migration. Still narrative-only,
+// GM-narrated flags, not computed state — no mark counts, no simulated
+// hacking, matches the "manual honesty" pattern used for Karma/Edge.
 export const DEVICE_STATUSES = [
-  { key: 'targeted', label: 'Targeted' },
-  { key: 'hacked', label: 'Hacked' },
-  { key: 'disabled', label: 'Disabled' },
-  { key: 'jammed', label: 'Jammed' },
+  { key: 'marked', label: 'Marked' },
+  { key: 'bricked', label: 'Bricked' },
+  { key: 'link-locked', label: 'Link-Locked' },
 ];
+
+// Icon/theme are deliberately decoupled and both ID-referenced, never
+// raw file/URL handling. Discriminated shape now so a future custom-
+// color picker needs no migration later — `{ kind: 'preset', id }`
+// today, `{ kind: 'custom', colors: {...} }` whenever that's built.
+// Real curated preset art doesn't exist yet — DEFAULT_THEME below is a
+// clearly-placeholder single entry, not a real registry.
+export const DEFAULT_PERSONA = {
+  name: '',
+  iconId: null,
+  iconDescription: '',
+  runningSilent: false,
+  theme: { kind: 'preset', id: 'default' },
+};
+
+export const DEVICE_MODES = ['AR', 'VR', 'Hot Sim'];
 
 class GearManager {
   _gear = {}; // { [instanceId]: { itemId, config, attachedTo: instanceId | null } }
   _pan = { masterId: null, slaved: [] }; // instance ids, not item ids — same reason gear moved to instances
   _deviceStatus = {}; // { [instanceId]: string[] } — narrative-only, see toggleDeviceStatus below
   _deviceDamage = {}; // { [instanceId]: number } — Matrix Condition Monitor damage, per device
+  _wirelessState = {}; // { [instanceId]: boolean } — per-item wireless on/off, defaults to ON when unset
+  _persona = { ...DEFAULT_PERSONA };
+  _deviceMode = 'AR';
   _essenceAdjustments = []; // [{ amount, note }] — manual, stacks with the automatic gear-based deduction
 
   constructor(data = {}) {
@@ -35,6 +55,9 @@ class GearManager {
     this._pan = data.pan || { masterId: null, slaved: [] };
     this._deviceStatus = data.deviceStatus || {};
     this._deviceDamage = data.deviceDamage || {};
+    this._wirelessState = data.wirelessState || {};
+    this._persona = data.persona || { ...DEFAULT_PERSONA };
+    this._deviceMode = data.deviceMode || 'AR';
     this._essenceAdjustments = data.essenceAdjustments || [];
   }
 
@@ -157,6 +180,99 @@ class GearManager {
     this._deviceStatus = { ...this._deviceStatus, [instanceId]: next };
   }
 
+  // ---- Wireless on/off ----
+  // Per-item toggle ("Turning It Off," confirmed FAQ mechanic — an
+  // Electronics + Logic test, or assumed doable outside combat). Fully
+  // independent from the slaved relationship — turning a device
+  // wireless-off never unslaves it, and slaving/unslaving never
+  // touches its wireless state. A slaved-but-wireless-off device just
+  // temporarily doesn't benefit from its master's Firewall or its own
+  // Wireless Bonus; the UI communicates that as a note, not by
+  // silently dropping the relationship. Deliberate: don't punish
+  // someone for briefly going dark by making them redo a connection
+  // they didn't ask to change.
+
+  isWirelessOn(instanceId) {
+    return this._wirelessState[instanceId] !== false; // default ON when unset
+  }
+
+  setWirelessOn(instanceId, on) {
+    this._wirelessState = { ...this._wirelessState, [instanceId]: on };
+  }
+
+  // Whether a device is ACTUALLY contributing to the PAN right now —
+  // not just "wireless-capable" (item.wireless) or "toggled on"
+  // (isWirelessOn) individually, but both, AND (if it's attached to
+  // something) its housing also toggled on. A Smartlink switched on
+  // inside a powered-down Cybereyes doesn't work — the cascade is real,
+  // not cosmetic. Single-level only; nothing in this app's attachment
+  // model nests deeper than item -> housing.
+  // Whether a device is actually part of the PAN at all — Primary,
+  // directly Slaved, or attached (possibly nested) to something that
+  // is. Missing from isEffectivelyWireless below until now — a
+  // wireless-capable item just sitting unslaved in inventory (default
+  // wireless-on) would have incorrectly passed that check, since it
+  // only verified wireless-capability and toggle state, never actual
+  // network membership.
+  isInPan(instanceId) {
+    if (instanceId === this._pan.masterId) return true;
+    if (this._pan.slaved.includes(instanceId)) return true;
+    const entry = this._gear[instanceId];
+    if (entry?.attachedTo) return this.isInPan(entry.attachedTo);
+    return false;
+  }
+
+  isEffectivelyWireless(instanceId) {
+    if (!this.isInPan(instanceId)) return false;
+    const entry = this._gear[instanceId];
+    if (!entry) return false;
+    const item = ALL_GEAR[entry.itemId];
+    if (!item?.wireless) return false;
+    if (!this.isWirelessOn(instanceId)) return false;
+    if (entry.attachedTo && !this.isWirelessOn(entry.attachedTo)) return false;
+    return true;
+  }
+
+  // Broader than isEffectivelyWireless above — that one specifically
+  // gates WIRELESS capability on/off, which only makes sense for items
+  // that are actually wireless-capable in the first place. Programs
+  // (and Tac-Apps) have no `wireless: true` flag at all — they have no
+  // on/off state of their own, they're either loaded (in the PAN) or
+  // they aren't — so gating them through the wireless check meant they
+  // could NEVER pass it, silently excluding every Program from
+  // deviceModifiers/conditionalModifiers regardless of whether it was
+  // actually attached. This is the real "is this contributing right
+  // now" check: wireless-capable items still need the full on/off
+  // cascade, everything else just needs to genuinely be in the PAN.
+  isActiveInPan(instanceId) {
+    if (!this.isInPan(instanceId)) return false;
+    const entry = this._gear[instanceId];
+    if (!entry) return false;
+    const item = ALL_GEAR[entry.itemId];
+    if (item?.wireless) return this.isEffectivelyWireless(instanceId);
+    return true;
+  }
+
+  // ---- Persona / Device Mode ----
+  // Conceptually part of "the PAN" as a whole per the PAN spec — not
+  // gear, so it doesn't belong on the collection above, but it's
+  // tightly coupled to PAN display, not a separate Matrix-session
+  // concern the way Hacked Devices (MatrixManager) is. Icon/theme are
+  // ID-referenced presets only; DEFAULT_PERSONA's theme id is a
+  // placeholder until real preset art exists.
+
+  get persona() { return this._persona; }
+
+  setPersona(updates) {
+    this._persona = { ...this._persona, ...updates };
+  }
+
+  get deviceMode() { return this._deviceMode; }
+
+  setDeviceMode(mode) {
+    this._deviceMode = mode;
+  }
+
   // ---- Matrix Condition Monitor ----
   // Per-device, not one shared value tied to the Primary — confirmed
   // against the actual reference: each device in a PAN carries its own
@@ -226,6 +342,9 @@ class GearManager {
       pan: this._pan,
       deviceStatus: this._deviceStatus,
       deviceDamage: this._deviceDamage,
+      wirelessState: this._wirelessState,
+      persona: this._persona,
+      deviceMode: this._deviceMode,
       essenceAdjustments: this._essenceAdjustments,
     };
   }

@@ -10,6 +10,13 @@ function capitalize(word) {
 // consumer right now; nothing stops Combat importing this directly later
 // if a weapon pool ever needs a plain skill+attribute base to build on.
 //
+// PHASING OUT in favor of buildOpenPool/PoolBuilder below — same pool
+// shape, no primary/secondary constraint, and the plan is for it to
+// become the standard everywhere (SkillRow retrofit included), with its
+// own editing UI collapsed/hidden by default so a plain roll still
+// stays a single tap. Not removed yet since SkillRow still calls this
+// directly — leave it working until that retrofit actually happens.
+//
 // Returns null when the skill genuinely can't be attempted (rank 0 on a
 // skill that isn't untrainable) — callers should treat null as "don't
 // render a roller," not as an empty pool.
@@ -59,4 +66,32 @@ export function karmaCost(fromRank, toRank) {
 // qualities land, rather than a hardcoded cap that'd need revisiting.
 export function hasAptitude(character, skillId) {
   return character.qualities.some((q) => q.qualityId === 'aptitude' && q.selection === skillId);
+}
+
+// Fully open pool assembler — the generalization buildSkillPool's
+// primary/secondary-only shape couldn't provide. Takes ANY skill paired
+// with ANY attribute, no constraint that the pairing has to match what
+// the skill itself defines — this is what PoolBuilder uses internally,
+// for every action/roll, not just the ones that happen to fit
+// buildSkillPool's narrower shape. Never returns null the way
+// buildSkillPool does for an untrainable rank-0 skill — per the
+// "nothing should ever be locked just because the rulebook says so"
+// principle, this always returns a real (possibly zero-total) pool the
+// player can still see and override from. Wound penalty applies here
+// too, same exemption-for-Damage-Resistance caveat as buildSkillPool.
+export function buildOpenPool(character, skillId, attributeKey) {
+  const def = SKILLS[skillId];
+  const rank = def ? character.getSkillRank(skillId) : 0;
+  const attrValue = character.getAttribute(attributeKey);
+
+  let pool = createPool();
+  if (def) {
+    pool = rank > 0
+      ? addComponent(pool, def.label, rank, 'skill')
+      : addComponent(pool, `${def.label} (untrained)`, def.untrained ? 0 : -1, 'untrained');
+  }
+  pool = addComponent(pool, capitalize(attributeKey), attrValue, 'attribute');
+  pool = addComponent(pool, 'Wound Penalty', -character.woundPenalty, 'wound');
+
+  return { ...pool, total: Math.max(0, pool.total) };
 }

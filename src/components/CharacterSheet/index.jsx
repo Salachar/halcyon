@@ -5,7 +5,6 @@ import { CollapsibleSection } from '@components/CollapsibleSection';
 import AttributeBox from '@components/AttributeBox';
 import SkillRow from '@components/SkillRow';
 import GearList from '@components/GearList';
-import NetworkPanel from '@components/NetworkPanel';
 import EssenceAdjustmentModal from '@components/EssenceAdjustmentModal';
 import Edge from '@components/Edge';
 import ConditionMonitor from '@components/ConditionMonitor';
@@ -175,12 +174,6 @@ export default function CharacterSheet({ character }) {
       <CollapsibleSection id="sheet-gear" title="Gear" defaultOpen>
         <Section>
           <GearList character={character} />
-        </Section>
-      </CollapsibleSection>
-
-      <CollapsibleSection id="sheet-pan" title="Personal Area Network" defaultOpen>
-        <Section>
-          <NetworkPanel character={character} />
         </Section>
       </CollapsibleSection>
 

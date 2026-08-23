@@ -1,0 +1,70 @@
+.sr-pool-builder {
+  padding: 0.6rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+}
+
+.sr-pool-builder-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sr-pool-builder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 8rem;
+}
+
+.sr-pool-builder-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+}
+
+.sr-pool-builder-extras {
+  margin-bottom: 0.5rem;
+}
+
+.sr-pool-builder-extra-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+.sr-pool-builder-extra-row:last-child {
+  margin-bottom: 0;
+}
+
+.sr-pool-builder-add {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  align-items: flex-end;
+}
+
+.sr-pool-builder-add-label {
+  flex: 2;
+}
+
+.sr-pool-builder-add-value {
+  flex: 1;
+  min-width: 4rem;
+}
+
+.sr-pool-builder-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}

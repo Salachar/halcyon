@@ -106,6 +106,20 @@ export default function CreationModal({ onClose }) {
       nuyen: priorities.resources ? PRIORITY_TABLE[priorities.resources].resources : 0,
       karma: 50,
     });
+
+    // Technomancers access the Matrix through their own Living Persona,
+    // not a purchased device — confirmed: "A living persona still uses
+    // the same four Matrix attributes as a device, but their ratings
+    // are determined by your Mental attributes." Auto-granted here
+    // (never purchased, never shown in Market) and set as Primary
+    // immediately, so a new technomancer character never has to
+    // manually promote anything to have a working PAN. See
+    // living_persona in matrix_devices.js for the full reasoning.
+    if (magicType === 'technomancer') {
+      const livingPersonaId = character.gearManager.add('living_persona', {});
+      character.gearManager.setPanMaster(livingPersonaId);
+    }
+
     addCharacter(character);
     selectCharacter(character.id);
     onClose();

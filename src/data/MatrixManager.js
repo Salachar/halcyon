@@ -12,9 +12,13 @@ export const ACCESS_LEVELS = [
 
 class MatrixManager {
   _hackedDevices = []; // [{ id, name, access, notes }] — freeform, not linked to any gear/character. These are devices the player doesn't own.
+  _noiseBase = 0; // manually set — "distance and terrain puts it at 5." Persistent within a scene, GM zeroes it out or resets it as circumstances change. Auto/optional modifiers on top of this are computed at display time, never stored (see deviceModifiers.js).
+  _overwatchScore = 0; // manually set — confirmed formula (+1/hit on illegal actions, +1/round illegal User access, +3/round illegal Admin access) is never auto-applied, since that means simulating an opposed test against a target this project deliberately doesn't model. Player/GM adds it up, same "manual honesty" pattern as everything else. Convergence at 40.
 
   constructor(data = {}) {
     this._hackedDevices = data.hackedDevices || [];
+    this._noiseBase = typeof data.noiseBase === 'number' ? data.noiseBase : 0;
+    this._overwatchScore = typeof data.overwatchScore === 'number' ? data.overwatchScore : 0;
   }
 
   get hackedDevices() { return this._hackedDevices; }
@@ -33,8 +37,14 @@ class MatrixManager {
     this._hackedDevices = this._hackedDevices.filter((d) => d.id !== id);
   }
 
+  get noiseBase() { return this._noiseBase; }
+  setNoiseBase(value) { this._noiseBase = value; }
+
+  get overwatchScore() { return this._overwatchScore; }
+  setOverwatchScore(value) { this._overwatchScore = Math.max(0, value); }
+
   toJSON() {
-    return { hackedDevices: this._hackedDevices };
+    return { hackedDevices: this._hackedDevices, noiseBase: this._noiseBase, overwatchScore: this._overwatchScore };
   }
 }
 

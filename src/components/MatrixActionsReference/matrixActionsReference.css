@@ -1,0 +1,122 @@
+.sr-mar-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sr-mar-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sr-mar-control-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+}
+
+.sr-mar-type-group {
+  margin-bottom: 0.6rem;
+}
+.sr-mar-type-group:last-child {
+  margin-bottom: 0;
+}
+
+.sr-mar-type-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin: 0 0 0.3rem;
+}
+
+.sr-mar-row {
+  padding: 0.5rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.4rem;
+  transition: opacity 0.15s ease;
+}
+.sr-mar-row:last-child {
+  margin-bottom: 0;
+}
+.sr-mar-row:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-mar-row--dim {
+  opacity: 0.4;
+}
+
+.sr-mar-row--illegal {
+  border-left: 3px solid var(--sr-red-border);
+}
+.sr-mar-row--legal {
+  border-left: 3px solid var(--sr-blue-dim);
+}
+
+.sr-mar-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-mar-row-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.88rem;
+}
+
+.sr-mar-row-badges {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sr-mar-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--sr-radius);
+  color: var(--sr-text-dim);
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+}
+.sr-mar-badge--illegal {
+  color: var(--sr-red);
+  border-color: var(--sr-red-border);
+}
+
+.sr-mar-row-roll {
+  font-size: 0.75rem;
+  color: var(--sr-amber);
+  margin-top: 0.2rem;
+}
+
+.sr-mar-row-opposed {
+  font-size: 0.75rem;
+  color: var(--sr-text-dim);
+  margin-top: 0.1rem;
+}
+
+.sr-mar-row-description {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.sr-mar-row-builder {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--sr-hairline);
+}

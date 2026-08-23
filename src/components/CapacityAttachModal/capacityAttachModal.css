@@ -34,3 +34,33 @@
   color: var(--sr-text-dim);
   flex-shrink: 0;
 }
+
+.sr-cap-attach-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.75rem 0 0.4rem;
+}
+.sr-cap-attach-section-title:first-child {
+  margin-top: 0;
+}
+.sr-cap-attach-section-title--muted {
+  color: var(--sr-text-dim);
+}
+
+.sr-cap-attach-subgroup-title {
+  font-size: 0.68rem;
+  color: var(--sr-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0.4rem 0 0.25rem;
+}
+
+.sr-cap-attach-row--muted {
+  opacity: 0.7;
+}
+.sr-cap-attach-row--muted:hover {
+  opacity: 1;
+}
