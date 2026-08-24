@@ -7,11 +7,86 @@ import WeaponAttachModal from '@components/WeaponAttachModal';
 import CapacityAttachModal from '@components/CapacityAttachModal';
 import { computeCapacity, isHousingFor } from '@utils/gearCapacity';
 import { formatItemDetails } from '@utils/gearFormat';
+import { availableModesFor, resolveEffectiveAttackRatings, resolveAmmoCapacity, FIRE_MODE_MODIFIERS, AMMO_TYPE_MODIFIERS, AMMO_TYPE_OPTIONS } from '@utils/weaponEconomy';
 
 import './gearList.css';
 
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+// Firing mode + ammo type config, per owned firearm instance —
+// deliberately never gates weapon use; every field here is optional
+// and purely informational. Shows the resolved effective Attack Rating
+// live, since that's the one number that actually matters for the
+// attack dice pool comparison — see weaponEconomy.js for why Damage
+// Value stays reference text instead of being auto-combined.
+function WeaponConfig({ character, instanceId, item, touch }) {
+  const weaponState = character.gearManager.getWeaponState(instanceId);
+  const modes = availableModesFor(item);
+  const selectedMode = modes.includes(weaponState.selectedMode) ? weaponState.selectedMode : 'SS';
+  const loadedAmmoType = weaponState.loadedAmmoType || 'Regular';
+  const ammoOptions = item.stats?.ammo?.options;
+  const ammoContainer = weaponState.ammoContainer || ammoOptions?.[0]?.container || null;
+  const maxAmmo = resolveAmmoCapacity(item, ammoContainer);
+  const currentAmmo = weaponState.currentAmmoCount;
+
+  const effectiveAR = resolveEffectiveAttackRatings(item, selectedMode, loadedAmmoType);
+  const modeInfo = FIRE_MODE_MODIFIERS[selectedMode];
+  const ammoInfo = AMMO_TYPE_MODIFIERS[loadedAmmoType];
+
+  const update = (updates) => {
+    character.gearManager.setWeaponState(instanceId, updates);
+    touch();
+  };
+
+  return (
+    <div className="sr-weapon-config">
+      <div className="sr-weapon-config-row">
+        <div className="sr-weapon-config-field">
+          <span className="sr-weapon-config-label">Mode</span>
+          <select className="sr-number-input" value={selectedMode} onChange={(e) => update({ selectedMode: e.target.value })}>
+            {modes.map((m) => <option key={m} value={m}>{FIRE_MODE_MODIFIERS[m].label}</option>)}
+          </select>
+        </div>
+        <div className="sr-weapon-config-field">
+          <span className="sr-weapon-config-label">Ammo Type</span>
+          <select className="sr-number-input" value={loadedAmmoType} onChange={(e) => update({ loadedAmmoType: e.target.value })}>
+            {AMMO_TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+        {ammoOptions && (
+          <div className="sr-weapon-config-field">
+            <span className="sr-weapon-config-label">Container</span>
+            <select className="sr-number-input" value={ammoContainer} onChange={(e) => update({ ammoContainer: e.target.value })}>
+              {ammoOptions.map((o) => <option key={o.container} value={o.container}>{o.container} ({o.capacity})</option>)}
+            </select>
+          </div>
+        )}
+      </div>
+
+      <div className="sr-weapon-config-resolved">
+        Effective AR: <strong>{effectiveAR.map((v) => v ?? '—').join('/')}</strong>
+        {modeInfo?.note && <div className="sr-weapon-config-note">{modeInfo.note}</div>}
+        {loadedAmmoType !== 'Regular' && ammoInfo && <div className="sr-weapon-config-note">DV modifier: {ammoInfo.damageValueNote}</div>}
+      </div>
+
+      {maxAmmo != null && (
+        <div className="sr-weapon-config-ammo">
+          <span className="sr-weapon-config-label">Ammo (optional)</span>
+          <input
+            type="number"
+            className="sr-number-input sr-weapon-config-ammo-input"
+            placeholder="—"
+            value={currentAmmo ?? ''}
+            onChange={(e) => update({ currentAmmoCount: e.target.value === '' ? null : Number(e.target.value) })}
+          />
+          <span className="sr-weapon-config-ammo-max"> / {maxAmmo}</span>
+          <button className="sr-btn sr-btn--secondary" onClick={() => update({ currentAmmoCount: maxAmmo })}>Reload</button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Just enough to show what a purchase config resolved to — matches the
@@ -93,6 +168,7 @@ export default function GearList({ character }) {
   const [enhanceContext, setEnhanceContext] = useState(null);
   const [attachWeaponId, setAttachWeaponId] = useState(null);
   const [attachHousingContext, setAttachHousingContext] = useState(null); // { instanceId, pool }
+  const [configWeaponId, setConfigWeaponId] = useState(null);
   const allEntries = Object.entries(character.gearManager.gear);
   const topLevelEntries = allEntries.filter(([, entry]) => !entry.attachedTo);
 
@@ -180,6 +256,9 @@ export default function GearList({ character }) {
               )}
               {isFirearm && (
                 <div className="sr-gear-list-actions">
+                  <button className="sr-btn sr-btn--secondary" onClick={() => setConfigWeaponId((prev) => (prev === instanceId ? null : instanceId))}>
+                    {configWeaponId === instanceId ? 'Hide Config' : 'Configure'}
+                  </button>
                   <button className="sr-btn sr-btn--secondary" onClick={() => setAttachWeaponId(instanceId)}>Attach</button>
                 </div>
               )}
@@ -206,6 +285,10 @@ export default function GearList({ character }) {
 
               <button className="sr-icon-btn" onClick={() => handleRemove(instanceId)} title="Remove">−</button>
             </div>
+
+            {isFirearm && configWeaponId === instanceId && (
+              <WeaponConfig character={character} instanceId={instanceId} item={item} touch={touch} />
+            )}
 
             {attachments.length > 0 && (
               <div className="sr-gear-list-attachments">

@@ -1,0 +1,117 @@
+.sr-sub-note {
+  font-size: 0.78rem;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.sr-sub-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+}
+
+.sr-sub-label {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.9rem;
+}
+
+.sr-sub-grade {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+}
+.sr-sub-cap {
+  font-size: 0.8rem;
+  color: var(--sr-text-dim);
+  font-weight: 400;
+}
+
+.sr-sub-hint {
+  font-size: 0.82rem;
+  color: var(--sr-text-dim);
+  font-style: italic;
+}
+
+.sr-sub-picker {
+  margin-top: 0.6rem;
+  padding: 0.6rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.sr-sub-picker-title {
+  width: 100%;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.2rem;
+}
+
+.sr-sub-known {
+  margin-top: 0.75rem;
+}
+
+.sr-sub-known-title,
+.sr-sub-reference-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.35rem;
+}
+
+.sr-sub-known-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.sr-sub-reference {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-sub-metamagic-card {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.4rem;
+}
+.sr-sub-metamagic-card:last-child {
+  margin-bottom: 0;
+}
+
+.sr-sub-metamagic-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.85rem;
+}
+
+.sr-sub-metamagic-description {
+  font-size: 0.78rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}

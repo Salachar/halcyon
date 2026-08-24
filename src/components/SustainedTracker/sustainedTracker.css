@@ -1,0 +1,60 @@
+.sr-sustained-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.sr-sustained-label {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sr-sustained-penalty {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+}
+
+.sr-sustained-list {
+  margin-bottom: 0.6rem;
+}
+
+.sr-sustained-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-blue-dim);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+}
+.sr-sustained-row:last-child {
+  margin-bottom: 0;
+}
+
+.sr-sustained-quickpick {
+  margin-bottom: 0.6rem;
+}
+
+.sr-sustained-quickpick-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.3rem;
+}
+
+.sr-sustained-add {
+  display: flex;
+  gap: 0.4rem;
+}
+.sr-sustained-add input {
+  flex: 1;
+}

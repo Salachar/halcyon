@@ -37,6 +37,7 @@ class Character {
   _name = '';
   _metatype = 'human';
   _magicType = 'mundane'; // mundane | aspected | full | adept | mysticAdept | technomancer
+  _magicAspect = '';
 
   _attributes = {
     body: 1, agility: 1, reaction: 1, strength: 1,
@@ -51,7 +52,14 @@ class Character {
   _qualities = []; // [{ qualityId, level?, selection? }] — qualityId matches QUALITIES ids
   _spells = []; // spell ids known, matching SPELLS ids
   _powers = []; // [{ powerId, level?, selection? }] — powerId matches POWERS ids
+  _initiateGrade = 0; // magicians — capped at Magic rating, see magicEconomy.js
+  _metamagics = []; // [{ metamagicId }] — NOT deduplicated, Power Point is repeatable
+  _submersionGrade = 0; // technomancers — capped at Resonance rating
+  _echoes = []; // [{ echoId }] — same shape as metamagics, catalog not yet populated (echoes.js)
   _complexForms = []; // complex form ids known, matching COMPLEX_FORMS ids
+  _sustainedEffects = [];
+  _boundSpirits = []; // [{ id, type, force, servicesRemaining, note }] — Full/Aspected/Mystic Adept magicians
+  _compiledSprites = []; // [{ id, type, level, tasksRemaining, registered, note }] — Technomancers. registered=false means unregistered (1 max, (level x 2) hour limit); registered=true means it counts against the (Resonance) registered-sprite cap and has no time limit.
   _mentorSpiritId = null; // matches MENTOR_SPIRITS ids
   _mentorSpiritAdvantage = null; // 'magician' | 'adept' — Mystic Adept's one-time permanent choice
 
@@ -81,6 +89,7 @@ class Character {
     this._name = data.name || '';
     this._metatype = data.metatype || 'human';
     this._magicType = data.magicType || 'mundane';
+    this._magicAspect = data.magicAspect || null;
 
     this._attributes = {
       body: 1, agility: 1, reaction: 1, strength: 1,
@@ -99,7 +108,14 @@ class Character {
     this._qualities = data.qualities || [];
     this._spells = data.spells || [];
     this._powers = data.powers || [];
+    this._initiateGrade = typeof data.initiateGrade === 'number' ? data.initiateGrade : 0;
+    this._metamagics = data.metamagics || [];
+    this._submersionGrade = typeof data.submersionGrade === 'number' ? data.submersionGrade : 0;
+    this._echoes = data.echoes || [];
     this._complexForms = data.complexForms || [];
+    this._sustainedEffects = data.sustainedEffects || [];
+    this._boundSpirits = data.boundSpirits || [];
+    this._compiledSprites = data.compiledSprites || [];
     this._mentorSpiritId = data.mentorSpiritId || null;
     this._mentorSpiritAdvantage = data.mentorSpiritAdvantage || null;
 
@@ -139,6 +155,15 @@ class Character {
 
   get magicType() { return this._magicType; }
   set magicType(value) { this._magicType = value; }
+
+  // Only meaningful when magicType === 'aspected' — 'sorcery' |
+  // 'conjuring' | 'enchanting'. Needed because knownSpellBudget
+  // (magicEconomy.js) can't tell a Conjuring-aspected character (0
+  // known spells — they summon spirits instead) from a Sorcery- or
+  // Enchanting-aspected one (Magic x 2 known spells) without it —
+  // magicType alone collapses all three aspects into one flat string.
+  get magicAspect() { return this._magicAspect; }
+  set magicAspect(value) { this._magicAspect = value; }
 
   // ---- Attributes — validated against the current metatype's range ----
 
@@ -264,15 +289,85 @@ class Character {
   addSpell(spellId) {
     if (!this._spells.includes(spellId)) this._spells.push(spellId);
   }
+  removeSpell(spellId) {
+    this._spells = this._spells.filter((id) => id !== spellId);
+  }
 
   get powers() { return this._powers; }
   addPower(powerId, extra = {}) {
     this._powers.push({ powerId, ...extra });
   }
+  removePowerAt(index) {
+    this._powers.splice(index, 1);
+  }
+  updatePowerAt(index, updates) {
+    this._powers = this._powers.map((p, i) => (i === index ? { ...p, ...updates } : p));
+  }
+
+  get initiateGrade() { return this._initiateGrade; }
+  set initiateGrade(value) { this._initiateGrade = Math.max(0, value); }
+
+  get metamagics() { return this._metamagics; }
+  addMetamagic(metamagicId) {
+    this._metamagics = [...this._metamagics, { metamagicId }];
+  }
+  removeMetamagicAt(index) {
+    this._metamagics = this._metamagics.filter((_, i) => i !== index);
+  }
+
+  get submersionGrade() { return this._submersionGrade; }
+  set submersionGrade(value) { this._submersionGrade = Math.max(0, value); }
+
+  get echoes() { return this._echoes; }
+  addEcho(echoId, extra = {}) {
+    this._echoes = [...this._echoes, { echoId, ...extra }];
+  }
+  removeEchoAt(index) {
+    this._echoes = this._echoes.filter((_, i) => i !== index);
+  }
 
   get complexForms() { return this._complexForms; }
-  addComplexForm(formId) {
-    if (!this._complexForms.includes(formId)) this._complexForms.push(formId);
+  addComplexForm(formId, extra = {}) {
+    this._complexForms.push({ formId, ...extra });
+  }
+  removeComplexFormAt(index) {
+    this._complexForms.splice(index, 1);
+  }
+
+  get sustainedEffects() { return this._sustainedEffects; }
+  addSustainedEffect(label) {
+    const id = crypto.randomUUID();
+    this._sustainedEffects = [...this._sustainedEffects, { id, label }];
+    return id;
+  }
+  removeSustainedEffect(id) {
+    this._sustainedEffects = this._sustainedEffects.filter((e) => e.id !== id);
+  }
+
+  get boundSpirits() { return this._boundSpirits; }
+  addBoundSpirit(spirit) {
+    const id = crypto.randomUUID();
+    this._boundSpirits = [...this._boundSpirits, { id, ...spirit }];
+    return id;
+  }
+  updateBoundSpirit(id, updates) {
+    this._boundSpirits = this._boundSpirits.map((s) => (s.id === id ? { ...s, ...updates } : s));
+  }
+  removeBoundSpirit(id) {
+    this._boundSpirits = this._boundSpirits.filter((s) => s.id !== id);
+  }
+
+  get compiledSprites() { return this._compiledSprites; }
+  addCompiledSprite(sprite) {
+    const id = crypto.randomUUID();
+    this._compiledSprites = [...this._compiledSprites, { id, ...sprite }];
+    return id;
+  }
+  updateCompiledSprite(id, updates) {
+    this._compiledSprites = this._compiledSprites.map((s) => (s.id === id ? { ...s, ...updates } : s));
+  }
+  removeCompiledSprite(id) {
+    this._compiledSprites = this._compiledSprites.filter((s) => s.id !== id);
   }
 
   get mentorSpiritId() { return this._mentorSpiritId; }
@@ -348,6 +443,7 @@ class Character {
       name: this.name,
       metatype: this.metatype,
       magicType: this.magicType,
+      magicAspect: this.magicAspect,
       attributes: this.attributes,
       magicResonance: this.magicResonance,
       currentEdge: this.currentEdge,
@@ -356,7 +452,14 @@ class Character {
       qualities: this.qualities,
       spells: this.spells,
       powers: this.powers,
+      initiateGrade: this.initiateGrade,
+      metamagics: this.metamagics,
+      submersionGrade: this.submersionGrade,
+      echoes: this.echoes,
       complexForms: this.complexForms,
+      sustainedEffects: this.sustainedEffects,
+      boundSpirits: this.boundSpirits,
+      compiledSprites: this.compiledSprites,
       mentorSpiritId: this.mentorSpiritId,
       mentorSpiritAdvantage: this.mentorSpiritAdvantage,
       gearManager: this.gearManager.toJSON(),

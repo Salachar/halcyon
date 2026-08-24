@@ -26,6 +26,13 @@ const MAGIC_TYPE_LABELS = {
   mundane: 'Mundane',
 };
 
+const MAGIC_ASPECTS = ['sorcery', 'conjuring', 'enchanting'];
+const MAGIC_ASPECT_LABELS = {
+  sorcery: 'Sorcery (Spellcasting)',
+  conjuring: 'Conjuring (Summoning)',
+  enchanting: 'Enchanting',
+};
+
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
@@ -46,6 +53,7 @@ export default function CreationModal({ onClose }) {
   });
   const [metatype, setMetatype] = useState(null);
   const [magicType, setMagicType] = useState(null);
+  const [magicAspect, setMagicAspect] = useState(null);
   const [attributes, setAttributes] = useState({
     body: 1, agility: 1, reaction: 1, strength: 1,
     willpower: 1, logic: 1, intuition: 1, charisma: 1, edge: 1,
@@ -70,13 +78,13 @@ export default function CreationModal({ onClose }) {
     ? PHYSICAL_MENTAL_ATTRS.find((a) => attributes[a] === attributeRanges[a][1]) || null
     : null;
 
-  const canFinish = prioritiesComplete && metatype && magicType && attributesUnlocked && pointsRemaining === 0;
+  const canFinish = prioritiesComplete && metatype && magicType && (magicType !== 'aspected' || magicAspect) && attributesUnlocked && pointsRemaining === 0;
 
   const handleAssignPriority = (categoryKey, row) => {
     setPriorities((prev) => {
       const next = { ...prev, [categoryKey]: row || null };
       if (categoryKey === 'metatype') { setMetatype(null); }
-      if (categoryKey === 'magicResonance') { setMagicType(null); }
+      if (categoryKey === 'magicResonance') { setMagicType(null); setMagicAspect(null); }
       return next;
     });
   };
@@ -99,6 +107,7 @@ export default function CreationModal({ onClose }) {
     const character = new Character({
       metatype,
       magicType,
+      magicAspect: magicType === 'aspected' ? magicAspect : null,
       attributes,
       magicResonance: magicValue,
       priorities,
@@ -188,7 +197,11 @@ export default function CreationModal({ onClose }) {
                       ? 'sr-btn sr-btn--secondary'
                       : 'sr-btn sr-btn--secondary sr-creation-option--unavailable'
                 }
-                onClick={() => legal && setMagicType(type)}
+                onClick={() => {
+                  if (!legal) return;
+                  setMagicType(type);
+                  if (type !== 'aspected') setMagicAspect(null);
+                }}
                 disabled={!legal}
               >
                 {MAGIC_TYPE_LABELS[type]}
@@ -196,6 +209,20 @@ export default function CreationModal({ onClose }) {
             );
           })}
         </div>
+
+        {magicType === 'aspected' && (
+          <div className="sr-creation-options">
+            {MAGIC_ASPECTS.map((aspect) => (
+              <button
+                key={aspect}
+                className={magicAspect === aspect ? 'sr-btn sr-btn--primary' : 'sr-btn sr-btn--secondary'}
+                onClick={() => setMagicAspect(aspect)}
+              >
+                {MAGIC_ASPECT_LABELS[aspect]}
+              </button>
+            ))}
+          </div>
+        )}
 
         <CollapsibleSection id="creation-attribute-spend" title="Attributes" defaultOpen>
           <p style={{ color: 'var(--sr-text-muted)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>

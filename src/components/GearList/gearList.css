@@ -98,3 +98,59 @@
   font-size: 0.8rem;
   color: var(--sr-text-muted);
 }
+
+.sr-weapon-config {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-weapon-config-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sr-weapon-config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sr-weapon-config-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+}
+
+.sr-weapon-config-resolved {
+  font-size: 0.8rem;
+  color: var(--sr-text);
+  margin-bottom: 0.5rem;
+}
+.sr-weapon-config-resolved strong {
+  color: var(--sr-orange-bright);
+}
+
+.sr-weapon-config-note {
+  font-size: 0.7rem;
+  color: var(--sr-text-dim);
+  margin-top: 0.15rem;
+}
+
+.sr-weapon-config-ammo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sr-weapon-config-ammo-input {
+  width: 4rem;
+}
+
+.sr-weapon-config-ammo-max {
+  font-size: 0.85rem;
+  color: var(--sr-text-dim);
+}

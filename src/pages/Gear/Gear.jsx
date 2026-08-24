@@ -12,6 +12,7 @@ import GearAugmentations from './GearAugmentations';
 import GearCyberwareBioware from './GearCyberwareBioware';
 import GearVehiclesDrones from './GearVehiclesDrones';
 import GearMatrixDevices from './GearMatrixDevices';
+import GearMagicalGoods from './GearMagicalGoods';
 
 const TABS = [
   { key: 'melee', label: 'Melee/Thrown' },
@@ -22,6 +23,7 @@ const TABS = [
   { key: 'cyberware', label: 'Cyberlimbs/Bioware' },
   { key: 'vehicles', label: 'Vehicles/Drones' },
   { key: 'matrix', label: 'Matrix Devices' },
+  { key: 'magical_goods', label: 'Magical Goods' },
 ];
 
 export default function Gear() {
@@ -47,6 +49,7 @@ export default function Gear() {
       {activeTab === 'cyberware' && <GearCyberwareBioware character={currentCharacter} />}
       {activeTab === 'vehicles' && <GearVehiclesDrones character={currentCharacter} />}
       {activeTab === 'matrix' && <GearMatrixDevices character={currentCharacter} />}
+      {activeTab === 'magical_goods' && <GearMagicalGoods character={currentCharacter} />}
     </Page>
   );
 }

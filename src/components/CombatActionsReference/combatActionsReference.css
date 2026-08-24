@@ -1,0 +1,107 @@
+.sr-car-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sr-car-type-group {
+  margin-bottom: 0.6rem;
+}
+.sr-car-type-group:last-child {
+  margin-bottom: 0;
+}
+
+.sr-car-type-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin: 0 0 0.35rem;
+}
+
+.sr-car-row {
+  padding: 0.5rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.4rem;
+}
+.sr-car-row:last-child {
+  margin-bottom: 0;
+}
+.sr-car-row:hover {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-car-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-car-row-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.88rem;
+}
+
+.sr-car-row-badges {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sr-car-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--sr-radius);
+  color: var(--sr-text-dim);
+  background-color: var(--sr-bg-base);
+  border: 1px solid var(--sr-hairline);
+}
+.sr-car-badge--anytime {
+  color: var(--sr-blue-bright);
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-car-row-description {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.sr-car-row-builder {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-car-edge-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.sr-car-edge-table th,
+.sr-car-edge-table td {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--sr-hairline);
+}
+.sr-car-edge-table th {
+  color: var(--sr-text-dim);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sr-car-edge-cost {
+  color: var(--sr-orange-bright);
+  font-weight: 700;
+}

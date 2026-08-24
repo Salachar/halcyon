@@ -14,6 +14,7 @@ import { GEAR_SENSORS_SECURITY_SURVIVAL } from './sensors_security_survival';
 import { GEAR_ARMOR_ELECTRONICS } from './armor_electronics';
 import { GEAR_FIREARMS_EXPLOSIVES } from './firearms_explosives';
 import { GEAR_MATRIX_DEVICES } from './matrix_devices';
+import { GEAR_MAGICAL_GOODS } from './magical_goods';
 
 export {
   GEAR_MELEE_THROWN,
@@ -24,6 +25,7 @@ export {
   GEAR_ARMOR_ELECTRONICS,
   GEAR_FIREARMS_EXPLOSIVES,
   GEAR_MATRIX_DEVICES,
+  GEAR_MAGICAL_GOODS,
 };
 
 export const ALL_GEAR = {
@@ -35,6 +37,7 @@ export const ALL_GEAR = {
   ...GEAR_ARMOR_ELECTRONICS,
   ...GEAR_FIREARMS_EXPLOSIVES,
   ...GEAR_MATRIX_DEVICES,
+  ...GEAR_MAGICAL_GOODS,
 };
 
 export const ALL_GEAR_IDS = Object.keys(ALL_GEAR);

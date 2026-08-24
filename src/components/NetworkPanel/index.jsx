@@ -4,6 +4,7 @@ import { ALL_GEAR } from '@data/gear';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import { panCategoryOf, panSortComparator, compositePersonaStats, PAN_CATEGORY_LABELS } from '@utils/panGrouping';
 import CapacityAttachModal from '@components/CapacityAttachModal';
+import ConfirmationModal from '@components/ConfirmationModal';
 
 import PersonaHeader from './PersonaHeader';
 import PersonaStatsBlock from './PersonaStatsBlock';
@@ -22,6 +23,7 @@ export default function NetworkPanel({ character }) {
   const { touch } = useCharacterManager();
   const [expandedId, setExpandedId] = useState(null);
   const [attachContext, setAttachContext] = useState(null); // { instanceId, pool }
+  const [pendingSlave, setPendingSlave] = useState(null); // instanceId — awaiting Living Network confirmation
 
   const gear = character.gearManager.gear;
   const pan = character.gearManager.pan;
@@ -66,7 +68,23 @@ export default function NetworkPanel({ character }) {
     character.gearManager.setPanMaster(instanceId);
     touch();
   };
+  // Confirmed via errata/FAQ: without the Living Network Echo, a
+  // technomancer's Living Persona can only ever be a SLAVE in someone
+  // else's PAN, never a master with anything subordinated to it —
+  // "Until you have the Living Network echo, [technomancers and RCCs]
+  // don't [interact]." Soft-gated, not hard-blocked, matching the same
+  // confirm-then-proceed pattern used for Capacity overflow — this is
+  // a real mechanical prerequisite, but the app still trusts the
+  // player to decide (a homebrew table, a GM exception, etc.).
+  const primaryIsUnlicensedLivingPersona =
+    primaryItem?.id === 'living_persona' &&
+    !character.echoes.some((e) => e.echoId === 'living_network');
+
   const handleSlave = (instanceId) => {
+    if (primaryIsUnlicensedLivingPersona) {
+      setPendingSlave(instanceId);
+      return;
+    }
     character.gearManager.addSlavedDevice(instanceId);
     touch();
   };
@@ -175,6 +193,22 @@ export default function NetworkPanel({ character }) {
           housingInstanceId={attachContext.instanceId}
           pool={attachContext.pool}
           onClose={() => setAttachContext(null)}
+        />
+      )}
+
+      {pendingSlave && (
+        <ConfirmationModal
+          open
+          title="No Living Network Echo"
+          message="Without the Living Network Echo, your Living Persona can only ever be a slave in someone else's PAN — it isn't supposed to subordinate devices to itself. Slave anyway?"
+          confirmLabel="Slave Anyway"
+          cancelLabel="Cancel"
+          onConfirm={() => {
+            character.gearManager.addSlavedDevice(pendingSlave);
+            touch();
+            setPendingSlave(null);
+          }}
+          onCancel={() => setPendingSlave(null)}
         />
       )}
     </div>

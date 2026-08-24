@@ -49,6 +49,7 @@ class GearManager {
   _persona = { ...DEFAULT_PERSONA };
   _deviceMode = 'AR';
   _essenceAdjustments = []; // [{ amount, note }] — manual, stacks with the automatic gear-based deduction
+  _weaponState = {}; // { [instanceId]: { selectedMode, loadedAmmoType, ammoContainer, currentAmmoCount } } — all optional, nothing here ever gates or blocks weapon use; see setWeaponState below
 
   constructor(data = {}) {
     this._gear = data.gear || {};
@@ -59,6 +60,7 @@ class GearManager {
     this._persona = data.persona || { ...DEFAULT_PERSONA };
     this._deviceMode = data.deviceMode || 'AR';
     this._essenceAdjustments = data.essenceAdjustments || [];
+    this._weaponState = data.weaponState || {};
   }
 
   // ---- Gear collection ----
@@ -336,6 +338,28 @@ class GearManager {
     this._essenceAdjustments = this._essenceAdjustments.filter((_, i) => i !== index);
   }
 
+  // ---- Weapon State ----
+  // Per-instance, purely informational — currently selected firing
+  // mode, loaded ammo type, which ammo container (for the few weapons
+  // with ammo.options, clip vs. belt), and a freely-editable round
+  // count. Deliberately never gates or blocks anything: a weapon works
+  // in combat with no weapon state set at all, an empty ammo count, or
+  // any combination thereof. This exists purely to compute and display
+  // the CORRECT effective Attack Rating for whatever's currently
+  // selected (see weaponEconomy.js) — not to enforce or automate
+  // ammo tracking, which is explicitly out of scope.
+
+  getWeaponState(instanceId) {
+    return this._weaponState[instanceId] || {};
+  }
+
+  setWeaponState(instanceId, updates) {
+    this._weaponState = {
+      ...this._weaponState,
+      [instanceId]: { ...this.getWeaponState(instanceId), ...updates },
+    };
+  }
+
   toJSON() {
     return {
       gear: this._gear,
@@ -346,6 +370,7 @@ class GearManager {
       persona: this._persona,
       deviceMode: this._deviceMode,
       essenceAdjustments: this._essenceAdjustments,
+      weaponState: this._weaponState,
     };
   }
 }

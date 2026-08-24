@@ -8,9 +8,18 @@ import GearList from '@components/GearList';
 import EssenceAdjustmentModal from '@components/EssenceAdjustmentModal';
 import Edge from '@components/Edge';
 import ConditionMonitor from '@components/ConditionMonitor';
+import InitiativeWidget from '@components/InitiativeWidget';
 import QualityCard from '@components/QualityCard';
 import QualityCreationModal from '@components/QualityCreationModal';
 import QualityAdvancementModal from '@components/QualityAdvancementModal';
+import KnownSpells from '@components/KnownSpells';
+import BoundSpirits from '@components/BoundSpirits';
+import KnownComplexForms from '@components/KnownComplexForms';
+import CompiledSprites from '@components/CompiledSprites';
+import AdeptPowers from '@components/AdeptPowers';
+import InitiationTracker from '@components/InitiationTracker';
+import SubmersionTracker from '@components/SubmersionTracker';
+import SustainedTracker from '@components/SustainedTracker';
 import StatusBadge from '@components/StatusBadge';
 import NumberEntryModal from '@components/NumberEntryModal';
 import QuickAdjustModal from '@components/QuickAdjustModal';
@@ -29,13 +38,24 @@ const ATTR_LABELS = {
   willpower: 'Willpower', logic: 'Logic', intuition: 'Intuition', charisma: 'Charisma', edge: 'Edge',
 };
 
+// Magic types that can EVER have a nonzero known-spell budget under
+// some configuration — Aspected-Conjuring currently resolves to 0 via
+// magicEconomy.js, but Conjuring is still a real possible pick within
+// 'aspected', so the section stays visible (0/0) rather than hidden,
+// same "show real zero, don't hide" instinct as everywhere else. Adept
+// (pure)/Technomancer/Mundane are structurally excluded instead — not
+// currently zero, but impossible by definition — same treatment as
+// Cyberjacks never getting a Make Primary button.
+const SPELL_CAPABLE_MAGIC_TYPES = ['full', 'aspected', 'mysticAdept'];
+
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 // Section order: identity, then active-play tools (Skills / Condition
 // Monitor / Edge — the things actually touched turn-to-turn), then
-// possessions/reference (Gear / Qualities — checked far less often).
+// possessions/reference (Gear / Spells / Qualities — checked far less
+// often).
 export default function CharacterSheet({ character }) {
   const { touch } = useCharacterManager();
   const [karmaModalOpen, setKarmaModalOpen] = useState(false);
@@ -64,6 +84,11 @@ export default function CharacterSheet({ character }) {
   };
 
   const magicLabel = character.magicType === 'technomancer' ? 'Resonance' : 'Magic';
+  const showSpells = SPELL_CAPABLE_MAGIC_TYPES.includes(character.magicType);
+  const showComplexForms = character.magicType === 'technomancer';
+  const showAdeptPowers = character.magicType === 'adept' || character.magicType === 'mysticAdept';
+  const showInitiation = showSpells || showAdeptPowers;
+  const showSustained = showSpells || showComplexForms;
 
   const incomplete = getIncompleteSections(character);
   const showBadges = incomplete.length > 0;
@@ -171,11 +196,81 @@ export default function CharacterSheet({ character }) {
         </Section>
       </CollapsibleSection>
 
+      <CollapsibleSection id="sheet-initiative" title="Initiative" defaultOpen>
+        <Section>
+          <InitiativeWidget character={character} />
+        </Section>
+      </CollapsibleSection>
+
       <CollapsibleSection id="sheet-gear" title="Gear" defaultOpen>
         <Section>
           <GearList character={character} />
         </Section>
       </CollapsibleSection>
+
+      {showSpells && (
+        <CollapsibleSection id="sheet-spells" title="Spells" defaultOpen>
+          <Section>
+            <KnownSpells character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showSpells && (
+        <CollapsibleSection id="sheet-spirits" title="Bound Spirits" defaultOpen>
+          <Section>
+            <BoundSpirits character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showAdeptPowers && (
+        <CollapsibleSection id="sheet-adept-powers" title="Adept Powers" defaultOpen>
+          <Section>
+            <AdeptPowers character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showInitiation && (
+        <CollapsibleSection id="sheet-initiation" title="Initiation" defaultOpen>
+          <Section>
+            <InitiationTracker character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showComplexForms && (
+        <CollapsibleSection id="sheet-complex-forms" title="Complex Forms" defaultOpen>
+          <Section>
+            <KnownComplexForms character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showComplexForms && (
+        <CollapsibleSection id="sheet-sprites" title="Compiled Sprites" defaultOpen>
+          <Section>
+            <CompiledSprites character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showComplexForms && (
+        <CollapsibleSection id="sheet-submersion" title="Submersion" defaultOpen>
+          <Section>
+            <SubmersionTracker character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showSustained && (
+        <CollapsibleSection id="sheet-sustained" title="Sustained" defaultOpen>
+          <Section>
+            <SustainedTracker character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
 
       <CollapsibleSection
         id="sheet-qualities"
