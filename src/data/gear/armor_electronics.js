@@ -121,6 +121,38 @@ const armor_cold_resistance = clothingArmor({ id: 'armor_cold_resistance', label
 const armor_fire_resistance = clothingArmor({ id: 'armor_fire_resistance', label: 'Fire Resistance', cost: null, costPerRating: 250, availability: null, description: 'Cancels Burning status a number of times equal to its rating, then wears out.', tags: ['armor_mod'], stats: { ratingRange: [1, 6], armorCapacityUsed: 3 } });
 const armor_electricity_resistance = clothingArmor({ id: 'armor_electricity_resistance', label: 'Electricity Resistance', cost: null, costPerRating: 250, availability: null, description: 'Cancels Zapped status a number of times equal to its rating, then wears out.', tags: ['armor_mod'], stats: { ratingRange: [1, 6], armorCapacityUsed: 3 } });
 
+const dragonsilk_clothing = clothingArmor({
+  id: 'dragonsilk_clothing', label: 'DragonSilk Clothing',
+  tags: ['armor', 'clothing'],
+  cost: 5000, availability: 6,
+  description: "Century Dynamics Interactive Media's softer fabric variant — shifts randomly through a red-orange or blue-violet spectrum (no thermochromic property). Woven into dresses/shirts/fine attire.",
+  stats: { defenseRating: 1, capacityProvided: 8 },
+});
+
+const dragonthread_vest = clothingArmor({
+  id: 'dragonthread_vest', label: 'DragonThread Vest',
+  tags: ['armor', 'clothing'],
+  cost: 2000, availability: 4,
+  description: 'Thermochromic (shifts color with ambient temperature) fabric with kinetically absorptive fibers. Available in blue/red/green.',
+  stats: { defenseRating: 3, capacityProvided: 8 },
+});
+
+const dragonthread_jacket = clothingArmor({
+  id: 'dragonthread_jacket', label: 'DragonThread Jacket',
+  tags: ['armor', 'clothing'],
+  cost: 3000, availability: 4,
+  description: 'As DragonThread Vest, jacket cut.',
+  stats: { defenseRating: 3, capacityProvided: 10 },
+});
+
+const dragonthread_duster = clothingArmor({
+  id: 'dragonthread_duster', label: 'DragonThread Duster',
+  tags: ['armor', 'clothing'],
+  cost: 4000, availability: 5,
+  description: 'As DragonThread Vest, duster cut.',
+  stats: { defenseRating: 3, capacityProvided: 12 },
+});
+
 // ---- Helmets & Shields ----
 
 // Helmet capacity is device capacity, not armor capacity — resolved
@@ -308,6 +340,8 @@ export const GEAR_ARMOR_ELECTRONICS = {
   clothing, electrochromic_feature, feedback_feature,
   synthleather_jacket, actioneer_business_clothes, armor_clothing, armor_jacket, armor_vest, chameleon_suit, full_body_armor, full_body_armor_helmet, lined_coat, urban_explorer_jumpsuit,
   armor_chemical_protection, armor_chemical_seal, armor_cold_resistance, armor_fire_resistance, armor_electricity_resistance,
+  dragonsilk_clothing, dragonthread_vest, dragonthread_jacket, dragonthread_duster,
+
   helmet, ballistic_shield, riot_shield,
   ar_gloves, electronic_paper, printer, satellite_link, sim_module, sim_module_hot_sim, simrig_accessory, subvocal_mic, trid_projector, trodes,
   standard_tags, datachip, security_stealth_tags, sensor_tags,

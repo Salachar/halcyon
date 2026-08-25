@@ -764,6 +764,36 @@ const catalyst_stick = survival({
   stats: {},
 });
 
+const ballistic_tent = survival({
+  id: 'ballistic_tent',
+  label: 'Ballistic Tent',
+  legality: null,
+  image: null,
+  tags: ['survival'],
+  cost: 1100,
+  availability: 2,
+  description: 'Self-inflating, steel-strutted shelter, deployable in under 3 minutes. Fabric doubles as urban camouflage when set against a building (+2 dice on Stealth tests).',
+  stats: {
+    armorRating: 4,
+    size: 'Large',
+  },
+});
+
+const ballistic_tent_military_grade = survival({
+  id: 'ballistic_tent_military_grade',
+  label: 'Ballistic Tent (Military Grade)',
+  legality: null,
+  image: null,
+  tags: ['survival'],
+  cost: 4500,
+  availability: 4,
+  description: 'Upgraded Ballistic Tent, later variant deployed for Desert Wars use.',
+  stats: {
+    armorRating: 8,
+    size: 'Large',
+  },
+});
+
 export const GEAR_SENSORS_SECURITY_SURVIVAL = {
   directional_microphone, earbuds, headphones, laser_mic, omnidirectional_mic,
   audio_enhancement, select_sound_filter_device, spatial_recognizer_device,
@@ -773,6 +803,7 @@ export const GEAR_SENSORS_SECURITY_SURVIVAL = {
   glue_solvent, glue_sprayer, thermite_burning_bar,
   chemsuit, climbing_gear, diving_gear, flashlight, gas_mask, gecko_tape_gloves, hazmat_suit, light_stick, magnesium_torch_flare, microflare_launcher, microflares, rappelling_gloves, respirator, survival_kit,
   grapple_gun, microwire, myomeric_rope, standard_rope, stealth_rope, catalyst_stick,
+  ballistic_tent, ballistic_tent_military_grade,
 };
 
 export const GEAR_SENSORS_SECURITY_SURVIVAL_IDS = Object.keys(GEAR_SENSORS_SECURITY_SURVIVAL);

@@ -1,15 +1,11 @@
 .sr-avatar-modal {
-  max-width: 520px;
-  width: 90vw;
+  width: 90vw !important;
 }
 
 .sr-avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(3.25rem, 1fr));
-  gap: 0.5rem;
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 0.25rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .sr-avatar-thumb {
@@ -29,13 +25,15 @@
 }
 
 .sr-avatar-thumb img {
-  width: 100%;
-  height: 100%;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   display: block;
 }
 
 .sr-avatar-clear {
+  width: 100px;
+  height: 100px;
   aspect-ratio: 1;
   border-radius: 50%;
   border: 2px dashed var(--sr-hairline);

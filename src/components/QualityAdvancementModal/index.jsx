@@ -2,7 +2,9 @@ import { useState } from 'react';
 
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import ConfirmationModal from '@components/ConfirmationModal';
+import QualitySelectionInput from '@components/QualitySelectionInput';
 import { QUALITIES, QUALITY_IDS } from '@data/character/qualities';
+import { SKILLS } from '@data/character/skills';
 import { resolveQualityKarma, canAffordQuality, creationQualityCapsExceeded, netBonusKarma } from '@utils/qualityEconomy';
 
 import './qualityAdvancementModal.css';
@@ -75,12 +77,11 @@ function QualityPickRow({ quality, character, expanded, onToggle, onConfirm }) {
               </div>
             )}
             {needsSelection && (
-              <input
-                type="text"
-                className="sr-number-input sr-qpick-selection-input"
+              <QualitySelectionInput
+                requiresSelection={quality.requiresSelection}
                 value={selection}
-                onChange={(e) => setSelection(e.target.value)}
-                placeholder={`Selection (${quality.requiresSelection})`}
+                onChange={setSelection}
+                className="sr-number-input sr-qpick-selection-input"
               />
             )}
             <button className="sr-btn sr-btn--primary" disabled={needsSelection && !selection.trim()} onClick={handleConfirmForm}>
@@ -133,6 +134,12 @@ export default function QualityAdvancementModal({ character, open, onClose }) {
     touch();
   };
 
+  const pendingSelectionLabel = pendingPick?.extra.selection
+    ? (pendingPick.quality.requiresSelection === 'skill'
+      ? (SKILLS[pendingPick.extra.selection]?.label ?? pendingPick.extra.selection)
+      : pendingPick.extra.selection)
+    : null;
+
   const confirmMessage = pendingPick
     ? [
         pendingPick.quality.label,
@@ -140,7 +147,7 @@ export default function QualityAdvancementModal({ character, open, onClose }) {
           ? `Grants +${pendingPick.karma} Karma.`
           : `Costs ${pendingPick.karma} Karma.`,
         pendingPick.extra.level ? `Level ${pendingPick.extra.level}.` : null,
-        pendingPick.extra.selection ? `Selection: ${pendingPick.extra.selection}.` : null,
+        pendingSelectionLabel ? `Selection: ${pendingSelectionLabel}.` : null,
       ].filter(Boolean).join('\n')
     : '';
 

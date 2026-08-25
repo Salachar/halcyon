@@ -56,7 +56,7 @@ export const COMBAT_ACTIONS = {
   dismiss_spirit: {
     label: 'Dismiss Spirit',
     actionType: 'minor', timing: 'initiative', hasTest: false,
-    description: 'Dismiss a spirit under your control. Full mechanical text not confirmed against source this pass — name and category only.',
+    description: "No separate write-up exists in source — this is the same mechanism as Command Spirit's own \"or dismiss them\" clause, just listed as its own named entry in the action table.",
   },
   dodge: {
     label: 'Dodge',

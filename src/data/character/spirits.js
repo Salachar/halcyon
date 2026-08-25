@@ -10,9 +10,8 @@
 // bound, how many services remain), not a live-computed opponent/ally
 // stat block. The GM narrates what the spirit actually does.
 //
-// Beast is a confirmed 6th type (per the book's own index) but its
-// specific stat formula never turned up in this pass — flagged here,
-// not invented.
+// All 6 types confirmed complete (Beast's stat block was the last one
+// found).
 
 export const SPIRIT_TYPES = {
   air: {
@@ -29,15 +28,15 @@ export const SPIRIT_TYPES = {
   },
   beast: {
     label: 'Beast',
-    description: 'One of the two non-elemental spirit types. Stat formula not confirmed against source this pass — name, category, and general shape only.',
-    attributes: null,
-    initiative: null,
-    astralInitiative: null,
-    defenseRating: null,
-    skills: null,
-    powers: null,
-    weaknesses: null,
-    optionalPowers: null,
+    description: 'One of the two non-elemental spirit types, resembling animals.',
+    attributes: 'B F+2, A F+1, R F, S F+2, W F, L F, I F, C F, M F, Ess F',
+    initiative: '(F x 2) + 2D6',
+    astralInitiative: '(F x 2) + 3D6',
+    defenseRating: 'F + 2',
+    skills: 'Astral, Close Combat, Perception',
+    powers: 'Animal Control, Astral Form, Enhanced Senses (hearing, low-light vision, smell), Fear, Materialization, Movement, Sapience',
+    weaknesses: 'Allergy (silver, Severe)',
+    optionalPowers: 'Concealment, Confusion, Guard, Natural Weapon (claws/bite), Noxious Breath, Search, Venom',
   },
   earth: {
     label: 'Earth',

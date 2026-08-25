@@ -260,6 +260,49 @@ export const QUALITIES = {
     description: '2 additional Damage Overflow boxes per rank.',
   },
 
+  harbor_rat: {
+    label: 'Harbor Rat',
+    type: 'positive',
+    karmaCost: 3,
+    description: 'Bonus point of Edge on any Social test with people working or living in a port zone (Victoria Harbour, etc.).',
+  },
+
+  mong_kok_street_courier: {
+    label: 'Mong Kok Street Courier',
+    type: 'positive',
+    karmaCost: 6,
+    description: '+2 dice on Stealth, Piloting, and Navigation tests when operating in the streets of Hong Kong.',
+  },
+
+  data_whisperer: {
+    label: 'Data Whisperer',
+    type: 'positive',
+    karmaCostPerLevel: 10,
+    levelRange: [1, 3],
+    description: "-1 threshold per level on Matrix Search tests. Doesn't apply to Foundation technology, or the Resonance/Dissonance wells.",
+  },
+
+  talislegger: {
+    label: 'Talislegger',
+    type: 'positive',
+    karmaCost: 9,
+    description: 'Reagents at half cost while in Hong Kong.',
+  },
+
+  properly_aligned: {
+    label: 'Properly Aligned',
+    type: 'positive',
+    karmaCost: 15,
+    description: 'Treat medium mana ebbs/flows as low; ignore low mana ebbs/flows entirely.',
+  },
+
+  eye_for_quality: {
+    label: 'Eye for Quality',
+    type: 'positive',
+    karmaCost: 3,
+    description: '+2 dice on Perception tests to judge the quality/authenticity of secondhand, black-, or grey-market goods.',
+  },
+
   // ==================== NEGATIVE ====================
 
   addiction: {
@@ -502,6 +545,20 @@ export const QUALITIES = {
     type: 'negative',
     karmaCost: 8,
     description: 'Cannot spend Edge resisting infection; +1 threshold to fight off any infection; –1 dice pool penalty on all tests while ill.',
+  },
+
+  bad_qi: {
+    label: 'Bad Qi',
+    type: 'negative',
+    karmaCost: 10,
+    description: "Magic users take an additional -1 dice pool penalty per sustained spell on any Action test; also applies to any mana-channeling action (ritual, enchanting, summoning). Adepts channel magic differently and can't take this quality.",
+  },
+
+  walled_in: {
+    label: 'Walled In',
+    type: 'negative',
+    karmaCost: 8,
+    description: "A Willpower (2) test (Minor Action) is required whenever entering a space where you can't reach the far wall in one Move action; failure means you can't earn or spend Edge until you succeed.",
   },
 };
 

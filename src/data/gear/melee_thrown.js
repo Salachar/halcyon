@@ -491,12 +491,26 @@ const throwing_stars = {
   },
 };
 
+const telescoping_ladder_staff = {
+  id: 'telescoping_ladder_staff', label: 'Telescoping Ladder Staff',
+  category: 'melee_weapon', legality: null, image: null, tags: ['melee_weapon'],
+  wireless: true,
+  cost: 750, availability: 4,
+  description: 'Collapses to a 12cm-diameter, 150cm cylinder; triggers to extend 6m with climbing nodules snapping out for rapid ascent. Extend/retract is a Minor Action, usable for up to 6m of extra vertical movement.',
+  stats: {
+    damageValue: '3S',
+    attackRatings: [8, null, null, null, null],
+    wirelessBonus: 'Bonus Minor Action on extend/retract.',
+  },
+};
+
 export const GEAR_MELEE_THROWN = {
   combat_axe, combat_survival_knife, forearm_snap_blades, knife, katana, polearm, sword,
   club, extendable_baton, sap, staff, stun_baton, telescoping_staff,
   bike_chain, bullwhip, knucks, shock_gloves, monofilament_whip,
   bow, arrow, injection_arrow, crossbow_light, crossbow_standard, crossbow_heavy,
   bolt, injection_bolt, throwing_knives, throwing_stars,
+  telescoping_ladder_staff,
 };
 
 export const GEAR_MELEE_THROWN_IDS = Object.keys(GEAR_MELEE_THROWN);

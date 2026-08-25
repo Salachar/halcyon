@@ -58,6 +58,8 @@ class Character {
   _echoes = []; // [{ echoId }] — same shape as metamagics, catalog not yet populated (echoes.js)
   _complexForms = []; // complex form ids known, matching COMPLEX_FORMS ids
   _sustainedEffects = [];
+  _knowledgeSkills = []; // [{ id, label }] — freeform, no ranks, GM-approved names
+  _languages = []; // [{ id, label, tier }] — tier: 'base' | 'specialist' | 'expert' | 'native'
   _boundSpirits = []; // [{ id, type, force, servicesRemaining, note }] — Full/Aspected/Mystic Adept magicians
   _compiledSprites = []; // [{ id, type, level, tasksRemaining, registered, note }] — Technomancers. registered=false means unregistered (1 max, (level x 2) hour limit); registered=true means it counts against the (Resonance) registered-sprite cap and has no time limit.
   _mentorSpiritId = null; // matches MENTOR_SPIRITS ids
@@ -114,6 +116,8 @@ class Character {
     this._echoes = data.echoes || [];
     this._complexForms = data.complexForms || [];
     this._sustainedEffects = data.sustainedEffects || [];
+    this._knowledgeSkills = data.knowledgeSkills || [];
+    this._languages = data.languages || [];
     this._boundSpirits = data.boundSpirits || [];
     this._compiledSprites = data.compiledSprites || [];
     this._mentorSpiritId = data.mentorSpiritId || null;
@@ -344,6 +348,29 @@ class Character {
     this._sustainedEffects = this._sustainedEffects.filter((e) => e.id !== id);
   }
 
+  get knowledgeSkills() { return this._knowledgeSkills; }
+  addKnowledgeSkill(label) {
+    const id = crypto.randomUUID();
+    this._knowledgeSkills = [...this._knowledgeSkills, { id, label }];
+    return id;
+  }
+  removeKnowledgeSkill(id) {
+    this._knowledgeSkills = this._knowledgeSkills.filter((k) => k.id !== id);
+  }
+
+  get languages() { return this._languages; }
+  addLanguage(label, tier = 'base') {
+    const id = crypto.randomUUID();
+    this._languages = [...this._languages, { id, label, tier }];
+    return id;
+  }
+  updateLanguageTier(id, tier) {
+    this._languages = this._languages.map((l) => (l.id === id ? { ...l, tier } : l));
+  }
+  removeLanguage(id) {
+    this._languages = this._languages.filter((l) => l.id !== id);
+  }
+
   get boundSpirits() { return this._boundSpirits; }
   addBoundSpirit(spirit) {
     const id = crypto.randomUUID();
@@ -458,6 +485,8 @@ class Character {
       echoes: this.echoes,
       complexForms: this.complexForms,
       sustainedEffects: this.sustainedEffects,
+      knowledgeSkills: this.knowledgeSkills,
+      languages: this.languages,
       boundSpirits: this.boundSpirits,
       compiledSprites: this.compiledSprites,
       mentorSpiritId: this.mentorSpiritId,

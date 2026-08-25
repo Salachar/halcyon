@@ -23,9 +23,9 @@ class MatrixManager {
 
   get hackedDevices() { return this._hackedDevices; }
 
-  addHackedDevice(name, access = 'outsider', notes = '') {
+  addHackedDevice(name, access, notes, tags = []) {
     const id = crypto.randomUUID();
-    this._hackedDevices = [...this._hackedDevices, { id, name, access, notes }];
+    this._hackedDevices = [...this._hackedDevices, { id, name, access, notes, tags }];
     return id;
   }
 

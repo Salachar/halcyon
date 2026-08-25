@@ -4,6 +4,7 @@ import { Section, Panel, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
 import AttributeBox from '@components/AttributeBox';
 import SkillRow from '@components/SkillRow';
+import KnowledgeLanguageSkills from '@components/KnowledgeLanguageSkills';
 import GearList from '@components/GearList';
 import EssenceAdjustmentModal from '@components/EssenceAdjustmentModal';
 import Edge from '@components/Edge';
@@ -187,6 +188,12 @@ export default function CharacterSheet({ character }) {
           {SKILL_IDS.map((skillId) => (
             <SkillRow key={skillId} character={character} skillId={skillId} />
           ))}
+        </Section>
+      </CollapsibleSection>
+
+      <CollapsibleSection id="sheet-knowledge-language" title="Knowledge & Language Skills" defaultOpen>
+        <Section>
+          <KnowledgeLanguageSkills character={character} />
         </Section>
       </CollapsibleSection>
 

@@ -2,7 +2,9 @@ import { useState } from 'react';
 
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import ConfirmationModal from '@components/ConfirmationModal';
+import QualitySelectionInput from '@components/QualitySelectionInput';
 import { QUALITIES, QUALITY_IDS } from '@data/character/qualities';
+import { SKILLS } from '@data/character/skills';
 import { resolveQualityKarma, netBonusKarma } from '@utils/qualityEconomy';
 
 import './qualityCreationModal.css';
@@ -60,12 +62,11 @@ function QualityCheckRow({ quality, staged, blocked, onStage, onUnstage, onUpdat
                 </div>
               )}
               {needsSelection && (
-                <input
-                  type="text"
-                  className="sr-number-input sr-qcreate-selection-input"
+                <QualitySelectionInput
+                  requiresSelection={quality.requiresSelection}
                   value={selection}
-                  onChange={(e) => onUpdateExtra({ level, selection: e.target.value })}
-                  placeholder={`Selection (${quality.requiresSelection})`}
+                  onChange={(val) => onUpdateExtra({ level, selection: val })}
+                  className="sr-number-input sr-qcreate-selection-input"
                 />
               )}
             </div>
@@ -213,7 +214,10 @@ export default function QualityCreationModal({ character, open, onClose }) {
           const karma = resolveQualityKarma(q, false, extra.level);
           const bits = [q.label, q.type === 'negative' ? `+${karma} Karma` : `${karma} Karma`];
           if (extra.level) bits.push(`Level ${extra.level}`);
-          if (extra.selection) bits.push(`Selection: ${extra.selection}`);
+          if (extra.selection) {
+            const selectionLabel = q.requiresSelection === 'skill' ? (SKILLS[extra.selection]?.label ?? extra.selection) : extra.selection;
+            bits.push(`Selection: ${selectionLabel}`);
+          }
           return bits.join(' — ');
         }).join('\n') + `\n\nNet Karma change: ${stagedNetBonus >= 0 ? '+' : ''}${stagedNetBonus}`}
         confirmLabel="Confirm"

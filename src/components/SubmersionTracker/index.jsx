@@ -41,7 +41,6 @@ export default function SubmersionTracker({ character }) {
 
   const known = character.echoes;
   const knownIds = new Set(known.map((e) => e.echoId));
-  const hasEchoCatalog = ECHO_IDS.length > 0;
   const availableEchoes = ECHO_IDS.filter((id) => ECHOES[id].repeatable || !knownIds.has(id));
 
   const raiseGrade = () => {
@@ -49,7 +48,7 @@ export default function SubmersionTracker({ character }) {
     character.karma -= cost;
     character.submersionGrade = nextGrade;
     touch();
-    if (hasEchoCatalog) setPickingEcho(true);
+    setPickingEcho(true);
   };
 
   const pickEcho = (id) => {
@@ -99,7 +98,7 @@ export default function SubmersionTracker({ character }) {
         </button>
       )}
 
-      {pickingEcho && hasEchoCatalog && !pickingSelectionFor && (
+      {pickingEcho && !pickingSelectionFor && (
         <div className="sr-sub-picker">
           <div className="sr-sub-picker-title">Choose an Echo</div>
           {availableEchoes.map((id) => (
@@ -121,10 +120,6 @@ export default function SubmersionTracker({ character }) {
         </div>
       )}
 
-      {pickingEcho && !hasEchoCatalog && (
-        <p className="sr-sub-hint">Echo catalog not yet available — Grade raised, Echo pick pending.</p>
-      )}
-
       {known.length > 0 && (
         <div className="sr-sub-known">
           <div className="sr-sub-known-title">Known Echoes</div>
@@ -138,10 +133,6 @@ export default function SubmersionTracker({ character }) {
             </div>
           ))}
         </div>
-      )}
-
-      {!hasEchoCatalog && (
-        <p className="sr-sub-hint">Echo catalog not yet confirmed against source — grade tracking works, the reference list below is empty until that data exists.</p>
       )}
     </div>
   );

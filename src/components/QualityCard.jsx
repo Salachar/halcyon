@@ -1,3 +1,5 @@
+import { SKILLS } from '@data/character/skills';
+
 // Slim, full-width row — same shape as SkillCard, one quality per row,
 // stacked vertically. `type` drives the accent color: positive uses the
 // same blue-bright everything else uses for headings, negative reuses
@@ -9,6 +11,11 @@
 // page), this is pure definition display. Present (CharacterSheet), the
 // meta line resolves to the actual owned level/selection instead of the
 // generic range/type, and a remove button appears.
+//
+// A stored selection resolves through SKILLS when requiresSelection is
+// 'skill' (currently just Aptitude) — the value is a real skill id now
+// (QualitySelectionInput), not a freeform label, so this shows the
+// proper display name instead of the raw id.
 export default function QualityCard({ quality, entry, onRemove }) {
   const isNegative = quality.type === 'negative';
 
@@ -17,6 +24,10 @@ export default function QualityCard({ quality, entry, onRemove }) {
       ? `${quality.karmaCostPerLevel * entry.level} Karma`
       : `${quality.karmaCostPerLevel} Karma/level`
     : `${quality.karmaCost} Karma`;
+
+  const selectionLabel = entry?.selection
+    ? (quality.requiresSelection === 'skill' ? (SKILLS[entry.selection]?.label ?? entry.selection) : entry.selection)
+    : null;
 
   return (
     <div className={isNegative ? 'sr-quality-card sr-quality-card--negative' : 'sr-quality-card'}>
@@ -31,7 +42,7 @@ export default function QualityCard({ quality, entry, onRemove }) {
 
       <div className="sr-quality-card-body">
         <p className="sr-quality-card-description">{quality.description}</p>
-        {entry?.selection && <div className="sr-quality-card-tag">Selected: {entry.selection}</div>}
+        {selectionLabel && <div className="sr-quality-card-tag">Selected: {selectionLabel}</div>}
         {!entry && quality.requiresSelection && (
           <div className="sr-quality-card-tag">Requires selection: {quality.requiresSelection}</div>
         )}

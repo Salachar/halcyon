@@ -3,8 +3,13 @@
 // more than once. When Echoes can be taken multiple times, their
 // bonuses stack."
 //
-// INCOMPLETE — more Echoes are confirmed to exist beyond Skinlink
-// (the original excerpt cut off there), just not yet found in source.
+// All 7 Echoes confirmed complete — Skinlink's entry (last, ending
+// with the same "Only selected once." closing pattern as every other
+// one-time Echo) was originally received mid-word-truncated, which led
+// to an incorrect "more exist beyond this" flag here. The follow-up
+// message completed Skinlink's text properly, and there's no actual
+// evidence anything follows it — that flag was a stale assumption
+// carried forward without re-checking, not a real gap. Corrected.
 
 // Living Network resolved a real ambiguity flagged when this file was
 // first built — confirmed via errata/FAQ consensus: without it, a
@@ -61,4 +66,4 @@ export const ECHOES = {
 export const ECHO_IDS = Object.keys(ECHOES);
 
 export const SUBMERSION_NOTE =
-  'Deepens a Technomancer\'s Resonance connection. First submersion sets Submersion Grade to 1; each subsequent submersion raises it by 1, capped at your Resonance rating. Cost: (10 + desired Submersion Grade) Karma, (Grade + 1) weeks. Each grade also grants an Echo. This catalog is INCOMPLETE — the source cut off mid-list; more Echoes exist beyond what\'s captured here.';
+  'Deepens a Technomancer\'s Resonance connection. First submersion sets Submersion Grade to 1; each subsequent submersion raises it by 1, capped at your Resonance rating. Cost: (10 + desired Submersion Grade) Karma, (Grade + 1) weeks. Each grade also grants an Echo — all 7 confirmed complete.';

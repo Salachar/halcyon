@@ -612,6 +612,14 @@ function bioware(overrides) {
   return { category: 'bioware', legality: null, image: null, ...overrides };
 }
 
+const biochromatic_tattoos = {
+  id: 'biochromatic_tattoos', label: 'Biochromatic Tattoos',
+  category: 'bioware', legality: null, image: null, tags: ['bioware'],
+  cost: 4000, availability: 7,
+  description: 'Pre-nanotech mood-reactive tattoos feeding directly into the nervous system, glowing in shifting colors tied to emotional intensity. Only installable at a facility-level location; removal typically costs additional Essence equal to the installation cost.',
+  stats: { essenceCost: 0.03 },
+};
+
 const adrenaline_pump = bioware({
   id: 'adrenaline_pump',
   label: 'Adrenaline Pump',
