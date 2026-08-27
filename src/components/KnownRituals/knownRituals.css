@@ -1,0 +1,107 @@
+.sr-kr-budget {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  padding: 0.5rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+}
+
+.sr-kr-budget-label {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.9rem;
+}
+
+.sr-kr-budget-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sr-orange-bright);
+}
+.sr-kr-budget-count--over {
+  color: var(--sr-red);
+}
+
+.sr-kr-note {
+  font-size: 0.75rem;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.sr-kr-row {
+  padding: 0.5rem 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.4rem;
+}
+.sr-kr-row:last-child {
+  margin-bottom: 0;
+}
+.sr-kr-row--known {
+  border-color: var(--sr-blue-dim);
+}
+
+.sr-kr-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-kr-row-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.85rem;
+}
+
+.sr-kr-row-meta {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--sr-text-dim);
+  margin-top: 0.15rem;
+}
+
+.sr-kr-row-description {
+  font-size: 0.78rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.sr-kr-reference {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-kr-reference-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sr-text-dim);
+  margin-bottom: 0.4rem;
+}
+
+.sr-kr-keyword-card {
+  padding: 0.45rem 0.7rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  margin-bottom: 0.3rem;
+}
+.sr-kr-keyword-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.8rem;
+}
+.sr-kr-keyword-description {
+  font-size: 0.75rem;
+  color: var(--sr-text-muted);
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}

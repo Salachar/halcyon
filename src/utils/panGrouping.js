@@ -1,4 +1,5 @@
 import { sumDeviceModifiersGlobal } from '@utils/deviceModifiers';
+import { arrayCompositedStats } from '@utils/vehicleEconomy';
 
 // Fixed category ordering for PAN display — Cyberware (sub-ordered by
 // body location: head -> eyes -> ears -> torso -> limbs), then
@@ -53,8 +54,18 @@ function cyberwareSubOrder(item) {
  * creation, and never through the normal promote flow — excluding it
  * here is what keeps "Make/Unset Primary" from ever rendering on its
  * row, no ID-specific check needed anywhere else.
+ *
+ * comm_sensor_array is a third, different reason again: a vehicle's
+ * Comms/Sensor Array only ever reaches a character's PAN by being
+ * deliberately slaved there ("Slave to Vehicle"), never promoted — a
+ * whole separate vehicle's Matrix presence can't sensibly become
+ * someone's own Primary persona. Its actual ASDF isn't a static catalog
+ * stat either — it's resolved dynamically from its own attached
+ * Comm Sensor Enhancement Modules, same "read live, not from the
+ * catalog" pattern as Living Persona, just pointed at
+ * arrayCompositedStats (vehicleEconomy.js) instead of Mental attributes.
  */
-export const MATRIX_CATEGORIES = ['commlink', 'cyberdeck', 'cyberjack', 'mtoc', 'rcc', 'living_persona'];
+export const MATRIX_CATEGORIES = ['commlink', 'cyberdeck', 'cyberjack', 'mtoc', 'rcc', 'living_persona', 'comm_sensor_array'];
 export const PRIMARY_CAPABLE_CATEGORIES = ['commlink', 'cyberdeck', 'mtoc', 'rcc'];
 
 /**
@@ -119,9 +130,12 @@ const LIVING_PERSONA_ATTRIBUTE_MAP = {
   firewall: 'willpower',
 };
 
-function resolveDeviceAttrValue(character, item, attr) {
+function resolveDeviceAttrValue(character, item, attr, instanceId) {
   if (item?.id === 'living_persona') {
     return character.getAttribute(LIVING_PERSONA_ATTRIBUTE_MAP[attr]);
+  }
+  if (item?.id === 'comms_sensor_array') {
+    return arrayCompositedStats(character, instanceId)[attr];
   }
   return item?.stats?.[attr];
 }
@@ -158,7 +172,7 @@ export function compositePersonaStats(character, matrixEntries, ALL_GEAR) {
     for (const [instanceId, entry] of matrixEntries) {
       if (!character.gearManager.isEffectivelyWireless(instanceId)) continue;
       const item = ALL_GEAR[entry.itemId];
-      const val = resolveDeviceAttrValue(character, item, attr);
+      const val = resolveDeviceAttrValue(character, item, attr, instanceId);
       if (val != null && val !== 0 && (best == null || val > best)) {
         best = val;
       }

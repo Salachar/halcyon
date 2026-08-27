@@ -10,7 +10,7 @@ import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurcha
 import { SKILLS } from '@data/character/skills';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import PurchaseModal from '@components/PurchaseModal';
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearMeleeThrown({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);

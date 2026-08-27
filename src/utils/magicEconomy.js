@@ -124,6 +124,17 @@ export function knownSpellBudget(character) {
   return 0; // adept, technomancer, mundane
 }
 
+// Rituals share the SAME allowance as Spells, not a separate pool —
+// confirmed: "Rituals still have to be picked separately, out of the
+// same allowance of known spells." This is what both KnownSpells and
+// KnownRituals actually check against, not character.spells.length or
+// character.rituals.length alone — either component checking only its
+// own list would silently disagree with the other about how much
+// budget is left.
+export function combinedSpellRitualCount(character) {
+  return character.spells.length + character.rituals.length;
+}
+
 // Complex Forms — Resonance x 2, technomancer-only, no sub-type split
 // the way Spells has to handle (Aspected magicians differ by aspect;
 // technomancers don't have an equivalent branching). Confirmed: "When

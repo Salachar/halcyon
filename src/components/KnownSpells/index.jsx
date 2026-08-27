@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { SPELLS } from '@data/character/spells';
 import { useCharacterManager } from '@hooks/useCharacterManager';
-import { knownSpellBudget } from '@utils/magicEconomy';
+import { knownSpellBudget, combinedSpellRitualCount } from '@utils/magicEconomy';
 
 import './knownSpells.css';
 
@@ -22,16 +22,19 @@ function durationLabel(d) {
 // Known Spells — soft-gated against knownSpellBudget (magicEconomy.js),
 // same "inform, don't block" pattern as everywhere else in this app.
 // Toggling past budget still works; the count just turns red, matching
-// Over Capacity's visual language elsewhere. Rituals aren't included —
-// no ritual data exists anywhere yet (see magicEconomy.js's own note),
-// this only ever shows the 73 real Spells entries.
+// Over Capacity's visual language elsewhere. The budget readout counts
+// combinedSpellRitualCount, not just character.spells.length — Rituals
+// share this same allowance, and a Ritual learned via KnownRituals has
+// to show up here too or the two components would silently disagree
+// about how much budget is left.
 export default function KnownSpells({ character }) {
   const { touch } = useCharacterManager();
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   const budget = knownSpellBudget(character);
   const known = character.spells;
-  const overBudget = known.length > budget;
+  const combinedSpent = combinedSpellRitualCount(character);
+  const overBudget = combinedSpent > budget;
 
   const toggleSpell = (spellId) => {
     if (known.includes(spellId)) {
@@ -59,9 +62,9 @@ export default function KnownSpells({ character }) {
   return (
     <div className="sr-known-spells">
       <div className="sr-ks-budget">
-        <span className="sr-ks-budget-label">Known Spells</span>
+        <span className="sr-ks-budget-label">Known Spells & Rituals</span>
         <span className={overBudget ? 'sr-ks-budget-count sr-ks-budget-count--over' : 'sr-ks-budget-count'}>
-          {known.length}/{budget}{overBudget ? ' — Over Budget' : ''}
+          {combinedSpent}/{budget}{overBudget ? ' — Over Budget' : ''}
         </span>
       </div>
 

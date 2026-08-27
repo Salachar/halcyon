@@ -15,7 +15,7 @@ import {
 
 import { formatDamageValue, formatAttackRatings, formatAvailability, formatCost } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearFirearmsExplosives({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);

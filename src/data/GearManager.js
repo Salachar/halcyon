@@ -50,6 +50,7 @@ class GearManager {
   _deviceMode = 'AR';
   _essenceAdjustments = []; // [{ amount, note }] — manual, stacks with the automatic gear-based deduction
   _weaponState = {}; // { [instanceId]: { selectedMode, loadedAmmoType, ammoContainer, currentAmmoCount } } — all optional, nothing here ever gates or blocks weapon use; see setWeaponState below
+  _vehicleState = {}; // { [instanceId]: { conditionMonitorDamage, currentSpeed, controlMode, driverName } } — same shape/philosophy as weaponState; see setVehicleState below
 
   constructor(data = {}) {
     this._gear = data.gear || {};
@@ -61,6 +62,7 @@ class GearManager {
     this._deviceMode = data.deviceMode || 'AR';
     this._essenceAdjustments = data.essenceAdjustments || [];
     this._weaponState = data.weaponState || {};
+    this._vehicleState = data.vehicleState || {};
   }
 
   // ---- Gear collection ----
@@ -306,8 +308,13 @@ class GearManager {
     return this._deviceDamage[instanceId] || 0;
   }
 
-  setDeviceDamage(instanceId, value) {
-    const max = this.matrixMonitorMaxFor(instanceId);
+  // maxOverride is optional — used by the Comms/Sensor Array, whose
+  // real max includes a +1-per-CSM redundancy bonus matrixMonitorMaxFor
+  // alone doesn't know about (that lives in vehicleEconomy.js, not
+  // here). Existing callers omit it and get the plain Matrix CM
+  // formula unchanged.
+  setDeviceDamage(instanceId, value, maxOverride) {
+    const max = maxOverride ?? this.matrixMonitorMaxFor(instanceId);
     this._deviceDamage = { ...this._deviceDamage, [instanceId]: Math.max(0, Math.min(max, value)) };
   }
 
@@ -360,6 +367,39 @@ class GearManager {
     };
   }
 
+  // ---- Vehicle State ----
+  // Same shape and philosophy as Weapon State above — per-instance,
+  // purely informational, nothing here gates or blocks vehicle use.
+  // controlMode is 'remote' | 'jumped-in' | 'manual' | undefined (no
+  // driver assigned) — confirmed only one controller at a time per
+  // vehicle/drone, but that's a fact for the player to track
+  // themselves, not something enforced in code.
+
+  getVehicleState(instanceId) {
+    return this._vehicleState[instanceId] || {};
+  }
+
+  setVehicleState(instanceId, updates) {
+    this._vehicleState = {
+      ...this._vehicleState,
+      [instanceId]: { ...this.getVehicleState(instanceId), ...updates },
+    };
+  }
+
+  // Condition Monitor = (Body/2) + 8, a single pool (not split Physical/
+  // Stun like a character's) — confirmed directly. Returns 0 for
+  // anything that isn't a real vehicle/drone with a Body stat, same
+  // "0 means don't show this" convention as matrixMonitorMaxFor.
+  vehicleMonitorMaxFor(instanceId) {
+    const entry = this._gear[instanceId];
+    if (!entry) return 0;
+    const item = ALL_GEAR[entry.itemId];
+    if (!item || (item.category !== 'vehicle' && item.category !== 'drone')) return 0;
+    const body = item.stats?.body;
+    if (body == null) return 0;
+    return Math.ceil(body / 2) + 8;
+  }
+
   toJSON() {
     return {
       gear: this._gear,
@@ -371,6 +411,7 @@ class GearManager {
       deviceMode: this._deviceMode,
       essenceAdjustments: this._essenceAdjustments,
       weaponState: this._weaponState,
+      vehicleState: this._vehicleState,
     };
   }
 }

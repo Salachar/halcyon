@@ -1,8 +1,11 @@
+import { useState } from 'react';
+
 import { SKILLS } from '@data/character/skills';
 import { useCharacterManager } from '@hooks/useCharacterManager';
-import Dice from '@components/Dice';
+import PoolBuilder from '@components/PoolBuilder';
+import ConfirmationModal from '@components/ConfirmationModal';
 
-import { buildSkillPool, karmaCost, hasAptitude } from '@utils/skillEconomy';
+import { karmaCost, hasAptitude } from '@utils/skillEconomy';
 import './skillRow.css';
 
 function capitalize(word) {
@@ -19,8 +22,23 @@ function capitalize(word) {
 // scratch work at creation). Once a rank was bought with Karma, the
 // stepper's − is disabled — undoing that deliberately goes through the
 // GM Grant/Correct actions (not built this pass), not a casual click.
+//
+// Rolling now goes through PoolBuilder (buildOpenPool) instead of
+// buildSkillPool directly — same retrofit MatrixActionsReference/
+// CombatActionsReference/VehicleActionsReference already went through.
+// buildOpenPool never returns null the way buildSkillPool did for an
+// untrainable skill at rank 0 — it shows a real pool with the -1
+// untrained penalty baked in, matching this app's "nothing should be
+// locked down" principle. But the untrained STATE still deserves a
+// clear marker, not a silent penalty buried in the pool breakdown — an
+// "Untrained" button stands in for the roller until confirmed, opening
+// a plain warning modal first. Confirming just reveals PoolBuilder for
+// the rest of this component's lifetime; buying a rank makes the gate
+// disappear entirely on its own (isUntrained requires rank === 0).
 export default function SkillRow({ character, skillId }) {
   const { touch } = useCharacterManager();
+  const [untrainedConfirmed, setUntrainedConfirmed] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const def = SKILLS[skillId];
   const rank = character.getSkillRank(skillId);
   const usingPoints = character.skillPointsRemaining > 0;
@@ -63,9 +81,10 @@ export default function SkillRow({ character, skillId }) {
     touch();
   };
 
-  const pool = buildSkillPool(character, skillId);
   const attrLabel = capitalize(def.primaryAttribute) + (def.secondaryAttribute ? ` / ${capitalize(def.secondaryAttribute)}` : '');
   const costLabel = usingPoints ? '1 pt' : `${nextCost} karma`;
+  const isUntrained = rank === 0 && !def.untrained;
+  const showGate = isUntrained && !untrainedConfirmed;
 
   return (
     <div className="sr-skill-row">
@@ -81,13 +100,28 @@ export default function SkillRow({ character, skillId }) {
         <span className="sr-skill-row-cost">{canIncrease ? costLabel : ''}</span>
       </div>
 
-      {pool ? (
-        <div className="sr-skill-row-dice">
-          <Dice pool={pool} />
-        </div>
-      ) : (
-        <div className="sr-skill-row-untrainable">Untrained — can't attempt</div>
-      )}
+      <div className="sr-skill-row-dice">
+        {showGate ? (
+          <button className="sr-btn sr-btn--secondary sr-skill-row-untrained-btn" onClick={() => setConfirmModalOpen(true)}>
+            Untrained
+          </button>
+        ) : (
+          <PoolBuilder character={character} defaultSkillId={skillId} defaultAttribute={def.primaryAttribute} />
+        )}
+      </div>
+
+      <ConfirmationModal
+        open={confirmModalOpen}
+        title="Untrained Skill"
+        message={`You have no ranks in ${def.label} and it can't normally be attempted untrained. You can still try — it'll roll at a penalty. Attempt anyway?`}
+        confirmLabel="Attempt Anyway"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          setUntrainedConfirmed(true);
+          setConfirmModalOpen(false);
+        }}
+        onCancel={() => setConfirmModalOpen(false)}
+      />
     </div>
   );
 }

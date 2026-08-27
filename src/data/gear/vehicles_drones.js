@@ -433,6 +433,7 @@ const gmc_riverine = V({
     pilot: 4,
     sensor: 4,
     seats: 8,
+    facilityCapacityProvided: 3,
   },
 });
 

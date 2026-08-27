@@ -8,7 +8,7 @@ import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurcha
 import { formatAvailability, formatCost } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
 import { MTOC_STANDARD_CAPABILITIES } from '@data/gear/matrix_devices';
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearMatrixDevices({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);

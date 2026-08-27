@@ -10,7 +10,7 @@ import { gearByTag } from '@utils/gearTags';
 import { SENSOR_PACKAGE_MAX_RATING, SENSOR_FUNCTIONS } from '@data/gear/sensors_security_survival';
 import { resolveDeviceRating } from '@utils/augmentationEconomy';
 
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearSensorsSecuritySurvival({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);

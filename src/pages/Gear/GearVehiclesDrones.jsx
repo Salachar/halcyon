@@ -7,7 +7,7 @@ import { useCharacterManager } from '@hooks/useCharacterManager';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 function formatHandling(i) {
   const h = i.stats.handling;

@@ -15,6 +15,7 @@ import { GEAR_ARMOR_ELECTRONICS } from './armor_electronics';
 import { GEAR_FIREARMS_EXPLOSIVES } from './firearms_explosives';
 import { GEAR_MATRIX_DEVICES } from './matrix_devices';
 import { GEAR_MAGICAL_GOODS } from './magical_goods';
+import { GEAR_ADDITIONS } from './additions';
 
 export {
   GEAR_MELEE_THROWN,
@@ -26,6 +27,7 @@ export {
   GEAR_FIREARMS_EXPLOSIVES,
   GEAR_MATRIX_DEVICES,
   GEAR_MAGICAL_GOODS,
+  GEAR_ADDITIONS,
 };
 
 export const ALL_GEAR = {
@@ -38,6 +40,7 @@ export const ALL_GEAR = {
   ...GEAR_FIREARMS_EXPLOSIVES,
   ...GEAR_MATRIX_DEVICES,
   ...GEAR_MAGICAL_GOODS,
+  ...GEAR_ADDITIONS,
 };
 
 export const ALL_GEAR_IDS = Object.keys(ALL_GEAR);

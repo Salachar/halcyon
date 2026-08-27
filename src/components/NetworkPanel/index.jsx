@@ -10,6 +10,7 @@ import PersonaHeader from './PersonaHeader';
 import PersonaStatsBlock from './PersonaStatsBlock';
 import MatrixDevicesList from './MatrixDevicesList';
 import CategorySection from './CategorySection';
+import SlaveToVehicleModal from './SlaveToVehicleModal';
 
 import './networkPanel.css';
 
@@ -24,6 +25,7 @@ export default function NetworkPanel({ character }) {
   const [expandedId, setExpandedId] = useState(null);
   const [attachContext, setAttachContext] = useState(null); // { instanceId, pool }
   const [pendingSlave, setPendingSlave] = useState(null); // instanceId — awaiting Living Network confirmation
+  const [slaveToVehicleOpen, setSlaveToVehicleOpen] = useState(false);
 
   const gear = character.gearManager.gear;
   const pan = character.gearManager.pan;
@@ -114,7 +116,10 @@ export default function NetworkPanel({ character }) {
         <p className="sr-pan-hint">No Primary device set — promote a commlink or cyberdeck from Slavable below.</p>
       )}
 
-      <div className="sr-pan-section-title">Slaved ({allSlavedEntries.length})</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span className="sr-pan-section-title">Slaved ({allSlavedEntries.length})</span>
+        <button className="sr-btn sr-btn--secondary" onClick={() => setSlaveToVehicleOpen(true)}>Slave to Vehicle</button>
+      </div>
       {allSlavedEntries.length === 0 && !primaryItem ? (
         <p className="sr-pan-hint">Nothing slaved yet.</p>
       ) : (
@@ -209,6 +214,18 @@ export default function NetworkPanel({ character }) {
             setPendingSlave(null);
           }}
           onCancel={() => setPendingSlave(null)}
+        />
+      )}
+
+      {slaveToVehicleOpen && (
+        <SlaveToVehicleModal
+          character={character}
+          onSlave={(arrayInstanceId) => {
+            character.gearManager.addSlavedDevice(arrayInstanceId);
+            touch();
+            setSlaveToVehicleOpen(false);
+          }}
+          onClose={() => setSlaveToVehicleOpen(false)}
         />
       )}
     </div>

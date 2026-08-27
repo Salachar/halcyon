@@ -14,6 +14,7 @@ import QualityCard from '@components/QualityCard';
 import QualityCreationModal from '@components/QualityCreationModal';
 import QualityAdvancementModal from '@components/QualityAdvancementModal';
 import KnownSpells from '@components/KnownSpells';
+import KnownRituals from '@components/KnownRituals';
 import BoundSpirits from '@components/BoundSpirits';
 import KnownComplexForms from '@components/KnownComplexForms';
 import CompiledSprites from '@components/CompiledSprites';
@@ -219,6 +220,14 @@ export default function CharacterSheet({ character }) {
         <CollapsibleSection id="sheet-spells" title="Spells" defaultOpen>
           <Section>
             <KnownSpells character={character} />
+          </Section>
+        </CollapsibleSection>
+      )}
+
+      {showSpells && (
+        <CollapsibleSection id="sheet-rituals" title="Rituals" defaultOpen>
+          <Section>
+            <KnownRituals character={character} />
           </Section>
         </CollapsibleSection>
       )}

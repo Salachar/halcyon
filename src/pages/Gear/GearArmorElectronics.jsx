@@ -9,7 +9,7 @@ import { formatAvailability, formatCost, formatCapacity } from '@utils/gearForma
 import { gearByTag } from '@utils/gearTags';
 import { resolveDeviceRating } from '@utils/augmentationEconomy';
 
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearArmorElectronics({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);

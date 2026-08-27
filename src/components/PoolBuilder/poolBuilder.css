@@ -5,6 +5,38 @@
   border-radius: var(--sr-radius);
 }
 
+.sr-pool-builder-collapsed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sr-pool-builder-summary-label {
+  font-size: 0.8rem;
+  color: var(--sr-text-muted);
+}
+
+.sr-pool-builder-edit-btn--changed {
+  position: relative;
+}
+.sr-pool-builder-edit-btn--changed::after {
+  content: '';
+  position: absolute;
+  top: 0.05rem;
+  right: 0.05rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background-color: var(--sr-orange-bright);
+}
+
+.sr-pool-builder-edit {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--sr-hairline);
+}
+
 .sr-pool-builder-row {
   display: flex;
   gap: 0.5rem;

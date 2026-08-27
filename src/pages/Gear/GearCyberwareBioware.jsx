@@ -8,7 +8,7 @@ import { gearByTag } from '@utils/gearTags';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import PurchaseModal from '@components/PurchaseModal';
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearCyberwareBioware({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);

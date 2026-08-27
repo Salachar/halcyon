@@ -51,6 +51,7 @@ class Character {
 
   _qualities = []; // [{ qualityId, level?, selection? }] — qualityId matches QUALITIES ids
   _spells = []; // spell ids known, matching SPELLS ids
+  _rituals = []; // [ritualId] — flat, same shape as _spells; shares its allowance, see combinedSpellRitualCount (magicEconomy.js)
   _powers = []; // [{ powerId, level?, selection? }] — powerId matches POWERS ids
   _initiateGrade = 0; // magicians — capped at Magic rating, see magicEconomy.js
   _metamagics = []; // [{ metamagicId }] — NOT deduplicated, Power Point is repeatable
@@ -109,6 +110,7 @@ class Character {
 
     this._qualities = data.qualities || [];
     this._spells = data.spells || [];
+    this._rituals = data.rituals || [];
     this._powers = data.powers || [];
     this._initiateGrade = typeof data.initiateGrade === 'number' ? data.initiateGrade : 0;
     this._metamagics = data.metamagics || [];
@@ -297,6 +299,14 @@ class Character {
     this._spells = this._spells.filter((id) => id !== spellId);
   }
 
+  get rituals() { return this._rituals; }
+  addRitual(ritualId) {
+    if (!this._rituals.includes(ritualId)) this._rituals.push(ritualId);
+  }
+  removeRitual(ritualId) {
+    this._rituals = this._rituals.filter((id) => id !== ritualId);
+  }
+
   get powers() { return this._powers; }
   addPower(powerId, extra = {}) {
     this._powers.push({ powerId, ...extra });
@@ -478,6 +488,7 @@ class Character {
       knowledgeSkills: this.knowledgeSkills,
       qualities: this.qualities,
       spells: this.spells,
+      rituals: this.rituals,
       powers: this.powers,
       initiateGrade: this.initiateGrade,
       metamagics: this.metamagics,

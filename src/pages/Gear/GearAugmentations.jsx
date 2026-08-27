@@ -11,7 +11,7 @@ import PurchaseModal from '@components/PurchaseModal';
 import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
 import { resolveDeviceRating } from '@utils/augmentationEconomy';
 
-import './gearBuyButton.css';
+import '@styles/gearBuyButton.css';
 
 export default function GearAugmentations({ character }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
