@@ -18,7 +18,24 @@ function capitalize(word) {
 // `initialConfig` lets a caller override the starting rating/capacity
 // (used by the cyberlimb Enhance flow to open pre-filled at "next
 // rating" rather than the item's raw minimum) — omit it for normal use.
-export default function PurchaseModal({ item, character, initialConfig, onPurchase, onFreeGrab, onClose }) {
+//
+// The rating/capacity/units input is no longer hard-clamped to
+// [min, max] — [min, max] shows as a plain reference note beside the
+// field instead, and the player can type anything, including outside
+// that range. This matters for items like Ram Plate (cost = the
+// vehicle's own Body x 250¥) where "Rating" is really just a stand-in
+// for a number that has no fixed catalog range at all — a hard clamp
+// there would have been actively wrong, not just restrictive. Applied
+// as a general rule for every configurable item, not just those, same
+// "inform, don't block" instinct as everywhere else in this app.
+// `vehicle` is optional context (passed through from Market/MarketModal
+// when opened from a vehicle-attach flow) — shown as a small reference
+// line next to a rating input whenever the item's ratingLabel matches a
+// real stat on that vehicle (Ram Plate's "Body" label -> vehicle.stats.
+// body). Purely informational, same as everywhere else in this app —
+// never auto-fills the input or gates the value, just tells the player
+// what number to type.
+export default function PurchaseModal({ item, character, vehicle, initialConfig, onPurchase, onFreeGrab, onClose }) {
   const configurable = isConfigurable(item);
   const gradeable = isGradeable(item);
   const installChoice = needsInstallChoice(item);
@@ -35,6 +52,7 @@ export default function PurchaseModal({ item, character, initialConfig, onPurcha
   const grabbable = character != null && affordableEssence;
 
   const [min, max] = configRange(item);
+  const hasBoundedRange = min != null && max != null && Number.isFinite(max);
 
   // Explicit, not Object.keys(config)[0] — config can now carry a
   // rating/capacity/units key AND a grade key AND an installLocation
@@ -61,14 +79,22 @@ export default function PurchaseModal({ item, character, initialConfig, onPurcha
               <input
                 type="number"
                 className="sr-number-input"
-                min={min}
-                max={max}
                 value={config[configKey]}
                 onChange={(e) => {
-                  const v = Math.max(min, Math.min(max, Number(e.target.value) || min));
+                  const v = e.target.value === '' ? min : Number(e.target.value);
                   setConfig((c) => ({ ...c, [configKey]: v }));
                 }}
               />
+              {(min != null || hasBoundedRange) && (
+                <span className="sr-modal-config-range-note">
+                  Typical range: {min}{hasBoundedRange ? `–${max}` : '+'}
+                </span>
+              )}
+              {vehicle && item.ratingLabel && vehicle.stats?.[item.ratingLabel.toLowerCase()] != null && (
+                <span className="sr-modal-config-range-note">
+                  This vehicle's {item.ratingLabel}: <strong>{vehicle.stats[item.ratingLabel.toLowerCase()]}</strong>
+                </span>
+              )}
             </div>
           )}
 

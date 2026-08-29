@@ -8,8 +8,14 @@ export function isConfigurable(item) {
   return item.costPerRating != null || item.costPerCapacity != null || item.costPerUnit != null;
 }
 
+// ratingLabel is a small, additive override — items using the
+// costPerRating axis for something that isn't conceptually "Rating"
+// (Ram Plate's cost scales off the vehicle's own Body, chosen by hand
+// in the same input) can set ratingLabel: 'Body' to relabel the field
+// without needing a whole separate config axis. Every existing item
+// without this field keeps showing "Rating" exactly as before.
 export function configLabel(item) {
-  if (item.costPerRating != null) return 'Rating';
+  if (item.costPerRating != null) return item.ratingLabel || 'Rating';
   if (item.costPerCapacity != null) return 'Capacity';
   if (item.costPerUnit != null) return item.unitLength ? `Length (× ${item.unitLength}m)` : `Quantity (× ${item.unitQuantity ?? 1})`;
   return null;

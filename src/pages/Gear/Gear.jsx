@@ -1,35 +1,12 @@
-import { useState } from 'react';
-
-import { Page, PageHeader, Tabs } from '@components/PageComponents';
+import { Page, PageHeader } from '@components/PageComponents';
 import { useCharacterManager } from '@hooks/useCharacterManager';
-import GearSearch from './GearSearch';
+import Market from '@components/Market';
 
-import GearMeleeThrown from './GearMeleeThrown';
-import GearFirearmsExplosives from './GearFirearmsExplosives';
-import GearArmorElectronics from './GearArmorElectronics';
-import GearSensorsSecuritySurvival from './GearSensorsSecuritySurvival';
-import GearAugmentations from './GearAugmentations';
-import GearCyberwareBioware from './GearCyberwareBioware';
-import GearVehiclesDrones from './GearVehiclesDrones';
-import GearMatrixDevices from './GearMatrixDevices';
-import GearMagicalGoods from './GearMagicalGoods';
-import GearAdditions from './GearAdditions';
-
-const TABS = [
-  { key: 'melee', label: 'Melee/Thrown' },
-  { key: 'firearms', label: 'Firearms/Explosives' },
-  { key: 'armor', label: 'Armor/Electronics' },
-  { key: 'sensors', label: 'Sensors/Security/Survival' },
-  { key: 'augmentations', label: 'Headware/Eyeware/Bodyware' },
-  { key: 'cyberware', label: 'Cyberlimbs/Bioware' },
-  { key: 'vehicles', label: 'Vehicles/Drones' },
-  { key: 'additions', label: 'Vehicle Additions' },
-  { key: 'matrix', label: 'Matrix Devices' },
-  { key: 'magical_goods', label: 'Magical Goods' },
-];
-
+// Now just a thin shell — Market (components/Market) owns the actual
+// tabs/search/content, extracted so it's usable anywhere (a full page
+// here, or dropped into MarketModal for the "buy without leaving the
+// attach flow" case) rather than being tied to this one page.
 export default function Gear() {
-  const [activeTab, setActiveTab] = useState('melee');
   const { currentCharacter } = useCharacterManager();
 
   return (
@@ -38,21 +15,7 @@ export default function Gear() {
         title="Gear"
         subtitle="Browse everything for sale — tap $ on an item to configure and buy"
       />
-
-      <GearSearch />
-
-      <Tabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
-
-      {activeTab === 'melee' && <GearMeleeThrown character={currentCharacter} />}
-      {activeTab === 'firearms' && <GearFirearmsExplosives character={currentCharacter} />}
-      {activeTab === 'armor' && <GearArmorElectronics character={currentCharacter} />}
-      {activeTab === 'sensors' && <GearSensorsSecuritySurvival character={currentCharacter} />}
-      {activeTab === 'augmentations' && <GearAugmentations character={currentCharacter} />}
-      {activeTab === 'cyberware' && <GearCyberwareBioware character={currentCharacter} />}
-      {activeTab === 'vehicles' && <GearVehiclesDrones character={currentCharacter} />}
-      {activeTab === 'additions' && <GearAdditions character={currentCharacter} />}
-      {activeTab === 'matrix' && <GearMatrixDevices character={currentCharacter} />}
-      {activeTab === 'magical_goods' && <GearMagicalGoods character={currentCharacter} />}
+      <Market character={currentCharacter} />
     </Page>
   );
 }

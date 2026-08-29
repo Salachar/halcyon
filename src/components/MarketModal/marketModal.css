@@ -1,0 +1,5 @@
+.sr-market-modal {
+  width: 90vw !important;
+  max-height: 90vh;
+  overflow-y: auto;
+}

@@ -43,6 +43,12 @@ export const VEHICLE_ACTIONS = {
     threshold: 'Normal ranged attack rules, plus Speed Interval penalties',
     description: "Firing a weapon mounted on a vehicle — Engineering + Logic, not the weapon's own normal skill. Otherwise resolves as a standard ranged attack, with the current Speed Interval penalty applied on top.",
   },
+  mechanical_arm_melee: {
+    label: 'Mechanical Arm Melee Attack',
+    skill: 'close_combat', attribute: 'agility',
+    threshold: 'Normal melee attack rules',
+    description: "A vehicle-mounted Mechanical Arm making a melee attack — only usable if remotely operated or the vehicle has a [Close Combat] Targeting autosoft. Confirmed as resolved with Close Combat + Sensor, but Sensor is a vehicle stat, not a character attribute PoolBuilder can pull automatically — the default pool shown here (Close Combat + Agility) is a placeholder; swap the attribute value for the vehicle's actual Sensor rating using PoolBuilder's own Add Modifier control before rolling. Attack Rating = Sensor + Arm Strength (Arm Strength = vehicle Body/2, rounded up, capped by the arm's own size tier).",
+  },
 };
 
 export const VEHICLE_ACTION_IDS = Object.keys(VEHICLE_ACTIONS);

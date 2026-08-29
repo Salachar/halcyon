@@ -1,15 +1,19 @@
 import { useState } from 'react';
 
-import { Section, GearTable, Callout } from '@components/PageComponents';
+import { GearTable } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
 import PurchaseModal from '@components/PurchaseModal';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost } from '@utils/gearFormat';
+import { formatHandling, formatSeats, formatAcceleration, formatSpeedInterval, formatTopSpeed } from '@utils/vehicleGearFormat';
 import { gearByTag } from '@utils/gearTags';
 import '@styles/gearBuyButton.css';
 
-export default function GearMagicalGoods({ character }) {
+// Split out of the former GearVehiclesDrones.jsx (Vehicles / Watercraft
+// / Drones), matching the vehicles.js/watercraft.js/drones.js data
+// split.
+export default function GearDrones({ character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();
 
@@ -33,21 +37,17 @@ export default function GearMagicalGoods({ character }) {
     },
   };
 
-  const focusColumns = [
-    { label: 'Focus', render: (i) => i.label },
-    { label: 'Bonding Cost (Karma)', render: (i) => `Force × ${i.stats.bondingKarmaPerRating}` },
-    { label: 'Avail', render: formatAvailability },
-    { label: 'Cost', render: formatCost },
-    buyColumn,
-  ];
-  const formulaColumns = [
-    { label: 'Formula', render: (i) => i.label },
-    { label: 'Avail', render: formatAvailability },
-    { label: 'Cost', render: formatCost },
-    buyColumn,
-  ];
-  const supplyColumns = [
-    { label: 'Supply', render: (i) => i.label },
+  const vehicleColumns = [
+    { label: 'Drone', render: (i) => i.label },
+    { label: 'Handling', render: formatHandling },
+    { label: 'Accel', render: formatAcceleration },
+    { label: 'Speed Int.', render: formatSpeedInterval },
+    { label: 'Top Speed', render: formatTopSpeed },
+    { label: 'Body', render: (i) => i.stats.body },
+    { label: 'Armor', render: (i) => i.stats.armor },
+    { label: 'Pilot', render: (i) => i.stats.pilot },
+    { label: 'Sensor', render: (i) => i.stats.sensor },
+    { label: 'Seats', render: formatSeats },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
@@ -55,30 +55,27 @@ export default function GearMagicalGoods({ character }) {
 
   return (
     <>
-      <CollapsibleSection id="gear-magic-foci" title="Foci" defaultOpen>
-        <GearTable items={gearByTag('focus')} columns={focusColumns} />
-        <Section>
-          <Callout title="Bonding" variant="note">
-            Bonding cost is Karma, not Nuyen — spend it through the normal Karma controls on the character sheet once you decide to bond. Owning an unbonded focus is allowed; it just doesn't do anything yet.
-          </Callout>
-          <Callout title="Sub-Types" variant="note">
-            Several focus categories have multiple named sub-effects (Enchanting: Alchemical/Disenchanting; Metamagic: Centering/Flexible Signature/Masking/Spell Shaping; Spell: four types, e.g. Counterspelling) chosen when the focus is created — pricing is identical within a category regardless of which is picked, so they're not separate catalog entries here.
-          </Callout>
-        </Section>
+      <CollapsibleSection id="gear-drones-micro" title="Microdrones">
+        <GearTable items={gearByTag('microdrone')} columns={vehicleColumns} />
       </CollapsibleSection>
-
-      <CollapsibleSection id="gear-magic-formulae" title="Formulae">
-        <GearTable items={gearByTag('formula')} columns={formulaColumns} />
+      <CollapsibleSection id="gear-drones-mini" title="Minidrones">
+        <GearTable items={gearByTag('minidrone')} columns={vehicleColumns} />
       </CollapsibleSection>
-
-      <CollapsibleSection id="gear-magic-supplies" title="Magical Supplies">
-        <GearTable items={gearByTag('magical_supply')} columns={supplyColumns} />
+      <CollapsibleSection id="gear-drones-small" title="Small Drones">
+        <GearTable items={gearByTag('small_drone')} columns={vehicleColumns} />
+      </CollapsibleSection>
+      <CollapsibleSection id="gear-drones-medium" title="Medium Drones">
+        <GearTable items={gearByTag('medium_drone')} columns={vehicleColumns} />
+      </CollapsibleSection>
+      <CollapsibleSection id="gear-drones-large" title="Large Drones">
+        <GearTable items={gearByTag('large_drone')} columns={vehicleColumns} />
       </CollapsibleSection>
 
       {purchaseItem && (
         <PurchaseModal
           item={purchaseItem}
           character={character}
+          vehicle={vehicle}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

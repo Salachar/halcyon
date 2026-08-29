@@ -14,7 +14,7 @@ import '@styles/gearBuyButton.css';
 // to actually BUY one first. Same shape as every other GearXXX.jsx
 // Market tab (GearMagicalGoods, GearMatrixDevices) — buy it here, then
 // attach it to a mothership vehicle from the Vehicles tab.
-export default function GearFacilities({ character }) {
+export default function GearFacilities({  character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();
 
@@ -104,6 +104,7 @@ export default function GearFacilities({ character }) {
         <PurchaseModal
           item={purchaseItem}
           character={character}
+          vehicle={vehicle}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

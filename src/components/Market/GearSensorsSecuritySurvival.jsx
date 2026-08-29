@@ -7,11 +7,12 @@ import { useCharacterManager } from '@hooks/useCharacterManager';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { formatAvailability, formatCost, formatCapacity } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
+import { SENSOR_PACKAGE_MAX_RATING, SENSOR_FUNCTIONS } from '@data/gear/sensors_security_survival';
 import { resolveDeviceRating } from '@utils/augmentationEconomy';
 
 import '@styles/gearBuyButton.css';
 
-export default function GearArmorElectronics({ character }) {
+export default function GearSensorsSecuritySurvival({  character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();
 
@@ -41,31 +42,25 @@ export default function GearArmorElectronics({ character }) {
     { label: 'Cost', render: formatCost },
     buyColumn,
   ];
-  const armorColumns = [
-    { label: 'Item', render: (i) => i.label },
-    { label: 'Defense Rating', render: (i) => (i.stats.defenseRating != null ? `+${i.stats.defenseRating}` : '—') },
-    { label: 'Capacity', render: formatCapacity },
-    { label: 'Avail', render: formatAvailability },
-    { label: 'Cost', render: formatCost },
-    buyColumn,
-  ];
-  const deviceColumns = [
+  const housingColumns = [
     { label: 'Device', render: (i) => i.label },
+    { label: 'Capacity', render: formatCapacity },
     { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
   ];
-  const opticalColumns = [
+  const securityColumns = [
     { label: 'Item', render: (i) => i.label },
-    { label: 'Capacity', render: formatCapacity },
+    { label: 'Structure', render: (i) => i.stats.structure ?? '—' },
+    { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
   ];
-  const idColumns = [
+  const toolColumns = [
     { label: 'Item', render: (i) => i.label },
-    { label: 'Max Value', render: (i) => (i.stats.maxValue != null ? `${i.stats.maxValue.toLocaleString()}¥` : '—') },
+    { label: 'DV', render: (i) => i.stats.damageValue ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
@@ -73,49 +68,45 @@ export default function GearArmorElectronics({ character }) {
 
   return (
     <>
-      <CollapsibleSection id="gear-ae-clothing" title="Clothing">
-        <GearTable items={gearByTag('clothing')} columns={basicColumns} />
+      <CollapsibleSection id="gear-sss-auditory" title="Auditory Devices">
+        <GearTable items={gearByTag('auditory')} columns={housingColumns} />
       </CollapsibleSection>
 
-      <CollapsibleSection id="gear-ae-armor" title="Armor">
-        <GearTable items={gearByTag('armor_item')} columns={armorColumns} />
-        <Section title="Armor Mods">
-          <GearTable items={gearByTag('armor_mod')} columns={armorColumns} />
-          <Callout title="Source Note" variant="note">Four of these five mods are missing an Availability value in the book's own table — left blank rather than guessed.</Callout>
+      <CollapsibleSection id="gear-sss-sensors" title="Sensors">
+        <GearTable items={gearByTag('sensor')} columns={housingColumns} />
+        <Section title="Sensor Packages (Max Rating by Housing)">
+          <table className="sr-table">
+            <thead><tr><th>Housing</th><th>Max Rating</th></tr></thead>
+            <tbody>{SENSOR_PACKAGE_MAX_RATING.map((p) => <tr key={p.housing}><td>{p.housing}</td><td>{p.maxRating}</td></tr>)}</tbody>
+          </table>
         </Section>
-        <Section title="Helmets & Shields">
-          <GearTable items={gearByTag('helmet_shield')} columns={armorColumns} />
+        <Section title="Sensor Functions">
+          <table className="sr-table">
+            <thead><tr><th>Function</th><th>Max Range</th></tr></thead>
+            <tbody>{SENSOR_FUNCTIONS.map((f) => <tr key={f.label}><td>{f.label}</td><td>{typeof f.maxRange === 'number' ? `${f.maxRange}m` : (f.maxRange ?? '—')}</td></tr>)}</tbody>
+          </table>
+          <Callout title="Not Separate SKUs" variant="note">
+            Functions above cost the same as whatever Single Sensor / Sensor Array slot they're loaded into — they're a configuration choice, not their own priced item.
+          </Callout>
         </Section>
       </CollapsibleSection>
 
-      <CollapsibleSection id="gear-ae-accessories" title="Electronics Accessories">
-        <GearTable items={gearByTag('electronics_accessory')} columns={deviceColumns} />
+      <CollapsibleSection id="gear-sss-security" title="Security Devices">
+        <GearTable items={gearByTag('security')} columns={securityColumns} />
       </CollapsibleSection>
 
-      <CollapsibleSection id="gear-ae-rfid" title="RFID Tags">
-        <GearTable items={gearByTag('rfid')} columns={deviceColumns} />
+      <CollapsibleSection id="gear-sss-breaking" title="Breaking and Entering Gear">
+        <GearTable items={gearByTag('breaking_entering')} columns={toolColumns} />
       </CollapsibleSection>
 
-      <CollapsibleSection id="gear-ae-comms" title="Communications and Countermeasures">
-        <GearTable items={gearByTag('comms_countermeasure')} columns={basicColumns} />
+      <CollapsibleSection id="gear-sss-chemicals" title="Industrial Chemicals">
+        <GearTable items={gearByTag('industrial_chemical')} columns={toolColumns} />
       </CollapsibleSection>
 
-      <CollapsibleSection id="gear-ae-software" title="Software">
-        <GearTable items={gearByTag('software')} columns={basicColumns} />
-      </CollapsibleSection>
-
-      <CollapsibleSection id="gear-ae-id" title="ID and Credit">
-        <GearTable items={gearByTag('id_credit')} columns={idColumns} />
-      </CollapsibleSection>
-
-      <CollapsibleSection id="gear-ae-tools" title="Tools">
-        <GearTable items={gearByTag('electronics_tool')} columns={basicColumns} />
-      </CollapsibleSection>
-
-      <CollapsibleSection id="gear-ae-optical" title="Optical and Imaging Devices">
-        <GearTable items={gearByTag('optical_device')} columns={opticalColumns} />
-        <Section title="Visual Enhancements">
-          <GearTable items={gearByTag('visual_enhancement')} columns={opticalColumns} />
+      <CollapsibleSection id="gear-sss-survival" title="Survival Gear">
+        <GearTable items={gearByTag('survival')} columns={toolColumns} />
+        <Section title="Grapple Gun Family">
+          <GearTable items={gearByTag('grapple_gun_family')} columns={basicColumns} />
         </Section>
       </CollapsibleSection>
 
@@ -123,6 +114,7 @@ export default function GearArmorElectronics({ character }) {
         <PurchaseModal
           item={purchaseItem}
           character={character}
+          vehicle={vehicle}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

@@ -17,7 +17,7 @@ import { formatDamageValue, formatAttackRatings, formatAvailability, formatCost 
 import { gearByTag } from '@utils/gearTags';
 import '@styles/gearBuyButton.css';
 
-export default function GearFirearmsExplosives({ character }) {
+export default function GearFirearmsExplosives({  character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();
 
@@ -150,6 +150,7 @@ export default function GearFirearmsExplosives({ character }) {
         <PurchaseModal
           item={purchaseItem}
           character={character}
+          vehicle={vehicle}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

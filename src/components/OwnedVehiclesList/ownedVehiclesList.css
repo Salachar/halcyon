@@ -438,3 +438,9 @@
   color: var(--sr-text-dim);
   margin-top: 0.2rem;
 }
+
+.sr-picker-market-row {
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--sr-hairline);
+}

@@ -3,14 +3,17 @@ import { useState } from 'react';
 import { Section, GearTable, Callout } from '@components/PageComponents';
 import { CollapsibleSection } from '@components/CollapsibleSection';
 
-import { formatAvailability, formatCost, formatEssence, formatCapacity, formatDamageValue, formatAttackRatings } from '@utils/gearFormat';
+import { formatAvailability, formatCost, formatEssence, formatCapacity } from '@utils/gearFormat';
 import { gearByTag } from '@utils/gearTags';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import PurchaseModal from '@components/PurchaseModal';
+import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
+import { resolveDeviceRating } from '@utils/augmentationEconomy';
+
 import '@styles/gearBuyButton.css';
 
-export default function GearCyberwareBioware({ character }) {
+export default function GearAugmentations({  character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();
 
@@ -34,27 +37,17 @@ export default function GearCyberwareBioware({ character }) {
     },
   };
 
-  const limbColumns = [
-    { label: 'Limb', render: (i) => i.label },
-    { label: 'Essence', render: formatEssence },
-    { label: 'Capacity', render: formatCapacity },
+  const basicColumns = [
+    { label: 'Item', render: (i) => i.label },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
   ];
-  const implantWeaponColumns = [
-    { label: 'Weapon', render: (i) => i.label },
-    { label: 'Essence', render: formatEssence },
-    { label: 'Capacity', render: formatCapacity },
-    { label: 'DV', render: formatDamageValue },
-    { label: 'Attack Ratings (C/N/M/F/E)', render: formatAttackRatings },
-    { label: 'Avail', render: formatAvailability },
-    { label: 'Cost', render: formatCost },
-    buyColumn,
-  ];
-  const bioColumns = [
+  const headwareColumns = [
     { label: 'Item', render: (i) => i.label },
     { label: 'Essence', render: formatEssence },
+    { label: 'Capacity', render: formatCapacity },
+    { label: 'Device Rating', render: (i) => resolveDeviceRating(i, {}) ?? '—' },
     { label: 'Avail', render: formatAvailability },
     { label: 'Cost', render: formatCost },
     buyColumn,
@@ -62,35 +55,45 @@ export default function GearCyberwareBioware({ character }) {
 
   return (
     <>
-      <CollapsibleSection id="gear-cw-limbs" title="Cyberlimbs" defaultOpen>
-        <GearTable items={gearByTag('cyberlimb')} columns={limbColumns} />
-        <Section title="Cyberlimb Accessories">
-          <GearTable items={gearByTag('cyberlimb_accessory')} columns={limbColumns} />
-        </Section>
+      <Callout title="Grades" variant="critical">
+        {Object.entries(AUGMENTATION_GRADES).map(([grade, m]) => (
+          <div key={grade} style={{ marginBottom: '0.25rem' }}>
+            <strong style={{ textTransform: 'capitalize' }}>{grade}</strong>: Essence ×{m.essenceMultiplier}, Cost ×{m.costMultiplier}, Availability {m.availabilityModifier >= 0 ? '+' : ''}{m.availabilityModifier}
+          </div>
+        ))}
+        Applies to every item below except Biotech Basics — grade is chosen when buying, in the purchase modal.
+      </Callout>
+
+      <CollapsibleSection id="gear-aug-biotech" title="Biotech Basics" defaultOpen>
+        <GearTable items={gearByTag('biotech')} columns={basicColumns} />
       </CollapsibleSection>
 
-      <CollapsibleSection id="gear-cw-implant-weapons" title="Cyber Implant Weapons">
-        <GearTable items={gearByTag('implant_weapon')} columns={implantWeaponColumns} />
-        <Section title="Firearm-Class Implants">
-          <GearTable items={gearByTag('firearm_implant')} columns={limbColumns} />
-          <Callout title="Bring Your Own Gun" variant="note">
-            These make space — the actual firearm is bought separately from Gear &gt; Firearms/Explosives.
+      <CollapsibleSection id="gear-aug-headware" title="Headware">
+        <GearTable items={gearByTag('headware')} columns={headwareColumns} />
+      </CollapsibleSection>
+
+      <CollapsibleSection id="gear-aug-eyeware" title="Eyeware">
+        <GearTable items={gearByTag('eyeware')} columns={headwareColumns} />
+      </CollapsibleSection>
+
+      <CollapsibleSection id="gear-aug-earware" title="Earware">
+        <GearTable items={gearByTag('earware')} columns={headwareColumns} />
+      </CollapsibleSection>
+
+      <CollapsibleSection id="gear-aug-bodyware" title="Bodyware">
+        <GearTable items={gearByTag('bodyware')} columns={headwareColumns} />
+        <Section>
+          <Callout title="Not Yet on the Rules Tab" variant="note">
+            Surgery/Recovery damage and Augmentation Overdrive are real rules covering everything on this page — they don't live in Rules yet.
           </Callout>
         </Section>
-      </CollapsibleSection>
-
-      <CollapsibleSection id="gear-cw-bioware" title="Bioware">
-        <GearTable items={gearByTag('bioware_basic')} columns={bioColumns} />
-      </CollapsibleSection>
-
-      <CollapsibleSection id="gear-cw-cultured" title="Cultured Bioware">
-        <GearTable items={gearByTag('bioware_cultured')} columns={bioColumns} />
       </CollapsibleSection>
 
       {purchaseItem && (
         <PurchaseModal
           item={purchaseItem}
           character={character}
+          vehicle={vehicle}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

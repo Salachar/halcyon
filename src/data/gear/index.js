@@ -7,7 +7,7 @@
 // conversation: one flat, O(1)-lookup catalog spanning every category.
 
 import { GEAR_MELEE_THROWN } from './melee_thrown';
-import { GEAR_VEHICLES_DRONES } from './vehicles_drones';
+// import { GEAR_VEHICLES_DRONES } from './vehicles_drones';
 import { GEAR_CYBERWARE_BIOWARE } from './cyberware_bioware';
 import { GEAR_AUGMENTATIONS } from './augmentations';
 import { GEAR_SENSORS_SECURITY_SURVIVAL } from './sensors_security_survival';
@@ -16,10 +16,13 @@ import { GEAR_FIREARMS_EXPLOSIVES } from './firearms_explosives';
 import { GEAR_MATRIX_DEVICES } from './matrix_devices';
 import { GEAR_MAGICAL_GOODS } from './magical_goods';
 import { GEAR_ADDITIONS } from './additions';
+import { GEAR_VEHICLES } from './vehicles';
+import { GEAR_WATERCRAFT } from './watercraft';
+import { GEAR_DRONES } from './drones';
 
 export {
   GEAR_MELEE_THROWN,
-  GEAR_VEHICLES_DRONES,
+  // GEAR_VEHICLES_DRONES,
   GEAR_CYBERWARE_BIOWARE,
   GEAR_AUGMENTATIONS,
   GEAR_SENSORS_SECURITY_SURVIVAL,
@@ -28,11 +31,14 @@ export {
   GEAR_MATRIX_DEVICES,
   GEAR_MAGICAL_GOODS,
   GEAR_ADDITIONS,
+  GEAR_VEHICLES,
+  GEAR_WATERCRAFT,
+  GEAR_DRONES,
 };
 
 export const ALL_GEAR = {
   ...GEAR_MELEE_THROWN,
-  ...GEAR_VEHICLES_DRONES,
+  // ...GEAR_VEHICLES_DRONES,
   ...GEAR_CYBERWARE_BIOWARE,
   ...GEAR_AUGMENTATIONS,
   ...GEAR_SENSORS_SECURITY_SURVIVAL,
@@ -41,6 +47,9 @@ export const ALL_GEAR = {
   ...GEAR_MATRIX_DEVICES,
   ...GEAR_MAGICAL_GOODS,
   ...GEAR_ADDITIONS,
+  ...GEAR_VEHICLES,
+  ...GEAR_WATERCRAFT,
+  ...GEAR_DRONES,
 };
 
 export const ALL_GEAR_IDS = Object.keys(ALL_GEAR);

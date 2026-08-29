@@ -10,7 +10,7 @@ import { gearByTag } from '@utils/gearTags';
 import { MTOC_STANDARD_CAPABILITIES } from '@data/gear/matrix_devices';
 import '@styles/gearBuyButton.css';
 
-export default function GearMatrixDevices({ character }) {
+export default function GearMatrixDevices({  character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();
 
@@ -143,6 +143,7 @@ export default function GearMatrixDevices({ character }) {
         <PurchaseModal
           item={purchaseItem}
           character={character}
+          vehicle={vehicle}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

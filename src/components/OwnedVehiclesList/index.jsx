@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ALL_GEAR } from '@data/gear';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import { computeCapacity, wouldExceedCapacity } from '@utils/gearCapacity';
-import CapacityAttachModal from '@components/CapacityAttachModal';
+import MarketModal from '@components/MarketModal';
 import ConfirmationModal from '@components/ConfirmationModal';
 import Dice from '@components/Dice';
 import {
@@ -26,74 +26,13 @@ function isVehicleLike(item) {
   return item?.category === 'vehicle' || item?.category === 'drone';
 }
 
-// Cargo mode — a dead-end summary card for anything sitting inside
-// someone's storage. Deliberately never expands into its own tree,
-// no matter how outfitted it actually is underneath (a fully-loaded
-// warship stored on a lift shows exactly the same simple card as an
-// empty one) — Active mode only ever applies to top-level owned
-// vehicles. "Take Out of Storage" (detach) is the only way back to
-// Active mode; drilling into a stored vehicle's own configuration
-// in-place is a deliberate future layer, not part of this build.
-function CargoCard({ character, instanceId, item, touch }) {
-  const stats = item.stats || {};
-
-  const takeOut = () => {
-    character.gearManager.detach(instanceId);
-    touch();
-  };
-
-  return (
-    <div className="sr-cargo-card">
-      <div className="sr-cargo-card-header">
-        <span className="sr-cargo-card-name">{item.label}</span>
-        <button className="sr-btn sr-btn--secondary" onClick={takeOut}>Take Out of Storage</button>
-      </div>
-      <div className="sr-cargo-card-stats">
-        {stats.handling && <span>Handling {stats.handling.onRoad}{stats.handling.offRoad != null ? `/${stats.handling.offRoad}` : ''}</span>}
-        {stats.body != null && <span>Body {stats.body}</span>}
-        {stats.armor != null && <span>Armor {stats.armor}</span>}
-        {stats.pilot != null && <span>Pilot {stats.pilot}</span>}
-        {stats.sensor != null && <span>Sensor {stats.sensor}</span>}
-      </div>
-    </div>
-  );
-}
-
-// Whatever's currently attached to a Storage Unit — a plain gear item
-// gets a simple row, anything vehicle-like gets the full CargoCard
-// (dead-end, never expands).
-function StoredContentsList({ character, storageInstanceId, touch }) {
-  const contents = character.gearManager.attachmentsOf(storageInstanceId);
-  if (contents.length === 0) return null;
-
-  const detach = (childId) => {
-    character.gearManager.detach(childId);
-    touch();
-  };
-
-  return (
-    <div className="sr-storage-contents">
-      {contents.map(([id, e]) => {
-        const item = ALL_GEAR[e.itemId];
-        return isVehicleLike(item) ? (
-          <CargoCard key={id} character={character} instanceId={id} item={item} touch={touch} />
-        ) : (
-          <div key={id} className="sr-storage-item-row">
-            <span>{item.label}</span>
-            <button className="sr-btn sr-btn--secondary" onClick={() => detach(id)}>Remove</button>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // Generic Storage attach — split Preferred/Other via
 // isPreferredForStorage (vehicleEconomy.js), same intended/unintended
 // instinct as cyberware. Never capacity-gated; nothing here checks a
 // count or confirms an overflow, since Storage was deliberately built
 // with no cap at all.
-function StorageAttachPicker({ character, storageInstanceId, storageItem, touch, onClose }) {
+function StorageAttachPicker({ character, storageInstanceId, storageItem, touch, onClose, vehicleItem }) {
+  const [browsingMarket, setBrowsingMarket] = useState(false);
   const owned = Object.entries(character.gearManager.gear).filter(([id, e]) => !e.attachedTo && id !== storageInstanceId);
   const preferred = owned.filter(([, e]) => isPreferredForStorage(storageItem, ALL_GEAR[e.itemId]));
   const other = owned.filter(([, e]) => !isPreferredForStorage(storageItem, ALL_GEAR[e.itemId]));
@@ -110,6 +49,10 @@ function StorageAttachPicker({ character, storageInstanceId, storageItem, touch,
         <div className="sr-modal-header">
           <h3 className="sr-modal-title">Store Item — {storageItem.label}</h3>
           <button className="sr-modal-close" onClick={onClose} aria-label="Close">×</button>
+        </div>
+
+        <div className="sr-picker-market-row">
+          <button className="sr-btn sr-btn--secondary" onClick={() => setBrowsingMarket(true)}>Browse Market</button>
         </div>
 
         {preferred.length > 0 && (
@@ -130,6 +73,14 @@ function StorageAttachPicker({ character, storageInstanceId, storageItem, touch,
         )}
         {preferred.length === 0 && other.length === 0 && <p className="sr-veh-hint">No unattached items owned yet.</p>}
       </div>
+
+      {browsingMarket && (
+        <MarketModal
+          character={character}
+          vehicle={vehicleItem}
+          onClose={() => setBrowsingMarket(false)}
+        />
+      )}
     </div>
   );
 }
@@ -140,7 +91,7 @@ function StorageAttachPicker({ character, storageInstanceId, storageItem, touch,
 // nested right underneath. This is the only "nesting" that exists —
 // Upgrades can't take further Additions or Upgrades of their own,
 // which is what keeps the whole tree from ever needing true recursion.
-function UpgradeRow({ character, upgradeInstanceId, item, touch }) {
+function UpgradeRow({ character, upgradeInstanceId, item, touch, vehicleItem }) {
   const [showStoragePicker, setShowStoragePicker] = useState(false);
   const isStorage = item.stats?.storagePreferredCategories != null || item.tags?.includes('drone_rack') || item.id === 'weapon_rack';
 
@@ -172,6 +123,7 @@ function UpgradeRow({ character, upgradeInstanceId, item, touch }) {
           storageInstanceId={upgradeInstanceId}
           storageItem={item}
           touch={touch}
+          vehicleItem={vehicleItem}
           onClose={() => setShowStoragePicker(false)}
         />
       )}
@@ -185,6 +137,90 @@ function UpgradeRow({ character, upgradeInstanceId, item, touch }) {
 // the Matrix Capacity pool unchanged; CSMs and other upgrades go
 // through the generic Upgrade pool below instead, shown via the same
 // AdditionUpgradesPanel every other Addition uses.
+// Program attach for the Comms/Sensor Array's Matrix Capacity pool —
+// same treatment as UpgradeAttachPicker (full control, soft-gated via
+// wouldExceedCapacity, Browse Market included), replacing
+// CapacityAttachModal here. No Preferred/Other split — there's no
+// additionType-equivalent concept for Programs, they're identified
+// purely by stat presence (matrixCapacityUsed), same pattern
+// isConsumerFor already uses everywhere else.
+function ProgramAttachPicker({ character, arrayInstanceId, arrayItem, touch, onClose }) {
+  const [browsingMarket, setBrowsingMarket] = useState(false);
+  const [pendingOverflow, setPendingOverflow] = useState(null);
+
+  const owned = Object.entries(character.gearManager.gear).filter(([id, e]) => {
+    return !e.attachedTo && ALL_GEAR[e.itemId]?.stats?.matrixCapacityUsed != null;
+  });
+
+  const doAttach = (programInstanceId) => {
+    character.gearManager.attach(programInstanceId, arrayInstanceId);
+    touch();
+    onClose();
+  };
+
+  const attach = (programInstanceId) => {
+    const programEntry = character.gearManager.gear[programInstanceId];
+    const programItem = ALL_GEAR[programEntry.itemId];
+    const arrayEntry = character.gearManager.gear[arrayInstanceId];
+    const existingAttachments = character.gearManager.attachmentsOf(arrayInstanceId)
+      .filter(([, e]) => ALL_GEAR[e.itemId]?.stats?.matrixCapacityUsed != null)
+      .map(([, e]) => ({ item: ALL_GEAR[e.itemId], config: e.config }));
+    const overCapacity = wouldExceedCapacity(
+      arrayItem, arrayEntry?.config, existingAttachments, programItem, programEntry.config, 'matrix'
+    );
+    if (overCapacity) {
+      setPendingOverflow({ programInstanceId, message: `This puts ${arrayItem.label} over its Program Slots. Attach anyway?` });
+      return;
+    }
+    doAttach(programInstanceId);
+  };
+
+  return (
+    <div className="sr-modal-backdrop" onClick={onClose}>
+      <div className="sr-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="sr-modal-header">
+          <h3 className="sr-modal-title">Attach Program — {arrayItem.label}</h3>
+          <button className="sr-modal-close" onClick={onClose} aria-label="Close">×</button>
+        </div>
+
+        <div className="sr-picker-market-row">
+          <button className="sr-btn sr-btn--secondary" onClick={() => setBrowsingMarket(true)}>Browse Market</button>
+        </div>
+
+        {owned.length === 0 ? (
+          <p className="sr-veh-hint">No unattached Programs owned yet.</p>
+        ) : (
+          <div className="sr-storage-picker-group">
+            {owned.map(([id, e]) => (
+              <button key={id} className="sr-btn sr-btn--secondary" onClick={() => attach(id)}>{ALL_GEAR[e.itemId].label}</button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {pendingOverflow && (
+        <ConfirmationModal
+          open
+          title="Over Program Slots"
+          message={pendingOverflow.message}
+          confirmLabel="Attach Anyway"
+          cancelLabel="Cancel"
+          onConfirm={() => doAttach(pendingOverflow.programInstanceId)}
+          onCancel={() => setPendingOverflow(null)}
+        />
+      )}
+
+      {browsingMarket && (
+        <MarketModal
+          character={character}
+          defaultTab="matrix"
+          onClose={() => setBrowsingMarket(false)}
+        />
+      )}
+    </div>
+  );
+}
+
 function CommsSensorArrayPanel({ character, arrayInstanceId, touch }) {
   const [attachingProgram, setAttachingProgram] = useState(false);
 
@@ -245,10 +281,11 @@ function CommsSensorArrayPanel({ character, arrayInstanceId, touch }) {
       )}
 
       {attachingProgram && (
-        <CapacityAttachModal
+        <ProgramAttachPicker
           character={character}
-          housingInstanceId={arrayInstanceId}
-          pool="matrix"
+          arrayInstanceId={arrayInstanceId}
+          arrayItem={arrayItem}
+          touch={touch}
           onClose={() => setAttachingProgram(false)}
         />
       )}
@@ -258,8 +295,7 @@ function CommsSensorArrayPanel({ character, arrayInstanceId, touch }) {
 
 // Generic Upgrade attach/display for any Addition (or, via the
 // separate NativeUpgradePanel below, the vehicle itself). Soft-gated
-// through CapacityAttachModal exactly like every other Capacity pool —
-// confirms rather than blocks on overflow.
+// via wouldExceedCapacity — confirms rather than blocks on overflow.
 // Upgrade attach — same Preferred/Other split as Storage
 // (isPreferredForAddition, vehicleEconomy.js), matched against
 // additionType rather than category/tags. Deliberately NOT
@@ -271,8 +307,9 @@ function CommsSensorArrayPanel({ character, arrayInstanceId, touch }) {
 // building the actual Preferred/Other split into CapacityAttachModal
 // itself would need touching a component this session doesn't have a
 // safe local copy of.
-function UpgradeAttachPicker({ character, housingInstanceId, housingItem, touch, onClose, nativeCapacity }) {
+function UpgradeAttachPicker({ character, housingInstanceId, housingItem, touch, onClose, nativeCapacity, vehicleItem }) {
   const [pendingOverflow, setPendingOverflow] = useState(null);
+  const [browsingMarket, setBrowsingMarket] = useState(false);
 
   const owned = Object.entries(character.gearManager.gear).filter(([id, e]) => {
     return !e.attachedTo && ALL_GEAR[e.itemId]?.tags?.includes('addition_upgrade');
@@ -325,6 +362,10 @@ function UpgradeAttachPicker({ character, housingInstanceId, housingItem, touch,
           <button className="sr-modal-close" onClick={onClose} aria-label="Close">×</button>
         </div>
 
+        <div className="sr-picker-market-row">
+          <button className="sr-btn sr-btn--secondary" onClick={() => setBrowsingMarket(true)}>Browse Market</button>
+        </div>
+
         {preferred.length > 0 && (
           <div className="sr-storage-picker-group">
             <div className="sr-storage-picker-group-title">Preferred</div>
@@ -355,11 +396,20 @@ function UpgradeAttachPicker({ character, housingInstanceId, housingItem, touch,
           onCancel={() => setPendingOverflow(null)}
         />
       )}
+
+      {browsingMarket && (
+        <MarketModal
+          character={character}
+          defaultTab="additions"
+          vehicle={vehicleItem}
+          onClose={() => setBrowsingMarket(false)}
+        />
+      )}
     </div>
   );
 }
 
-function AdditionUpgradesPanel({ character, housingInstanceId, touch }) {
+function AdditionUpgradesPanel({ character, housingInstanceId, touch, vehicleItem }) {
   const [attaching, setAttaching] = useState(false);
 
   const housingEntry = character.gearManager.gear[housingInstanceId];
@@ -391,6 +441,7 @@ function AdditionUpgradesPanel({ character, housingInstanceId, touch }) {
           housingInstanceId={housingInstanceId}
           housingItem={housingItem}
           touch={touch}
+          vehicleItem={vehicleItem}
           onClose={() => setAttaching(false)}
         />
       )}
@@ -402,11 +453,13 @@ function AdditionUpgradesPanel({ character, housingInstanceId, touch }) {
 // (nativeUpgradeCapacity, vehicleEconomy.js). This is what Rigger
 // Cocoon attaches through now that Cockpit isn't a purchasable
 // Addition — a cockpit is something every vehicle already has, not
-// new capability being installed. Same CapacityAttachModal reused,
-// just pointed at the vehicle instance itself as the "housing" — the
-// modal only cares about isConsumerFor(item, 'upgrade') matching, it
-// doesn't care whether the housing's provided-capacity came from a
-// stored stat or a computed function.
+// new capability being installed. Same UpgradeAttachPicker reused,
+// just pointed at the vehicle instance itself as the "housing" via
+// nativeCapacity — the picker's isPreferredForAddition check already
+// handles this case (additionType == null matches a vehicle-category
+// housing), and its overflow check switches to nativeCapacity's own
+// numbers instead of reading a stored stat that doesn't exist on a
+// vehicle item.
 function NativeUpgradePanel({ character, vehicleInstanceId, vehicleItem, touch }) {
   const [attaching, setAttaching] = useState(false);
   const capacity = nativeUpgradeCapacity(character, vehicleInstanceId);
@@ -436,6 +489,7 @@ function NativeUpgradePanel({ character, vehicleInstanceId, vehicleItem, touch }
           housingItem={vehicleItem}
           nativeCapacity={capacity}
           touch={touch}
+          vehicleItem={vehicleItem}
           onClose={() => setAttaching(false)}
         />
       )}
@@ -552,6 +606,7 @@ function VehicleRow({ character, instanceId, entry, touch, onAttachAddition }) {
               additionItem={facItem}
               isArray={isArray}
               touch={touch}
+              vehicleItem={item}
             />
           );
         })}
@@ -563,7 +618,7 @@ function VehicleRow({ character, instanceId, entry, touch, onAttachAddition }) {
 // Split out so each Addition block can hold its own local storage-
 // picker toggle state (React hooks can't live inside a .map callback
 // directly).
-function AdditionBlock({ character, additionInstanceId, additionItem, isArray, touch }) {
+function AdditionBlock({ character, additionInstanceId, additionItem, isArray, touch, vehicleItem }) {
   const [showStoragePicker, setShowStoragePicker] = useState(false);
   const isStorage = additionItem?.stats?.storagePreferredCategories != null;
 
@@ -584,17 +639,101 @@ function AdditionBlock({ character, additionInstanceId, additionItem, isArray, t
         </div>
       </div>
       {isArray && <CommsSensorArrayPanel character={character} arrayInstanceId={additionInstanceId} touch={touch} />}
-      <AdditionUpgradesPanel character={character} housingInstanceId={additionInstanceId} touch={touch} />
+      <AdditionUpgradesPanel character={character} housingInstanceId={additionInstanceId} touch={touch} vehicleItem={vehicleItem} />
       {isStorage && showStoragePicker && (
         <StorageAttachPicker
           character={character}
           storageInstanceId={additionInstanceId}
           storageItem={additionItem}
           touch={touch}
+          vehicleItem={vehicleItem}
           onClose={() => setShowStoragePicker(false)}
         />
       )}
       {isStorage && <StoredContentsList character={character} storageInstanceId={additionInstanceId} touch={touch} />}
+    </div>
+  );
+}
+
+// Replaces CapacityAttachModal for Addition-attach specifically — same
+// reasoning as Upgrade/Storage, gives full control to add Browse
+// Market. No Preferred/Other split here (every Addition is equally
+// valid on any vehicle, nothing analogous to additionType exists for
+// this specific layer), just a flat list, soft-gated the same way.
+function AdditionAttachPicker({ character, vehicleInstanceId, vehicleItem, touch, onClose }) {
+  const [browsingMarket, setBrowsingMarket] = useState(false);
+  const [pendingOverflow, setPendingOverflow] = useState(null);
+
+  const owned = Object.entries(character.gearManager.gear).filter(([id, e]) => {
+    return !e.attachedTo && ALL_GEAR[e.itemId]?.tags?.includes('addition');
+  });
+
+  const doAttach = (additionInstanceId) => {
+    character.gearManager.attach(additionInstanceId, vehicleInstanceId);
+    touch();
+    onClose();
+  };
+
+  const attach = (additionInstanceId) => {
+    const additionEntry = character.gearManager.gear[additionInstanceId];
+    const additionItem = ALL_GEAR[additionEntry.itemId];
+    const vehicleEntry = character.gearManager.gear[vehicleInstanceId];
+    const existingAttachments = character.gearManager.attachmentsOf(vehicleInstanceId)
+      .filter(([, e]) => ALL_GEAR[e.itemId]?.tags?.includes('addition'))
+      .map(([, e]) => ({ item: ALL_GEAR[e.itemId], config: e.config }));
+    const overCapacity = wouldExceedCapacity(
+      vehicleItem, vehicleEntry?.config, existingAttachments, additionItem, additionEntry.config, 'addition'
+    );
+    if (overCapacity) {
+      setPendingOverflow({ additionInstanceId, message: `This puts ${vehicleItem.label} over its Addition Capacity. Attach anyway?` });
+      return;
+    }
+    doAttach(additionInstanceId);
+  };
+
+  return (
+    <div className="sr-modal-backdrop" onClick={onClose}>
+      <div className="sr-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="sr-modal-header">
+          <h3 className="sr-modal-title">Attach Addition — {vehicleItem.label}</h3>
+          <button className="sr-modal-close" onClick={onClose} aria-label="Close">×</button>
+        </div>
+
+        <div className="sr-picker-market-row">
+          <button className="sr-btn sr-btn--secondary" onClick={() => setBrowsingMarket(true)}>Browse Market</button>
+        </div>
+
+        {owned.length === 0 ? (
+          <p className="sr-veh-hint">No unattached Additions owned yet.</p>
+        ) : (
+          <div className="sr-storage-picker-group">
+            {owned.map(([id, e]) => (
+              <button key={id} className="sr-btn sr-btn--secondary" onClick={() => attach(id)}>{ALL_GEAR[e.itemId].label}</button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {pendingOverflow && (
+        <ConfirmationModal
+          open
+          title="Over Addition Capacity"
+          message={pendingOverflow.message}
+          confirmLabel="Attach Anyway"
+          cancelLabel="Cancel"
+          onConfirm={() => doAttach(pendingOverflow.additionInstanceId)}
+          onCancel={() => setPendingOverflow(null)}
+        />
+      )}
+
+      {browsingMarket && (
+        <MarketModal
+          character={character}
+          defaultTab="additions"
+          vehicle={vehicleItem}
+          onClose={() => setBrowsingMarket(false)}
+        />
+      )}
     </div>
   );
 }
@@ -628,10 +767,11 @@ export default function OwnedVehiclesList({ character }) {
       ))}
 
       {attachContext && (
-        <CapacityAttachModal
+        <AdditionAttachPicker
           character={character}
-          housingInstanceId={attachContext}
-          pool="addition"
+          vehicleInstanceId={attachContext}
+          vehicleItem={ALL_GEAR[character.gearManager.gear[attachContext].itemId]}
+          touch={touch}
           onClose={() => setAttachContext(null)}
         />
       )}
