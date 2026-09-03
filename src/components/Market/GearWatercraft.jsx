@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
-import { GearTable } from '@components/PageComponents';
-import { CollapsibleSection } from '@components/CollapsibleSection';
+import MarketSection from '@components/MarketSection';
 import PurchaseModal from '@components/PurchaseModal';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import { commitPurchase, commitFreeGrab, canAffordItem } from '@utils/gearPurchase';
@@ -10,15 +9,14 @@ import { formatHandling, formatSeats, formatAcceleration, formatSpeedInterval, f
 import { gearByTag } from '@utils/gearTags';
 import '@styles/gearBuyButton.css';
 
-// Split out of the former GearVehiclesDrones.jsx (Vehicles / Watercraft
-// / Drones), matching the vehicles.js/watercraft.js/drones.js data
-// split. A Length column is included since the largest vessels
-// (container ship, bulk carrier, tanker) carry a real length stat —
-// shows "—" for anything that doesn't. Accel/Speed Int./Top Speed use
-// the same primary/secondary-variant formatter Handling already had,
-// since a number of hulls carry alternate-mode values for all three.
+// Migrated onto MarketSection (Table/Card/Carousel switching) — the
+// proving ground for that component before the other 11 Market tabs
+// get the same treatment. Sectioning/partitioning logic below is
+// completely unchanged from before; only the render primitive swapped
+// from CollapsibleSection+GearTable to MarketSection, which wraps both
+// internally and adds the view-mode toggle in the same header slot.
 //
-// EVERY CATEGORY IS ITS OWN TOP-LEVEL COLLAPSIBLE. There are no "Boats"
+// EVERY CATEGORY IS ITS OWN TOP-LEVEL SECTION. There are no "Boats"
 // and "Submarines" wrappers — the roster is 73 vessels, and burying
 // fourteen categories two levels deep meant two clicks to reach
 // anything. The old `gear-water-boats` and `gear-water-subs` ids are
@@ -71,6 +69,10 @@ const SUBMARINE_SECTIONS = [
   { tag: 'attack_sub', id: 'gear-water-attacksubs', title: 'Attack Submarines', priority: 5 },
 ];
 
+// gearByTag does no ordering of its own (confirmed: it's just
+// Object.values(ALL_GEAR).filter(...)), so items came out in whatever
+// order watercraft.js declared them — an authorial/thematic sequence,
+// not price or alphabetical. Sorting each bucket by cost here instead.
 function partitionByTag(groupTag, sections) {
   const byPriority = [...sections].sort((a, b) => a.priority - b.priority);
   const buckets = new Map(sections.map((s) => [s.tag, []]));
@@ -80,6 +82,10 @@ function partitionByTag(groupTag, sections) {
     if (home) buckets.get(home.tag).push(item);
     else unsorted.push(item);
   }
+  for (const bucket of buckets.values()) {
+    bucket.sort((a, b) => a.cost - b.cost);
+  }
+  unsorted.sort((a, b) => a.cost - b.cost);
   return { buckets, unsorted };
 }
 
@@ -134,15 +140,24 @@ export default function GearWatercraft({ character, vehicle }) {
         const items = buckets.get(tag);
         if (!items.length) return null;
         return (
-          <CollapsibleSection key={tag} id={id} title={title}>
-            <GearTable items={items} columns={vehicleColumns} />
-          </CollapsibleSection>
+          <MarketSection
+            key={tag}
+            id={id}
+            title={title}
+            items={items}
+            columns={vehicleColumns}
+            renderBuyButton={buyColumn.render}
+          />
         );
       })}
       {unsorted.length > 0 && (
-        <CollapsibleSection id={unsortedId} title="Unsorted">
-          <GearTable items={unsorted} columns={vehicleColumns} />
-        </CollapsibleSection>
+        <MarketSection
+          id={unsortedId}
+          title="Unsorted"
+          items={unsorted}
+          columns={vehicleColumns}
+          renderBuyButton={buyColumn.render}
+        />
       )}
     </>
   );

@@ -1,0 +1,220 @@
+/* ---- View Mode Toggle ---- */
+
+.sr-view-mode-toggle {
+  display: flex;
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  overflow: hidden;
+}
+
+.sr-view-mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.5rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: none;
+  border-right: 1px solid var(--sr-hairline);
+  color: var(--sr-text-dim);
+  cursor: pointer;
+  line-height: 0;
+}
+.sr-view-mode-btn:last-child {
+  border-right: none;
+}
+.sr-view-mode-btn:hover {
+  color: var(--sr-text);
+  background-color: var(--sr-bg-base);
+}
+.sr-view-mode-btn--active {
+  color: var(--sr-orange-bright);
+  background-color: var(--sr-bg-base);
+}
+
+/* ---- Card mode row (GearCatalogueCard) ---- */
+/* Compact, image-left/info-right — meant for scanning a scrolling list
+   quickly, not a focal-point image. */
+
+.sr-catalogue-card {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  padding: 0.9rem;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+}
+
+.sr-catalogue-card-image {
+  flex-shrink: 0;
+  width: 7rem;
+  height: 7rem;
+  border-radius: var(--sr-radius);
+  overflow: hidden;
+  background-color: var(--sr-bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-catalogue-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sr-catalogue-card-image-placeholder {
+  color: var(--sr-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sr-catalogue-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sr-catalogue-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-catalogue-card-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+}
+
+.sr-catalogue-card-cost {
+  color: var(--sr-orange-bright);
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.sr-catalogue-card-description {
+  font-size: 0.82rem;
+  color: var(--sr-text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.sr-catalogue-card-buy {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* ---- Carousel mode feature (GearCatalogueFeature) ---- */
+/* Image-first, full-width, rectangular (16:9) — the image is the
+   focal point, everything else reads below it. A genuinely different
+   layout from Card mode's compact row, not a shared/conditional one. */
+
+.sr-catalogue-feature {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--sr-bg-panel-solid);
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius);
+  overflow: hidden;
+}
+
+.sr-catalogue-feature-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: var(--sr-bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-catalogue-feature-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.sr-catalogue-feature-image-placeholder {
+  color: var(--sr-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-catalogue-feature-image-placeholder svg {
+  font-size: 3rem;
+}
+
+.sr-catalogue-feature-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.9rem;
+}
+
+.sr-catalogue-feature-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-catalogue-feature-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+}
+
+.sr-catalogue-feature-cost {
+  color: var(--sr-orange-bright);
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.sr-catalogue-feature-description {
+  font-size: 0.82rem;
+  color: var(--sr-text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.sr-catalogue-feature-buy {
+  padding: 0 0.9rem 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+/* ---- Card List (stacked full-width) ---- */
+
+.sr-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ---- Carousel ---- */
+
+.sr-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sr-carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.sr-carousel-index {
+  font-size: 0.82rem;
+  color: var(--sr-text-dim);
+  min-width: 3.5rem;
+  text-align: center;
+}
