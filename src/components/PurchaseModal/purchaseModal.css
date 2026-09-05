@@ -1,0 +1,54 @@
+/* PurchaseModal-specific content — deliberately NOT under the sr-modal-*
+   prefix, which stays reserved for the generic modal shell (backdrop,
+   header, close button, actions) shared across every modal in the app.
+   This file is just the image + stat list added to make PurchaseModal
+   stop hiding info a Card/Carousel view would already show. */
+
+.sr-purchase-modal-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--sr-radius);
+  overflow: hidden;
+  background-color: var(--sr-bg-base);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-purchase-modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sr-purchase-modal-image--placeholder {
+  color: var(--sr-hairline);
+}
+.sr-purchase-modal-image--placeholder svg {
+  font-size: 3rem;
+}
+
+.sr-purchase-modal-stats-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.sr-purchase-modal-stats-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+}
+
+.sr-purchase-modal-stats-label {
+  color: var(--sr-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.65rem;
+}
+
+.sr-purchase-modal-stats-value {
+  color: var(--sr-text);
+  font-weight: 600;
+}

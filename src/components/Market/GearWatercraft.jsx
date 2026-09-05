@@ -172,6 +172,7 @@ export default function GearWatercraft({ character, vehicle }) {
           item={purchaseItem}
           character={character}
           vehicle={vehicle}
+          statColumns={vehicleColumns.slice(1, -1)}
           onClose={() => setPurchaseItem(null)}
           onPurchase={(purchase) => {
             commitPurchase(character, purchaseItem, purchase);

@@ -31,11 +31,21 @@ function resolveFallbackMode(excludedViewModes, preferredDefault) {
 // migration of every GearXXX.jsx tab yet — this is the reusable piece
 // itself, adopted tab by tab from here.
 //
-// `columns` feeds GearTable unchanged for Table mode. `renderBuyButton`
-// is meant to be the exact same function each GearXXX.jsx already
-// builds for its table's buy column (buyColumn.render) — passed
-// through as-is so Card/Carousel trigger the identical purchase flow,
-// nothing duplicated.
+// `columns` feeds GearTable unchanged for Table mode, and is also
+// where Card/Carousel modes derive their stat list from —
+// columns.slice(1, -1) strips the first (name/identity) and last (buy
+// button) columns, which don't apply to those layouts, leaving
+// whatever's actually stat-shaped in between. This means a tab's
+// Table columns stay the single source of truth for "what counts as
+// a stat" for that item type — nothing gets defined twice. `Cost`
+// isn't specially excluded from that slice even though it's also
+// shown in GearStatsBlock's own header — a small, harmless
+// duplication rather than special-casing one column.
+//
+// `renderBuyButton` is meant to be the exact same function each
+// GearXXX.jsx already builds for its table's buy column
+// (buyColumn.render) — passed through as-is so Card/Carousel trigger
+// the identical purchase flow, nothing duplicated.
 //
 // `defaultViewMode` lets a section open showier by default (e.g.
 // Watercraft's image-heavy sections opening straight to Carousel)
@@ -53,6 +63,7 @@ export default function MarketSection({
   const fallbackMode = resolveFallbackMode(excludedViewModes, defaultViewMode);
   const [mode, setMode] = useState(() => getStoredViewMode(id, fallbackMode));
   const effectiveMode = excludedViewModes.includes(mode) ? fallbackMode : mode;
+  const statColumns = columns.slice(1, -1);
 
   const handleModeChange = (newMode) => {
     setMode(newMode);
@@ -69,8 +80,8 @@ export default function MarketSection({
       }
     >
       {effectiveMode === 'table' && <GearTable items={items} columns={columns} />}
-      {effectiveMode === 'card' && <GearCardList items={items} renderBuyButton={renderBuyButton} />}
-      {effectiveMode === 'carousel' && <GearCarousel items={items} renderBuyButton={renderBuyButton} />}
+      {effectiveMode === 'card' && <GearCardList items={items} statColumns={statColumns} renderBuyButton={renderBuyButton} />}
+      {effectiveMode === 'carousel' && <GearCarousel items={items} statColumns={statColumns} renderBuyButton={renderBuyButton} />}
     </CollapsibleSection>
   );
 }

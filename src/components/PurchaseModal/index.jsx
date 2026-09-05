@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
 import { isConfigurable, configLabel, configRange, resolveCost, defaultConfig } from '@utils/gearPurchase';
 import { isGradeable, resolveEssenceCost, needsInstallChoice } from '@utils/augmentationEconomy';
 import { AUGMENTATION_GRADES } from '@data/gear/augmentations';
 import ConfirmationModal from '@components/ConfirmationModal';
+import './purchaseModal.css';
 
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
@@ -28,6 +30,7 @@ function capitalize(word) {
 // there would have been actively wrong, not just restrictive. Applied
 // as a general rule for every configurable item, not just those, same
 // "inform, don't block" instinct as everywhere else in this app.
+//
 // `vehicle` is optional context (passed through from Market/MarketModal
 // when opened from a vehicle-attach flow) — shown as a small reference
 // line next to a rating input whenever the item's ratingLabel matches a
@@ -35,7 +38,21 @@ function capitalize(word) {
 // body). Purely informational, same as everywhere else in this app —
 // never auto-fills the input or gates the value, just tells the player
 // what number to type.
-export default function PurchaseModal({ item, character, vehicle, initialConfig, onPurchase, onFreeGrab, onClose }) {
+//
+// `statColumns` is new — optional, same shape as MarketSection's own
+// (a tab's Table columns with the identity/buy columns sliced off).
+// The modal shouldn't hide info a Card/Carousel view would show, so an
+// image (with the same placeholder treatment as those views) and the
+// stat list appear here too now — styled from purchaseModal.css, kept
+// deliberately separate from the generic sr-modal-* shell classes
+// (backdrop/header/close/actions) that every modal in the app shares.
+// Name and Cost are deliberately NOT re-shown from GearStatsBlock's
+// own header — the modal's own title and its own Cost line already
+// cover those, and the modal's Cost is the LIVE resolved value
+// reflecting the current rating/grade selection, not the static
+// catalog number GearStatsBlock would show. Callers that don't pass
+// statColumns just see nothing new — no existing behavior changes.
+export default function PurchaseModal({ item, character, vehicle, statColumns = [], initialConfig, onPurchase, onFreeGrab, onClose }) {
   const configurable = isConfigurable(item);
   const gradeable = isGradeable(item);
   const installChoice = needsInstallChoice(item);
@@ -71,7 +88,28 @@ export default function PurchaseModal({ item, character, vehicle, initialConfig,
             <button className="sr-modal-close" onClick={onClose} aria-label="Close">×</button>
           </div>
 
+          {item.image ? (
+            <div className="sr-purchase-modal-image">
+              <img src={item.image} alt={item.label} />
+            </div>
+          ) : (
+            <div className="sr-purchase-modal-image sr-purchase-modal-image--placeholder">
+              <ImageNotSupportedOutlinedIcon fontSize="large" />
+            </div>
+          )}
+
           {item.description && <p className="sr-modal-description">{item.description}</p>}
+
+          {statColumns.length > 0 && (
+            <div className="sr-purchase-modal-stats-list">
+              {statColumns.map((col, i) => (
+                <div key={i} className="sr-purchase-modal-stats-row">
+                  <span className="sr-purchase-modal-stats-label">{col.label}</span>
+                  <span className="sr-purchase-modal-stats-value">{col.render(item)}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {configurable && configKey && (
             <div className="sr-modal-config">

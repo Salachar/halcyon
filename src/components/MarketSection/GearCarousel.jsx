@@ -1,16 +1,12 @@
 import { useState } from 'react';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 import GearCatalogueFeature from './GearCatalogueFeature';
 
-// One item at a time, paged with prev/next arrows. Position is
-// deliberately NOT persisted (only the chosen view mode is) — every
-// visit starts back at the first item, same as any other transient UI
-// state elsewhere in this app. Index/count shown as plain text for
-// now ("3 / 12") — dots or mini-previews are a real possibility later,
-// but starting simple per the ask.
-export default function GearCarousel({ items, renderBuyButton }) {
+// Pure paging state now — all rendering lives in GearCatalogueFeature.
+// Position is deliberately NOT persisted (only the chosen view mode
+// is) — every visit starts back at the first item, same as any other
+// transient UI state elsewhere in this app.
+export default function GearCarousel({ items, statColumns, renderBuyButton }) {
   const [index, setIndex] = useState(0);
 
   if (items.length === 0) {
@@ -24,28 +20,15 @@ export default function GearCarousel({ items, renderBuyButton }) {
   const item = items[clampedIndex];
 
   return (
-    <div className="sr-carousel">
-      <div className="sr-carousel-nav">
-        <button
-          className="sr-icon-btn"
-          onClick={() => setIndex((i) => Math.max(0, i - 1))}
-          disabled={clampedIndex === 0}
-          aria-label="Previous"
-        >
-          <ChevronLeftIcon />
-        </button>
-        <span className="sr-carousel-index">{clampedIndex + 1} / {items.length}</span>
-        <button
-          className="sr-icon-btn"
-          onClick={() => setIndex((i) => Math.min(items.length - 1, i + 1))}
-          disabled={clampedIndex === items.length - 1}
-          aria-label="Next"
-        >
-          <ChevronRightIcon />
-        </button>
-      </div>
-
-      <GearCatalogueFeature item={item} renderBuyButton={renderBuyButton} />
-    </div>
+    <GearCatalogueFeature
+      item={item}
+      statColumns={statColumns}
+      renderBuyButton={renderBuyButton}
+      onPrev={() => setIndex((i) => Math.max(0, i - 1))}
+      onNext={() => setIndex((i) => Math.min(items.length - 1, i + 1))}
+      canPrev={clampedIndex > 0}
+      canNext={clampedIndex < items.length - 1}
+      indexLabel={`${clampedIndex + 1} / ${items.length}`}
+    />
   );
 }

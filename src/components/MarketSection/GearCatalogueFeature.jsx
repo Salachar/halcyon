@@ -1,15 +1,18 @@
 import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
-import { formatCost } from '@utils/gearFormat';
+import GearStatsBlock from './GearStatsBlock';
 
-// Carousel mode's single-item view — image is the main focus, full
-// card width, rectangular (16:9, matching the actual aspect ratio of
-// the source images being added), with everything else reading below
-// it. A genuinely different job than Card mode's compact row: this is
-// "browse one thing at a time like a real catalogue page," not "scan a
-// list quickly" — hence its own component rather than a shared one
-// with conditional styling.
-export default function GearCatalogueFeature({ item, renderBuyButton }) {
+// Carousel mode's single-item view — image on top (the focal point),
+// then a nav+buy row (prev/next arrows, item count, and the buy
+// button sharing one row), then the shared GearStatsBlock below.
+// GearCarousel itself now only tracks index/paging state and passes
+// nav callbacks/flags down — this component owns all the rendering,
+// same division of responsibility as GearCardList/GearCatalogueCard.
+export default function GearCatalogueFeature({
+  item, statColumns, renderBuyButton, onPrev, onNext, canPrev, canNext, indexLabel,
+}) {
   return (
     <div className="sr-catalogue-feature">
       <div className="sr-catalogue-feature-image">
@@ -22,17 +25,22 @@ export default function GearCatalogueFeature({ item, renderBuyButton }) {
         )}
       </div>
 
-      <div className="sr-catalogue-feature-body">
-        <div className="sr-catalogue-feature-header">
-          <span className="sr-catalogue-feature-name">{item.label}</span>
-          <span className="sr-catalogue-feature-cost">{formatCost(item)}</span>
+      <div className="sr-catalogue-feature-nav-row">
+        <div className="sr-catalogue-feature-nav">
+          <button className="sr-icon-btn" onClick={onPrev} disabled={!canPrev} aria-label="Previous">
+            <ChevronLeftIcon />
+          </button>
+          <span className="sr-catalogue-feature-nav-index">{indexLabel}</span>
+          <button className="sr-icon-btn" onClick={onNext} disabled={!canNext} aria-label="Next">
+            <ChevronRightIcon />
+          </button>
         </div>
-        {item.description && <p className="sr-catalogue-feature-description">{item.description}</p>}
+        <div className="sr-catalogue-feature-buy">
+          {renderBuyButton(item)}
+        </div>
       </div>
 
-      <div className="sr-catalogue-feature-buy">
-        {renderBuyButton(item)}
-      </div>
+      <GearStatsBlock item={item} statColumns={statColumns} />
     </div>
   );
 }

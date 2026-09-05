@@ -10,9 +10,6 @@ import { formatHandling, formatSeats, formatAcceleration, formatSpeedInterval, f
 import { gearByTag } from '@utils/gearTags';
 import '@styles/gearBuyButton.css';
 
-// Split out of the former GearVehiclesDrones.jsx (Vehicles / Watercraft
-// / Drones), matching the vehicles.js/watercraft.js/drones.js data
-// split.
 export default function GearDrones({ character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();

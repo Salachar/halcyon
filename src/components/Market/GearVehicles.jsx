@@ -10,10 +10,6 @@ import { formatHandling, formatSeats, formatAcceleration, formatSpeedInterval, f
 import { gearByTag } from '@utils/gearTags';
 import '@styles/gearBuyButton.css';
 
-// Split out of the former GearVehiclesDrones.jsx (Vehicles / Watercraft
-// / Drones), matching the vehicles.js/watercraft.js/drones.js data
-// split. Ground/air vehicles plus Vehicle Modifications (which apply
-// universally across all three, kept here as the "primary" tab).
 export default function GearVehicles({ character, vehicle }) {
   const [purchaseItem, setPurchaseItem] = useState(null);
   const { touch } = useCharacterManager();

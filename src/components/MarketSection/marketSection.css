@@ -31,9 +31,74 @@
   background-color: var(--sr-bg-base);
 }
 
+/* ---- Shared Gear Stats Block (GearStatsBlock) ---- */
+/* Used by both Card and Carousel modes — name/cost header, description,
+   then a plain label:value list built off whatever columns the
+   calling tab already defined for Table mode. */
+
+.sr-gear-stats-block {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sr-gear-stats-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sr-gear-stats-name {
+  font-weight: 700;
+  color: var(--sr-blue-bright);
+  font-size: 0.95rem;
+}
+
+.sr-gear-stats-cost {
+  color: var(--sr-orange-bright);
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.sr-gear-stats-description {
+  font-size: 0.82rem;
+  color: var(--sr-text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.sr-gear-stats-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.sr-gear-stats-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+}
+
+.sr-gear-stats-label {
+  color: var(--sr-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.65rem;
+}
+
+.sr-gear-stats-value {
+  color: var(--sr-text);
+  font-weight: 600;
+}
+
 /* ---- Card mode row (GearCatalogueCard) ---- */
-/* Compact, image-left/info-right — meant for scanning a scrolling list
-   quickly, not a focal-point image. */
+/* Compact, image-left/stats-middle/buy-right — meant for scanning a
+   scrolling list quickly, not a focal-point image. */
 
 .sr-catalogue-card {
   display: flex;
@@ -68,41 +133,6 @@
   justify-content: center;
 }
 
-.sr-catalogue-card-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.sr-catalogue-card-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.sr-catalogue-card-name {
-  font-weight: 700;
-  color: var(--sr-blue-bright);
-  font-size: 0.95rem;
-}
-
-.sr-catalogue-card-cost {
-  color: var(--sr-orange-bright);
-  font-weight: 700;
-  font-size: 0.9rem;
-  flex-shrink: 0;
-}
-
-.sr-catalogue-card-description {
-  font-size: 0.82rem;
-  color: var(--sr-text-muted);
-  line-height: 1.45;
-  margin: 0;
-}
-
 .sr-catalogue-card-buy {
   flex-shrink: 0;
   display: flex;
@@ -111,8 +141,10 @@
 
 /* ---- Carousel mode feature (GearCatalogueFeature) ---- */
 /* Image-first, full-width, rectangular (16:9) — the image is the
-   focal point, everything else reads below it. A genuinely different
-   layout from Card mode's compact row, not a shared/conditional one. */
+   focal point. Below it, a nav+buy row (prev/next paging and the buy
+   button sharing one row), then the shared stats block. A genuinely
+   different layout from Card mode's compact row, not a shared/
+   conditional one. */
 
 .sr-catalogue-feature {
   display: flex;
@@ -135,7 +167,7 @@
 .sr-catalogue-feature-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 .sr-catalogue-feature-image-placeholder {
   color: var(--sr-hairline);
@@ -147,46 +179,35 @@
   font-size: 3rem;
 }
 
-.sr-catalogue-feature-body {
-  flex: 1;
-  min-width: 0;
+.sr-catalogue-feature-nav-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.9rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--sr-hairline);
 }
 
-.sr-catalogue-feature-header {
+.sr-catalogue-feature-nav {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: 0.75rem;
 }
 
-.sr-catalogue-feature-name {
-  font-weight: 700;
-  color: var(--sr-blue-bright);
-  font-size: 0.95rem;
-}
-
-.sr-catalogue-feature-cost {
-  color: var(--sr-orange-bright);
-  font-weight: 700;
-  font-size: 0.9rem;
-  flex-shrink: 0;
-}
-
-.sr-catalogue-feature-description {
+.sr-catalogue-feature-nav-index {
   font-size: 0.82rem;
-  color: var(--sr-text-muted);
-  line-height: 1.45;
-  margin: 0;
+  color: var(--sr-text-dim);
+  min-width: 3.5rem;
+  text-align: center;
 }
 
 .sr-catalogue-feature-buy {
-  padding: 0 0.9rem 0.9rem;
   display: flex;
   align-items: center;
+}
+
+.sr-catalogue-feature .sr-gear-stats-block {
+  padding: 0.9rem;
 }
 
 /* ---- Card List (stacked full-width) ---- */
@@ -195,26 +216,4 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-}
-
-/* ---- Carousel ---- */
-
-.sr-carousel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.sr-carousel-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.sr-carousel-index {
-  font-size: 0.82rem;
-  color: var(--sr-text-dim);
-  min-width: 3.5rem;
-  text-align: center;
 }

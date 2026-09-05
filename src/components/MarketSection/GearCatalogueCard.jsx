@@ -1,14 +1,13 @@
 import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
 
-import { formatCost } from '@utils/gearFormat';
+import GearStatsBlock from './GearStatsBlock';
 
-// Card mode's row — compact, image-left/info-right, meant for
-// scanning a scrolling list quickly. Deliberately NOT shared with
-// Carousel anymore (see GearCatalogueFeature) — the two modes are
-// doing genuinely different jobs (scan-a-list vs. focus-on-one), and
-// forcing them through one component with conditional styling was the
-// wrong call.
-export default function GearCatalogueCard({ item, renderBuyButton }) {
+// Card mode's row — compact, image-left/stats-middle/buy-right, meant
+// for scanning a scrolling list quickly. The identity/description/
+// stats content is delegated to GearStatsBlock (shared with Carousel
+// mode); only the outer image+layout shape is specific to this
+// component.
+export default function GearCatalogueCard({ item, statColumns, renderBuyButton }) {
   return (
     <div className="sr-catalogue-card">
       <div className="sr-catalogue-card-image">
@@ -21,13 +20,7 @@ export default function GearCatalogueCard({ item, renderBuyButton }) {
         )}
       </div>
 
-      <div className="sr-catalogue-card-body">
-        <div className="sr-catalogue-card-header">
-          <span className="sr-catalogue-card-name">{item.label}</span>
-          <span className="sr-catalogue-card-cost">{formatCost(item)}</span>
-        </div>
-        {item.description && <p className="sr-catalogue-card-description">{item.description}</p>}
-      </div>
+      <GearStatsBlock item={item} statColumns={statColumns} />
 
       <div className="sr-catalogue-card-buy">
         {renderBuyButton(item)}
