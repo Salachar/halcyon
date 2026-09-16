@@ -1,19 +1,59 @@
-// Commlinks and cyberdecks — unlike almost everything else in Gear,
-// these are named, pre-built products with fixed Matrix stats baked
-// into a fixed price, not a flat-cost or rating-scaled item. The D/F
-// (Data Processing/Firewall) and A/S (Attack/Sleaze) pairs are two of
-// the four Matrix Attributes everything Matrix-mechanical is built on
-// — a decker's whole capability in a hack comes from whatever device
-// they're carrying. That's the actual reason this needed its own file
-// instead of fitting the usual costPerRating shape.
-
+// Commlinks, cyberdecks, M-TOCs, Tac-Apps, RCCs and the Living Persona
+// — unlike almost everything else in Gear, these are named, pre-built
+// products with fixed Matrix stats baked into a fixed price, not a
+// flat-cost or rating-scaled item. The D/F (Data Processing/Firewall)
+// and A/S (Attack/Sleaze) pairs are two of the four Matrix Attributes
+// everything Matrix-mechanical is built on — a decker's whole
+// capability in a hack comes from whatever device they're carrying.
+// That's the actual reason this needed its own file instead of fitting
+// the usual costPerRating shape.
+//
 // Verified against 09a-matrix-basics-and-actions.md (Commlinks/Cyberdecks
 // tables, pp. ~170-184): all 12 items' Device Rating, D/F or A/S,
 // Program Slots, Availability, and Cost are exact matches to source —
 // no stat corrections needed. No "Wireless Bonus:" text exists for these
 // items in source; they ARE the wireless connectivity, not an accessory
 // with an optional bonus, so `wireless: true` alone is correct and
-// complete as-is.
+// complete. There is no `wirelessBonuses` anywhere in this file, and
+// that's right rather than an omission.
+//
+// ============================================================================
+// SCHEMA PASSES 1 AND 2 (both applied at once — this file hadn't had
+// either yet):
+//
+// S1. TWO PRE-SCHEMA EFFECT FIELDS UNIFIED. This file had NO `effect`
+//     field, but it had two fields doing that job under different
+//     names: `stats.notes` on the three M-TOCs and `stats.rules` on the
+//     nine Tac-Apps. Both were prose strings packing three to five
+//     distinct mechanics each. Both are now `effects` arrays, one
+//     mechanic per entry, matching every other gear file.
+//     `stats.edgeStorage` — an identical prose paragraph repeated
+//     verbatim on all three M-TOCs — folded in the same way, hoisted to
+//     a shared constant.
+// S2. `description` IS NOW OMITTABLE. Worth noting the commlinks,
+//     cyberdecks and RCCs come out of this with NO effects at all:
+//     their descriptions really are pure positioning flavor
+//     ("Mid-range commlink"), and every mechanical fact about them
+//     already lives in a structured stat. That's the rule working, not
+//     a gap.
+// D1. `referenceOnly: true` where no live computed field drives any of
+//     the item's effects. One item here is backed — ECM Warrior II,
+//     whose `conditionalModifiers.noise` genuinely drives the Noise
+//     reduction its effect names.
+// D2. `GEAR_MATRIX_DEVICES_IDS` WAS NEVER EXPORTED. Every other gear
+//     file exports `<NAME>_IDS = Object.keys(<NAME>)`; this one stopped
+//     at the item map. Anything iterating the catalog's files uniformly
+//     by ID list would have silently skipped every commlink,
+//     cyberdeck, M-TOC, Tac-App, RCC, and the Living Persona. Added.
+// D3. `MTOC_STANDARD_CAPABILITIES` WAS EXPORTED BUT UNUSED. The old
+//     header claimed the six shared capabilities were "captured in
+//     `standardCapabilities` (shared reference) and each item's own
+//     stats.notes" — but no item had a `standardCapabilities` field,
+//     and the notes strings didn't repeat them either. The constant
+//     sat unreferenced, so those six capabilities appeared nowhere a
+//     player could see. Now spread into each M-TOC's `effects`.
+// ============================================================================
+
 function commlinkDevice(overrides) {
   return { wireless: true, category: 'commlink', legality: null, image: null, tags: ['commlink'], ...overrides };
 }
@@ -88,54 +128,77 @@ const fairlight_excalibur = cyberdeckDevice({
 // Tactical Networks, pp. 89-91). Roughly half the size of a cyberdeck;
 // operates like one (same D/F-only Matrix presence, no hacking
 // capability) whether standalone or linked to a cyberdeck/RCC.
-// Every Mark shares five standard capabilities (enhanced audio/image
-// link, team biomonitor, team weapon status/access, access to linked
-// members' gear, real-time tactical/strategic evaluation software,
-// GPS/mapsoft nav) plus a Mark-specific ambush-detection/AR bonus
-// package — captured in `standardCapabilities` (shared reference) and
-// each item's own `stats.notes`. `stats.maxUsers` is the hard cap on
-// linked team members. `stats.edgeStorage` documents the M-TOC's
-// distinct rules role: it can bank Edge (up to its own Device Rating)
-// that would otherwise be lost, and share personal/stored Edge to
-// anyone linked in via a Minor Action.
+//
+// Every Mark shares six standard capabilities plus the Edge-banking
+// rule, then adds its own ambush-detection/AR package. All three are
+// spread into each item's `effects` (D3 above — they used to sit in an
+// exported constant nothing referenced). `stats.maxUsers` stays
+// structured as the hard cap on linked team members.
 function mtocDevice(overrides) {
   return { wireless: true, category: 'mtoc', legality: 'illegal', image: null, tags: ['mtoc'], ...overrides };
 }
 
 export const MTOC_STANDARD_CAPABILITIES = [
-  'Enhanced audio and image link',
-  'Team member biomonitor',
-  'Team member weapon status/access (ammo count, operational status, biometric access)',
-  "Access to linked team members' gear (includes commlinks and other communications gear)",
-  'Real-time tactical and strategic evaluation software',
-  'GPS and mapsoft navigation software',
+  'Enhanced audio and image link.',
+  'Team member biomonitor.',
+  'Team member weapon status and access — ammo count, operational status, biometric access.',
+  "Access to linked team members' gear, including commlinks and other communications gear.",
+  'Real-time tactical and strategic evaluation software.',
+  'GPS and mapsoft navigation software.',
+];
+
+const MTOC_EDGE_STORAGE = [
+  'Can bank Edge, up to its own Device Rating, that would otherwise evaporate.',
+  'Any linked member can transfer personal or stored Edge to another via a Minor Action.',
 ];
 
 const mtoc_mark_1 = mtocDevice({
   id: 'mtoc_mark_1', label: 'M-TOC Mark I', cost: 25000, availability: 8, legality: 'licensed',
-  description: 'Security/law-enforcement tac-net — hostage situations, specialized-response gaps. Cost-effective enough to issue to rank-and-file patrol officers.',
+  referenceOnly: true,
+  description: 'Security and law-enforcement tac-net — hostage situations, specialized-response gaps. Cost-effective enough to issue to rank-and-file patrol officers.',
   stats: {
     deviceRating: 3, dataProcessing: 4, firewall: 3, matrixCapacityProvided: 2, maxUsers: 9,
-    edgeStorage: 'Can bank Edge (up to Device Rating) that would otherwise evaporate; any linked member can transfer personal or stored Edge to another via a Minor Action.',
-    notes: 'Lowers threshold by 1 for Perception tests to detect ambush. IFF software: +1 to Perception tests to spot concealed weapons and to ID subjects via facial recognition. +1 AR for all linked smartgun weapons.',
+    effects: [
+      'Lowers the threshold by 1 for Perception tests to detect an ambush.',
+      'IFF software: +1 on Perception tests to spot concealed weapons and to identify subjects via facial recognition.',
+      '+1 Attack Rating for all linked smartgun weapons.',
+      ...MTOC_EDGE_STORAGE,
+      ...MTOC_STANDARD_CAPABILITIES,
+    ],
   },
 });
 const mtoc_mark_2 = mtocDevice({
   id: 'mtoc_mark_2', label: 'M-TOC Mark II', cost: 65000, availability: 9,
-  description: 'Front-line military tac-net, combat-specialized over Mark I. Physically resistant to external and Matrix damage; modular components ease field repair.',
+  referenceOnly: true,
+  description: 'Front-line military tac-net, combat-specialized over the Mark I. Physically resistant to external and Matrix damage; modular components ease field repair.',
   stats: {
     deviceRating: 5, dataProcessing: 6, firewall: 5, matrixCapacityProvided: 4, maxUsers: 15,
-    edgeStorage: 'Can bank Edge (up to Device Rating) that would otherwise evaporate; any linked member can transfer personal or stored Edge to another via a Minor Action.',
-    notes: 'Lowers threshold by 2 for Perception tests to detect ambush. +1 AR for all linked smartgun weapons. Enhanced encryption raises the threshold for all Cracking tests by 1. Modular construction lowers the threshold for repairing damage by 2. Rugged construction grants -1 to all physical damage taken.',
+    effects: [
+      'Lowers the threshold by 2 for Perception tests to detect an ambush.',
+      '+1 Attack Rating for all linked smartgun weapons.',
+      'Enhanced encryption raises the threshold for all Cracking tests by 1.',
+      'Modular construction lowers the threshold for repairing damage by 2.',
+      'Rugged construction grants -1 to all physical damage taken.',
+      ...MTOC_EDGE_STORAGE,
+      ...MTOC_STANDARD_CAPABILITIES,
+    ],
   },
 });
 const mtoc_mark_3 = mtocDevice({
   id: 'mtoc_mark_3', label: 'M-TOC Mark III', cost: 95000, availability: 12,
-  description: "Special Forces-grade tac-net — the most advanced tactical software on the market, harder to crack, and assists users' own hacking attempts. User cap kept low to prevent system overload, a minor drawback given how few SF-sized teams exist.",
+  referenceOnly: true,
+  description: "Special Forces-grade tac-net — the most advanced tactical software on the market, harder to crack, and it assists users' own hacking attempts. The user cap is kept low to prevent system overload, a minor drawback given how few SF-sized teams exist.",
   stats: {
     deviceRating: 7, dataProcessing: 7, firewall: 6, matrixCapacityProvided: 6, maxUsers: 10,
-    edgeStorage: 'Can bank Edge (up to Device Rating) that would otherwise evaporate; any linked member can transfer personal or stored Edge to another via a Minor Action.',
-    notes: 'Lowers threshold by 1 for Perception tests to detect ambush. +2 AR for all linked and smartgun weapons. Enhanced encryption raises the threshold for enemy Cracking tests by 3. Modular construction lowers the threshold for repairing damage by 2. Rugged construction grants -1 to all physical damage taken.',
+    effects: [
+      'Lowers the threshold by 1 for Perception tests to detect an ambush.',
+      '+2 Attack Rating for all linked and smartgun weapons.',
+      'Enhanced encryption raises the threshold for enemy Cracking tests by 3.',
+      'Modular construction lowers the threshold for repairing damage by 2.',
+      'Rugged construction grants -1 to all physical damage taken.',
+      ...MTOC_EDGE_STORAGE,
+      ...MTOC_STANDARD_CAPABILITIES,
+    ],
   },
 });
 
@@ -150,56 +213,109 @@ function tacApp(overrides) {
 
 const tac_app_artillery_barrage = tacApp({
   id: 'tac_app_artillery_barrage', label: 'Artillery Barrage', availability: 5,
-  description: 'Additional targeting data for launch-type weapons (grenade/rocket launchers, mortars); also lets a shooter rain fire from a smartgun-equipped assault rifle, machine gun, or assault cannon like a miniature artillery piece.',
-  stats: { matrixCapacityUsed: 1, rules: '+1 dice pool for grenade launchers, rocket launchers, and mortars. No weapon-related penalties for shooting assault rifles, machine guns, or assault cannons while active. Shooter still needs at least some line of sight or a known target location.' },
+  referenceOnly: true,
+  description: 'Additional targeting data for launch-type weapons, and a way to rain fire from a smartgun-equipped long arm like a miniature artillery piece.',
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: [
+      '+1 dice pool for grenade launchers, rocket launchers, and mortars.',
+      'No weapon-related penalties for shooting assault rifles, machine guns, or assault cannons while active.',
+      'The shooter still needs at least some line of sight, or a known target location.',
+    ],
+  },
 });
 const tac_app_co_pilot = tacApp({
   id: 'tac_app_co_pilot', label: 'Co-Pilot', availability: 3,
+  referenceOnly: true,
   description: 'Lets a team member take control of a linked vehicle or drone, freeing a rigger for other tasks — not considered optimal control.',
-  stats: { matrixCapacityUsed: 1, rules: 'New operator/driver controls a vehicle via commlink or AR gloves at a -1 dice pool penalty. Drones can only be issued commands as if from the captain\'s chair.' },
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: [
+      'A new operator or driver controls a vehicle via commlink or AR gloves at a -1 dice pool penalty.',
+      "Drones can only be issued commands as if from the captain's chair.",
+    ],
+  },
 });
 const tac_app_door_gunner = tacApp({
   id: 'tac_app_door_gunner', label: 'Door Gunner', availability: 5,
-  description: 'Advanced control/targeting software letting a secondary team member operate a mounted, remote-capable vehicle weapon — "it\'s just like having the weapon in your hands."',
-  stats: { matrixCapacityUsed: 1, rules: 'New operator/gunner controls a vehicle weapon via commlink or AR glove with no penalty, provided they can receive smartlink targeting data.' },
+  referenceOnly: true,
+  description: 'Advanced control and targeting software letting a secondary team member operate a mounted, remote-capable vehicle weapon — "it\'s just like having the weapon in your hands."',
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: [
+      'A new operator or gunner controls a vehicle weapon via commlink or AR glove with no penalty.',
+      'Requires that the operator can receive smartlink targeting data.',
+    ],
+  },
 });
+// NOT referenceOnly: conditionalModifiers.noise drives the Noise
+// reduction this effect names.
 const tac_app_ecm_warrior_ii = tacApp({
   id: 'tac_app_ecm_warrior_ii', label: 'ECM Warrior II', availability: 4,
   description: 'Extra "electronic ammo" for engaging enemy hackers and cutting through Noise.',
   stats: {
     matrixCapacityUsed: 1,
-    rules: '+2 to all offensive Cracking tests while active. -2 to all Noise within (Device Rating x 5) meters of the device running the app.',
     // Range-gated — the app has no location tracking to verify the (DR
     // x 5)m condition, so this is a conditionalModifier (optional,
     // player/GM-confirmed toggle in NoiseTracker), not an unconditional
     // deviceModifier like Signal Scrubber's flat, always-on -2.
     conditionalModifiers: { noise: -2 },
+    effects: [
+      '+2 on all offensive Cracking tests while active.',
+      '-2 to all Noise within Device Rating x 5 meters of the device running the app.',
+    ],
   },
 });
 const tac_app_junk_wall = tacApp({
   id: 'tac_app_junk_wall', label: 'Junk Wall', availability: 2,
-  description: 'Layers benign "junk code" onto the network and linked devices\' firewalls, forcing a hacker through the added layers to gain access.',
-  stats: { matrixCapacityUsed: 1, rules: "Add half the M-TOC's Device Rating (round up) to a linked cyberjack's or RCC's Firewall rating." },
+  referenceOnly: true,
+  description: "Layers benign \"junk code\" onto the network and linked devices' firewalls, forcing a hacker through the added layers to gain access.",
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: ["Adds half the M-TOC's Device Rating, rounded up, to a linked cyberjack's or RCC's Firewall rating."],
+  },
 });
 const tac_app_mobile_medic = tacApp({
   id: 'tac_app_mobile_medic', label: 'Mobile Medic', availability: 3,
-  description: 'Works with a medkit to feed the user real-time emergency medical instruction, guiding treatment even from someone who doesn\'t know how to administer aid.',
-  stats: { matrixCapacityUsed: 1, rules: "Add half the Device Rating to the user's First Aid dice pool, or add +1 to a medkit's rating." },
+  referenceOnly: true,
+  description: "Works with a medkit to feed the user real-time emergency medical instruction, guiding treatment even from someone who doesn't know how to administer aid.",
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: ["Adds half the Device Rating to the user's First Aid dice pool, or +1 to a medkit's Rating."],
+  },
 });
 const tac_app_sneak_sneak = tacApp({
   id: 'tac_app_sneak_sneak', label: 'Sneak-Sneak', availability: 3,
-  description: 'Tracking algorithms and image evaluation flag hazards/obstacles that could give the user away, and suggest alternate paths or methods.',
-  stats: { matrixCapacityUsed: 1, rules: '+2 dice pool on all Stealth (Sneaking) tests.' },
+  referenceOnly: true,
+  description: 'Tracking algorithms and image evaluation flag hazards and obstacles that could give the user away, and suggest alternate paths or methods.',
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: ['+2 dice pool on all Stealth (Sneaking) tests.'],
+  },
 });
 const tac_app_team_leader = tacApp({
   id: 'tac_app_team_leader', label: 'Team Leader', availability: 3,
+  referenceOnly: true,
   description: 'Feeds the designated leader data projections on the current tactical situation — sensor data, team biometrics, weapon status, environment — to aid decision-making and coordination.',
-  stats: { matrixCapacityUsed: 1, rules: 'Provides a pool of bonus dice equal to the M-TOC\'s Device Rating for teamwork, navigation, perception, and maneuver tests. Can be broken up and assigned as needed, but only once per combat engagement.' },
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: [
+      "Provides a pool of bonus dice equal to the M-TOC's Device Rating for teamwork, navigation, perception, and maneuver tests.",
+      'The pool can be broken up and assigned as needed, but only once per combat engagement.',
+    ],
+  },
 });
 const tac_app_target_artist = tacApp({
   id: 'tac_app_target_artist', label: 'Target Artist', availability: 3,
-  description: 'Pairs with Artillery Barrage — takes targeting data from any source with line of sight (a teammate, a drone) and paints the target/area for a shooter who lacks LOS themselves; also rapidly IDs and designates targets/obstacles/hazards on a mapsoft overlay.',
-  stats: { matrixCapacityUsed: 1, rules: 'Allows the shooter to attack without direct line of sight. Designated targets can then be hit with the "Called Shot" action as an anytime action.' },
+  referenceOnly: true,
+  description: 'Pairs with Artillery Barrage — takes targeting data from any source with line of sight, a teammate or a drone, and paints the target for a shooter who lacks LOS themselves. Also rapidly IDs and designates targets, obstacles, and hazards on a mapsoft overlay.',
+  stats: {
+    matrixCapacityUsed: 1,
+    effects: [
+      'Allows the shooter to attack without direct line of sight.',
+      'Designated targets can then be hit with the Called Shot action as an anytime action.',
+    ],
+  },
 });
 
 // Rigger Command Console (RCC), "captain's chair" — the rigger
@@ -214,6 +330,10 @@ const tac_app_target_artist = tacApp({
 // penalties are reduced by. `slavedDroneCapacity` is stored directly
 // (Device Rating x 3) rather than left for the UI to recompute, same
 // reasoning as any other derived-but-frequently-displayed number.
+//
+// These carry no `effects`: everything mechanical about an RCC is
+// already a structured stat, and the descriptions are pure market
+// positioning.
 function rccDevice(overrides) {
   return { wireless: true, category: 'rcc', legality: 'licensed', image: null, tags: ['rcc'], ...overrides };
 }
@@ -230,7 +350,7 @@ const rcc_allegiance_control_center = rccDevice({
 });
 const rcc_essy_motors_dronemaster = rccDevice({
   id: 'rcc_essy_motors_dronemaster', label: 'Essy Motors DroneMaster', cost: 16000, availability: 3,
-  description: 'Mid-range RCC, Data Processing/Firewall balanced evenly.',
+  description: 'Mid-range RCC, Data Processing and Firewall balanced evenly.',
   stats: { deviceRating: 3, dataProcessing: 4, firewall: 4, slavedDroneCapacity: 9 },
 });
 const rcc_horizon_overseer = rccDevice({
@@ -281,7 +401,7 @@ const rcc_aztechnology_tlaloc = rccDevice({
 // no ID-specific check needed: "Make/Unset Primary" never renders
 // since canBePrimary just checks category membership. Genuinely zero
 // Program Slots of its own (no matrixCapacityProvided) — a technomancer
-// needs the Emulate complex form specifically because they lack this,
+// needs the Emulate complex form specifically because they lack this;
 // giving Living Persona slots would contradict that rule directly.
 //
 // `wireless: true` stays SET (required for isEffectivelyWireless to
@@ -301,8 +421,15 @@ const living_persona = {
   id: 'living_persona', label: 'Living Persona',
   category: 'living_persona', wireless: true, legality: null, image: null,
   tags: ['living_persona'], cost: 0, availability: null,
-  description: "A technomancer's own Resonance-linked connection to the Matrix — no device required. Matrix attributes come directly from Mental attributes, not a purchased stat block.",
-  stats: {},
+  referenceOnly: true,
+  description: "A technomancer's own Resonance-linked connection to the Matrix — no device required.",
+  stats: {
+    effects: [
+      'Matrix attributes are derived from the Mental attributes, not from a purchased stat block.',
+      'Has no Program Slots of its own — a technomancer needs the Emulate complex form to run programs.',
+      'Always Primary, and never purchased.',
+    ],
+  },
 };
 
 export const GEAR_MATRIX_DEVICES = {
@@ -316,3 +443,6 @@ export const GEAR_MATRIX_DEVICES = {
   rcc_ares_red_dog_series, rcc_aztechnology_tlaloc,
   living_persona,
 };
+
+// D2: this export was missing entirely — every other gear file has one.
+export const GEAR_MATRIX_DEVICES_IDS = Object.keys(GEAR_MATRIX_DEVICES);

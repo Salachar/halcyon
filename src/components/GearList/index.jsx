@@ -1,19 +1,60 @@
 import { useState } from 'react';
 
 import { ALL_GEAR } from '@data/gear';
+import { SKILLS } from '@data/character/skills';
 import { useCharacterManager } from '@hooks/useCharacterManager';
-import CyberlimbEnhanceModal from '@components/CyberlimbEnhanceModal';
+import { CollapsibleSection } from '@components/CollapsibleSection';
+import { Section } from '@components/PageComponents';
+import OwnedGearCard from '@components/OwnedGearCard';
+import PoolBuilder from '@components/PoolBuilder';
 import WeaponAttachModal from '@components/WeaponAttachModal';
 import CapacityAttachModal from '@components/CapacityAttachModal';
+import GearDetailModal from '@components/GearDetailModal';
+import { IconButton, SecondaryButton } from '@components/Buttons';
 import { computeCapacity, isHousingFor } from '@utils/gearCapacity';
 import { formatItemDetails } from '@utils/gearFormat';
 import { availableModesFor, resolveEffectiveAttackRatings, resolveAmmoCapacity, FIRE_MODE_MODIFIERS, AMMO_TYPE_MODIFIERS, AMMO_TYPE_OPTIONS } from '@utils/weaponEconomy';
 
-import './gearList.css';
+import {
+  SectionCards, Mounts, Capacity, Details, Wireless, Effect, ReferenceBadge, Empty, Attachments, AttachmentRow, AttachmentName,
+  WeaponConfigBlock, WeaponConfigRow, WeaponConfigField, WeaponConfigLabel, WeaponConfigResolved, WeaponConfigNote,
+  WeaponConfigAmmo, WeaponConfigAmmoMax,
+} from './GearList.styles';
 
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
+
+// Category split — the actual GearList redesign. Not a copy of
+// Foundry's own Electronics/Chemicals/Survival/etc. naming (our
+// category/tags data doesn't map 1:1 onto that), but a real grouping
+// off what's actually here: Weapons (firearms, melee, and unattached
+// weapon accessories waiting to be attached — grouped WITH weapons
+// rather than the electronics catch-all, since that's where a player
+// would look for them), Armor (housings only — armor mods nest under
+// their housing, same as any other attachment), Cyberware & Bioware
+// (both categories together, conceptually "augmentations" even though
+// they're separate `category` values), Ammo & Explosives, and a
+// catch-all for everything else (electronics/software/optical/tool/
+// id_credit). Vehicles and drones are deliberately excluded entirely —
+// OwnedVehiclesList is their real home, showing them here too would
+// just be duplicate display.
+function categoryOf(item) {
+  if (item.category === 'vehicle' || item.category === 'drone') return null;
+  if (item.category === 'firearm' || item.category === 'melee_weapon' || item.category === 'weapon_accessory') return 'weapons';
+  if (item.category === 'armor') return 'armor';
+  if (item.category === 'cyberware' || item.category === 'cyberware_accessory' || item.category === 'bioware') return 'augmentations';
+  if (item.category === 'ammo' || item.category === 'explosive') return 'consumables';
+  return 'electronics';
+}
+
+const SECTIONS = [
+  { key: 'weapons', title: 'Weapons' },
+  { key: 'armor', title: 'Armor' },
+  { key: 'augmentations', title: 'Cyberware & Bioware' },
+  { key: 'electronics', title: 'Electronics, Software & Tools' },
+  { key: 'consumables', title: 'Ammo & Explosives' },
+];
 
 // Firing mode + ammo type config, per owned firearm instance —
 // deliberately never gates weapon use; every field here is optional
@@ -31,7 +72,7 @@ function WeaponConfig({ character, instanceId, item, touch }) {
   const maxAmmo = resolveAmmoCapacity(item, ammoContainer);
   const currentAmmo = weaponState.currentAmmoCount;
 
-  const effectiveAR = resolveEffectiveAttackRatings(item, selectedMode, loadedAmmoType);
+  const effectiveAR = resolveEffectiveAttackRatings(item, selectedMode, loadedAmmoType, weaponState.attackRatingAdjustment || 0);
   const modeInfo = FIRE_MODE_MODIFIERS[selectedMode];
   const ammoInfo = AMMO_TYPE_MODIFIERS[loadedAmmoType];
 
@@ -41,51 +82,52 @@ function WeaponConfig({ character, instanceId, item, touch }) {
   };
 
   return (
-    <div className="sr-weapon-config">
-      <div className="sr-weapon-config-row">
-        <div className="sr-weapon-config-field">
-          <span className="sr-weapon-config-label">Mode</span>
+    <WeaponConfigBlock>
+      <WeaponConfigRow>
+        <WeaponConfigField>
+          <WeaponConfigLabel>Mode</WeaponConfigLabel>
           <select className="sr-number-input" value={selectedMode} onChange={(e) => update({ selectedMode: e.target.value })}>
             {modes.map((m) => <option key={m} value={m}>{FIRE_MODE_MODIFIERS[m].label}</option>)}
           </select>
-        </div>
-        <div className="sr-weapon-config-field">
-          <span className="sr-weapon-config-label">Ammo Type</span>
+        </WeaponConfigField>
+        <WeaponConfigField>
+          <WeaponConfigLabel>Ammo Type</WeaponConfigLabel>
           <select className="sr-number-input" value={loadedAmmoType} onChange={(e) => update({ loadedAmmoType: e.target.value })}>
             {AMMO_TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
-        </div>
+        </WeaponConfigField>
         {ammoOptions && (
-          <div className="sr-weapon-config-field">
-            <span className="sr-weapon-config-label">Container</span>
+          <WeaponConfigField>
+            <WeaponConfigLabel>Container</WeaponConfigLabel>
             <select className="sr-number-input" value={ammoContainer} onChange={(e) => update({ ammoContainer: e.target.value })}>
               {ammoOptions.map((o) => <option key={o.container} value={o.container}>{o.container} ({o.capacity})</option>)}
             </select>
-          </div>
+          </WeaponConfigField>
         )}
-      </div>
+      </WeaponConfigRow>
 
-      <div className="sr-weapon-config-resolved">
+      <WeaponConfigResolved>
         Effective AR: <strong>{effectiveAR.map((v) => v ?? '—').join('/')}</strong>
-        {modeInfo?.note && <div className="sr-weapon-config-note">{modeInfo.note}</div>}
-        {loadedAmmoType !== 'Regular' && ammoInfo && <div className="sr-weapon-config-note">DV modifier: {ammoInfo.damageValueNote}</div>}
-      </div>
+        {modeInfo?.note && <WeaponConfigNote>{modeInfo.note}</WeaponConfigNote>}
+        {loadedAmmoType !== 'Regular' && ammoInfo && <WeaponConfigNote>DV modifier: {ammoInfo.damageValueNote}</WeaponConfigNote>}
+      </WeaponConfigResolved>
 
       {maxAmmo != null && (
-        <div className="sr-weapon-config-ammo">
-          <span className="sr-weapon-config-label">Ammo (optional)</span>
+        <WeaponConfigAmmo>
+          <WeaponConfigLabel>Ammo (optional)</WeaponConfigLabel>
           <input
             type="number"
-            className="sr-number-input sr-weapon-config-ammo-input"
+            className="sr-number-input"
+            style={{ width: '4rem' }}
             placeholder="—"
             value={currentAmmo ?? ''}
             onChange={(e) => update({ currentAmmoCount: e.target.value === '' ? null : Number(e.target.value) })}
           />
-          <span className="sr-weapon-config-ammo-max"> / {maxAmmo}</span>
-          <button className="sr-btn sr-btn--secondary" onClick={() => update({ currentAmmoCount: maxAmmo })}>Reload</button>
-        </div>
+          <WeaponConfigAmmoMax> / {maxAmmo}</WeaponConfigAmmoMax>
+          <SecondaryButton onClick={() => update({ currentAmmoCount: maxAmmo })}>Reload</SecondaryButton>
+        </WeaponConfigAmmo>
       )}
-    </div>
+    </WeaponConfigBlock>
   );
 }
 
@@ -129,9 +171,9 @@ function CapacitySummary({ housingItem, housingConfig, attachments, pool }) {
   const { provided, used, overCapacity } = computeCapacity(housingItem, housingConfig, items, pool);
   if (provided === 0 && used === 0) return null;
   return (
-    <div className={overCapacity ? 'sr-gear-list-capacity sr-gear-list-capacity--over' : 'sr-gear-list-capacity'}>
+    <Capacity $over={overCapacity}>
       Capacity: {used}/{provided}{overCapacity ? ' — Over Capacity' : ''}
-    </div>
+    </Capacity>
   );
 }
 
@@ -139,36 +181,56 @@ function CapacitySummary({ housingItem, housingConfig, attachments, pool }) {
 // Capacity" on a not-yet-attached consumer's own row, so a player can
 // tell what it'll cost before they attach it, and on nested attachment
 // rows so the breakdown under a housing is visible per-item, not just
-// as one aggregate number on the parent. Now sourced from
-// formatItemDetails (gearFormat.js) — extracted there so Market and
-// this sheet view can never drift apart on what counts as "relevant
-// detail" for an item, even though the two stay separate layouts.
+// as one aggregate number on the parent. Sourced from formatItemDetails
+// (gearFormat.js) — extracted there so Market and this sheet view can
+// never drift apart on what counts as "relevant detail" for an item,
+// even though the two stay separate layouts. Effects (wireless bonus
+// text) fold into this same block rather than a separate table — this
+// IS the condensed "Effects" treatment, just already how this app
+// handled attachment detail before the Detail Modal existed.
+// UPDATED for the effects[]/wirelessBonuses[] array schema — each entry
+// renders as its own line rather than one joined string, matching the
+// catalog's own "one distinct mechanic per entry" convention. A
+// referenceOnly badge appears once per item (not per line) when the
+// catalog has flagged this item as reminder-only text rather than
+// something this app currently computes for the player — see the
+// comment on formatItemDetails in gearFormat.js for what that flag
+// means and why it's item-level rather than per-line.
 function ItemDetails({ item, config }) {
-  const { line, wirelessBonus } = formatItemDetails(item, config);
+  const {
+    line,
+    effects = [],
+    wirelessBonuses = [],
+    referenceOnly,
+  } = formatItemDetails(item, config);
+  const hasAnyText = line || effects.length > 0 || wirelessBonuses.length > 0;
   return (
     <>
-      {line && <div className="sr-gear-list-details">{line}</div>}
-      {wirelessBonus && <div className="sr-gear-list-wireless">Wireless: {wirelessBonus}</div>}
+      {line && <Details>{line}</Details>}
+      {effects.map((text, i) => <Effect key={`effect-${i}`}>{text}</Effect>)}
+      {wirelessBonuses.map((text, i) => <Wireless key={`wireless-${i}`}>Wireless: {text}</Wireless>)}
+      {hasAnyText && referenceOnly && (
+        <ReferenceBadge title="Real rule text — apply it yourself; nothing here computes it automatically.">
+          Reference only
+        </ReferenceBadge>
+      )}
     </>
   );
 }
 
-const ENHANCEMENTS = [
-  { itemId: 'cyberlimb_armor', label: 'Armor' },
-  { itemId: 'cyberlimb_attribute_increase', label: 'Attribute' },
-];
-
 // gearManager.gear is instance-keyed — { [instanceId]: { itemId,
-// config, attachedTo } } — so two identical rifles are two real rows,
-// not one row with a quantity, and each can carry its own attachments.
-// Attached accessories are hidden from the flat top-level list and
-// shown nested under their parent instead, so nothing appears twice.
+// config, attachedTo: instanceId | null } } — so two identical rifles
+// are two real rows, not one row with a quantity, and each can carry
+// its own attachments. Attached accessories are hidden from the flat
+// top-level list and shown nested under their parent instead, so
+// nothing appears twice.
 export default function GearList({ character }) {
   const { touch } = useCharacterManager();
-  const [enhanceContext, setEnhanceContext] = useState(null);
   const [attachWeaponId, setAttachWeaponId] = useState(null);
   const [attachHousingContext, setAttachHousingContext] = useState(null); // { instanceId, pool }
   const [configWeaponId, setConfigWeaponId] = useState(null);
+  const [detailInstanceId, setDetailInstanceId] = useState(null);
+
   const allEntries = Object.entries(character.gearManager.gear);
   const topLevelEntries = allEntries.filter(([, entry]) => !entry.attachedTo);
 
@@ -182,142 +244,171 @@ export default function GearList({ character }) {
     touch();
   };
 
-  const openEnhance = (limbInstanceId, enhancement) => {
-    const item = ALL_GEAR[enhancement.itemId];
-    const maxRating = (item.ratingRange || item.stats?.ratingRange)?.[1] ?? 1;
-    const existing = character.gearManager.attachmentsOf(limbInstanceId)
-      .find(([, e]) => e.itemId === enhancement.itemId);
-    const currentRating = existing ? existing[1].config.rating ?? 0 : 0;
-    if (currentRating >= maxRating) return;
+  // Partition into sections, dropping anything categoryOf excludes
+  // (vehicles/drones) and anything ALL_GEAR no longer recognizes.
+  const bySection = { weapons: [], armor: [], augmentations: [], electronics: [], consumables: [] };
+  topLevelEntries.forEach(([instanceId, entry]) => {
+    const item = ALL_GEAR[entry.itemId];
+    if (!item) return;
+    const section = categoryOf(item);
+    if (!section) return;
+    bySection[section].push([instanceId, entry]);
+  });
 
-    setEnhanceContext({
-      limbInstanceId,
-      enhancementItemId: enhancement.itemId,
-      nextRating: currentRating + 1,
-      existingInstanceId: existing ? existing[0] : null,
-    });
+  const renderCard = (instanceId, entry) => {
+    const item = ALL_GEAR[entry.itemId];
+    const configLabel = formatConfig(entry.config);
+    const isCyberlimb = item.tags?.includes('cyberlimb');
+    const isFirearm = item.category === 'firearm';
+    const isArmorHousing = isHousingFor(item, 'armor');
+    const isDeviceHousing = isHousingFor(item, 'device');
+    const isCyberwareHousing = isHousingFor(item, 'cyberware');
+    const isMatrixHousing = isHousingFor(item, 'matrix');
+    const hasSkill = Boolean(item.skill);
+    const attachments = (isFirearm || isArmorHousing || isDeviceHousing || isCyberwareHousing || isMatrixHousing)
+      ? character.gearManager.attachmentsOf(instanceId)
+      : [];
+    const mounts = isFirearm && attachments.length > 0 ? mountSummary(attachments) : null;
+
+    // Roll button — any item with a skill (weapons: firearms, close
+    // combat, exotic_weapons) gets a PoolBuilder wired to that skill's
+    // primary attribute, with a reference block showing the combat
+    // math that ISN'T itself a pool component (DV, effective AR
+    // factoring in this instance's own stored mode/ammo/manual
+    // adjustment, Ammo) — the gap flagged when this redesign was
+    // planned. Attack Rating vs. Defense Rating comparison and Edge
+    // gain/spend stay explicitly out of scope here (a separate,
+    // later design conversation), this is reference only.
+    let rollButton = null;
+    if (hasSkill) {
+      const skillDef = SKILLS[item.skill];
+      const weaponState = character.gearManager.getWeaponState(instanceId);
+      let referenceNotes = null;
+      if (isFirearm) {
+        const modes = availableModesFor(item);
+        const selectedMode = modes.includes(weaponState.selectedMode) ? weaponState.selectedMode : 'SS';
+        const loadedAmmoType = weaponState.loadedAmmoType || 'Regular';
+        const effectiveAR = resolveEffectiveAttackRatings(item, selectedMode, loadedAmmoType, weaponState.attackRatingAdjustment || 0);
+        const maxAmmo = resolveAmmoCapacity(item, weaponState.ammoContainer);
+        referenceNotes = (
+          <>
+            DV {item.stats?.damageValue ?? '—'} · AR {effectiveAR.map((v) => v ?? '—').join('/')}
+            {maxAmmo != null && <> · Ammo {weaponState.currentAmmoCount ?? '—'}/{maxAmmo}</>}
+          </>
+        );
+      } else if (item.stats?.damageValue) {
+        referenceNotes = <>DV {item.stats.damageValue}{item.stats.attackRatings ? <> · AR {item.stats.attackRatings.map((v) => v ?? '—').join('/')}</> : null}</>;
+      }
+      rollButton = (
+        <PoolBuilder
+          character={character}
+          defaultSkillId={item.skill}
+          defaultAttribute={skillDef?.primaryAttribute ?? 'agility'}
+          referenceNotes={referenceNotes}
+        />
+      );
+    }
+
+    const actions = (
+      <>
+        {rollButton}
+        {isFirearm && (
+          <>
+            <SecondaryButton onClick={() => setConfigWeaponId((prev) => (prev === instanceId ? null : instanceId))}>
+              {configWeaponId === instanceId ? 'Hide Config' : 'Configure'}
+            </SecondaryButton>
+            <SecondaryButton onClick={() => setAttachWeaponId(instanceId)}>Attach</SecondaryButton>
+          </>
+        )}
+        {isArmorHousing && (
+          <SecondaryButton onClick={() => setAttachHousingContext({ instanceId, pool: 'armor' })}>Attach</SecondaryButton>
+        )}
+        {isDeviceHousing && (
+          <SecondaryButton onClick={() => setAttachHousingContext({ instanceId, pool: 'device' })}>Attach</SecondaryButton>
+        )}
+        {isCyberwareHousing && (
+          <SecondaryButton onClick={() => setAttachHousingContext({ instanceId, pool: 'cyberware' })}>Attach</SecondaryButton>
+        )}
+        {isMatrixHousing && (
+          <SecondaryButton onClick={() => setAttachHousingContext({ instanceId, pool: 'matrix' })}>Attach</SecondaryButton>
+        )}
+      </>
+    );
+
+    const detailsSlot = (
+      <>
+        <ItemDetails item={item} config={entry.config} />
+        {mounts && (
+          <Mounts>
+            {Object.entries(mounts).map(([mount, count]) => `${capitalize(mount)}: ${count}`).join(' · ')}
+          </Mounts>
+        )}
+        {isArmorHousing && <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="armor" />}
+        {isDeviceHousing && <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="device" />}
+        {isCyberwareHousing && <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="cyberware" />}
+        {isMatrixHousing && <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="matrix" />}
+      </>
+    );
+
+    return (
+      <OwnedGearCard
+        key={instanceId}
+        item={item}
+        configLabel={configLabel}
+        detailsSlot={detailsSlot}
+        onOpenDetail={() => setDetailInstanceId(instanceId)}
+        actions={actions}
+        onRemove={() => handleRemove(instanceId)}
+      >
+        {isFirearm && configWeaponId === instanceId && (
+          <WeaponConfig character={character} instanceId={instanceId} item={item} touch={touch} />
+        )}
+
+        {attachments.length > 0 && (
+          <Attachments>
+            {attachments.map(([attId, attEntry]) => {
+              const attItem = ALL_GEAR[attEntry.itemId];
+              if (!attItem) return null;
+              return (
+                <AttachmentRow key={attId}>
+                  <div>
+                    <AttachmentName>{attItem.label}</AttachmentName>
+                    <ItemDetails item={attItem} config={attEntry.config} />
+                  </div>
+                  <IconButton onClick={() => handleDetach(attId)} title="Detach">−</IconButton>
+                </AttachmentRow>
+              );
+            })}
+          </Attachments>
+        )}
+      </OwnedGearCard>
+    );
   };
 
-  if (topLevelEntries.length === 0) {
-    return <p className="sr-gear-list-empty">No gear owned yet — buy something from the Gear tab.</p>;
+  const hasAnyGear = topLevelEntries.some(([, entry]) => {
+    const item = ALL_GEAR[entry.itemId];
+    return item && categoryOf(item) != null;
+  });
+
+  if (!hasAnyGear) {
+    return <Empty>No gear owned yet — buy something from the Market.</Empty>;
   }
 
   return (
     <div className="sr-gear-list">
-      {topLevelEntries.map(([instanceId, entry]) => {
-        const item = ALL_GEAR[entry.itemId];
-        if (!item) return null;
-        const configLabel = formatConfig(entry.config);
-        const isCyberlimb = item.tags?.includes('cyberlimb');
-        const isFirearm = item.category === 'firearm';
-        const isArmorHousing = isHousingFor(item, 'armor');
-        const isDeviceHousing = isHousingFor(item, 'device');
-        const isCyberwareHousing = isHousingFor(item, 'cyberware');
-        const isMatrixHousing = isHousingFor(item, 'matrix');
-        const attachments = (isFirearm || isArmorHousing || isDeviceHousing || isCyberwareHousing || isMatrixHousing)
-          ? character.gearManager.attachmentsOf(instanceId)
-          : [];
-        const mounts = isFirearm && attachments.length > 0 ? mountSummary(attachments) : null;
-
+      {SECTIONS.map(({ key, title }) => {
+        const entries = bySection[key];
+        if (entries.length === 0) return null;
         return (
-          <div className="sr-gear-list-row" key={instanceId}>
-            <div className="sr-gear-list-main">
-              <div className="sr-gear-list-identity">
-                <div className="sr-gear-list-name">{item.label}</div>
-                {configLabel && <div className="sr-gear-list-config">{configLabel}</div>}
-                <ItemDetails item={item} config={entry.config} />
-                {mounts && (
-                  <div className="sr-gear-list-mounts">
-                    {Object.entries(mounts).map(([mount, count]) => `${capitalize(mount)}: ${count}`).join(' · ')}
-                  </div>
-                )}
-                {isArmorHousing && (
-                  <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="armor" />
-                )}
-                {isDeviceHousing && (
-                  <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="device" />
-                )}
-                {isCyberwareHousing && (
-                  <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="cyberware" />
-                )}
-                {isMatrixHousing && (
-                  <CapacitySummary housingItem={item} housingConfig={entry.config} attachments={attachments} pool="matrix" />
-                )}
-              </div>
-
-              {isCyberlimb && (
-                <div className="sr-gear-list-actions">
-                  {ENHANCEMENTS.map((e) => (
-                    <button key={e.itemId} className="sr-btn sr-btn--secondary" onClick={() => openEnhance(instanceId, e)}>
-                      {e.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {isFirearm && (
-                <div className="sr-gear-list-actions">
-                  <button className="sr-btn sr-btn--secondary" onClick={() => setConfigWeaponId((prev) => (prev === instanceId ? null : instanceId))}>
-                    {configWeaponId === instanceId ? 'Hide Config' : 'Configure'}
-                  </button>
-                  <button className="sr-btn sr-btn--secondary" onClick={() => setAttachWeaponId(instanceId)}>Attach</button>
-                </div>
-              )}
-              {isArmorHousing && (
-                <div className="sr-gear-list-actions">
-                  <button className="sr-btn sr-btn--secondary" onClick={() => setAttachHousingContext({ instanceId, pool: 'armor' })}>Attach</button>
-                </div>
-              )}
-              {isDeviceHousing && (
-                <div className="sr-gear-list-actions">
-                  <button className="sr-btn sr-btn--secondary" onClick={() => setAttachHousingContext({ instanceId, pool: 'device' })}>Attach</button>
-                </div>
-              )}
-              {isCyberwareHousing && (
-                <div className="sr-gear-list-actions">
-                  <button className="sr-btn sr-btn--secondary" onClick={() => setAttachHousingContext({ instanceId, pool: 'cyberware' })}>Attach</button>
-                </div>
-              )}
-              {isMatrixHousing && (
-                <div className="sr-gear-list-actions">
-                  <button className="sr-btn sr-btn--secondary" onClick={() => setAttachHousingContext({ instanceId, pool: 'matrix' })}>Attach</button>
-                </div>
-              )}
-
-              <button className="sr-icon-btn" onClick={() => handleRemove(instanceId)} title="Remove">−</button>
-            </div>
-
-            {isFirearm && configWeaponId === instanceId && (
-              <WeaponConfig character={character} instanceId={instanceId} item={item} touch={touch} />
-            )}
-
-            {attachments.length > 0 && (
-              <div className="sr-gear-list-attachments">
-                {attachments.map(([attId, attEntry]) => {
-                  const attItem = ALL_GEAR[attEntry.itemId];
-                  if (!attItem) return null;
-                  return (
-                    <div className="sr-gear-list-attachment-row" key={attId}>
-                      <div>
-                        <span className="sr-gear-list-attachment-name">{attItem.label}</span>
-                        <ItemDetails item={attItem} config={attEntry.config} />
-                      </div>
-                      <button className="sr-icon-btn" onClick={() => handleDetach(attId)} title="Detach">−</button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <CollapsibleSection key={key} id={`gear-list-${key}`} title={title} defaultOpen>
+            <Section>
+              <SectionCards>
+                {entries.map(([instanceId, entry]) => renderCard(instanceId, entry))}
+              </SectionCards>
+            </Section>
+          </CollapsibleSection>
         );
       })}
-
-      {enhanceContext && (
-        <CyberlimbEnhanceModal
-          character={character}
-          {...enhanceContext}
-          onClose={() => setEnhanceContext(null)}
-        />
-      )}
 
       {attachWeaponId && (
         <WeaponAttachModal
@@ -333,6 +424,15 @@ export default function GearList({ character }) {
           housingInstanceId={attachHousingContext.instanceId}
           pool={attachHousingContext.pool}
           onClose={() => setAttachHousingContext(null)}
+        />
+      )}
+
+      {detailInstanceId && (
+        <GearDetailModal
+          character={character}
+          instanceId={detailInstanceId}
+          touch={touch}
+          onClose={() => setDetailInstanceId(null)}
         />
       )}
     </div>

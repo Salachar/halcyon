@@ -22,6 +22,37 @@
 // respect (skip adding this penalty when building a resistance pool),
 // not something woundPenalty itself can express, since it's just a
 // single number with no notion of what kind of test it's for.
+//
+// DERIVED VALUES (this pass): Composure, Judge Intentions, Memory,
+// Lift/Carry, and Physical Attack Rating are all real, sourced
+// attribute-only tests (04-character-creation.md's "Final
+// Calculations" section) — plain attribute sums, confirmed against a
+// real Foundry character sheet's own numbers (Willpower+Charisma,
+// Willpower+Intuition, Logic+Intuition, Body+Willpower, and
+// Reaction+Strength respectively). Each gets a manual Adjustment
+// margin, same "derive, don't duplicate" instinct as woundPenalty and
+// effectiveMagicResonance already use — the base formula itself is
+// never mutated, only a separate adjustment number gets stored and
+// added on top. This keeps "why does this number look odd" always
+// answerable: either the real formula produced it, or someone
+// deliberately adjusted it, never an ambiguous mix of both in one
+// field. Physical/Stun Condition Monitor max — also technically
+// "Derived Values" per the book — are deliberately NOT duplicated
+// here; they're already shown once, in the Condition Monitor itself.
+//
+// Initiative (Physical/Astral/Matrix) gets the same Adjustment
+// treatment, but its BASE formulas are NOT computed here — Physical
+// depends on Adept Power levels (Improved Reflexes), Matrix depends on
+// GearManager's Device Mode and composited persona stats, neither of
+// which Character should reach into directly. Only the manual
+// adjustment margin (Score + Dice, per type) lives here; the display
+// component combines its own live-computed base with
+// character.initiativeAdjustments to get the final shown value.
+// Astral Initiative = Logic + Intuition + 2D6 flat (Astral Combat
+// Reference table) — confirmed, and deliberately NOT boosted by
+// Improved Reflexes' bonus dice, since the rulebook's own FAQ states
+// bonus Initiative dice apply to the physical world only, never
+// astral projection or VR.
 
 import { METATYPES } from '@data/character/metatypes';
 import GearManager from './GearManager';
@@ -31,6 +62,25 @@ const CORE_ATTRIBUTES = [
   'body', 'agility', 'reaction', 'strength',
   'willpower', 'logic', 'intuition', 'charisma', 'edge',
 ];
+
+const DEFAULT_DERIVED_VALUE_ADJUSTMENTS = {
+  physicalAttackRating: 0,
+  composure: 0,
+  judgeIntentions: 0,
+  memory: 0,
+  liftCarry: 0,
+};
+
+const DEFAULT_ATTRIBUTE_ADJUSTMENTS = {
+  body: 0, agility: 0, reaction: 0, strength: 0,
+  willpower: 0, logic: 0, intuition: 0, charisma: 0, edge: 0,
+};
+
+const DEFAULT_INITIATIVE_ADJUSTMENTS = {
+  physical: { score: 0, dice: 0 },
+  astral: { score: 0, dice: 0 },
+  matrix: { score: 0, dice: 0 },
+};
 
 class Character {
   _id;
@@ -45,6 +95,28 @@ class Character {
   };
   _magicResonance = 0; // meaning depends on magicType — Magic for casters/adepts, Resonance for technomancers
   _currentEdge = null; // fluctuating in-session Edge — distinct from the base attributes.edge rating, which never changes without a real advancement
+
+  _derivedValueAdjustments = { ...DEFAULT_DERIVED_VALUE_ADJUSTMENTS };
+  // Persisting attribute adjustment — deliberately separate from
+  // getAttribute()'s own base value, same "base formula untouched,
+  // adjustment stored alongside it" pattern as Derived Values and
+  // Initiative. Meant for something that actually sticks around
+  // (Wired Reflexes, a permanent cyberware bonus, a lasting magical
+  // effect) rather than a one-off situational modifier — those still
+  // belong as a manual PoolBuilder modifier on the specific roll, not
+  // here. getAttribute() itself is UNCHANGED by this and keeps
+  // returning the pure base value everywhere it's already called;
+  // getEffectiveAttribute() is the new, separate way to read base+
+  // adjustment together. Existing call sites (pool building, Derived
+  // Values, Initiative, etc.) are NOT updated to use the effective
+  // version yet — that happens opportunistically as each is revisited,
+  // not all at once in this pass.
+  _attributeAdjustments = { ...DEFAULT_ATTRIBUTE_ADJUSTMENTS };
+  _initiativeAdjustments = {
+    physical: { ...DEFAULT_INITIATIVE_ADJUSTMENTS.physical },
+    astral: { ...DEFAULT_INITIATIVE_ADJUSTMENTS.astral },
+    matrix: { ...DEFAULT_INITIATIVE_ADJUSTMENTS.matrix },
+  };
 
   _skills = {}; // { [skillId]: { rank, specialization, expertise } } — keys match SKILLS ids
   _knowledgeSkills = []; // [{ label, category: 'knowledge' | 'language', proficiency? }] — freeform, no fixed id list
@@ -104,6 +176,14 @@ class Character {
     // new character (or one from before this field existed) starts at
     // full Edge, same as showing up to a fresh session should.
     this._currentEdge = typeof data.currentEdge === 'number' ? data.currentEdge : this._attributes.edge;
+
+    this._derivedValueAdjustments = { ...DEFAULT_DERIVED_VALUE_ADJUSTMENTS, ...(data.derivedValueAdjustments || {}) };
+    this._attributeAdjustments = { ...DEFAULT_ATTRIBUTE_ADJUSTMENTS, ...(data.attributeAdjustments || {}) };
+    this._initiativeAdjustments = {
+      physical: { ...DEFAULT_INITIATIVE_ADJUSTMENTS.physical, ...(data.initiativeAdjustments?.physical || {}) },
+      astral: { ...DEFAULT_INITIATIVE_ADJUSTMENTS.astral, ...(data.initiativeAdjustments?.astral || {}) },
+      matrix: { ...DEFAULT_INITIATIVE_ADJUSTMENTS.matrix, ...(data.initiativeAdjustments?.matrix || {}) },
+    };
 
     this._skills = data.skills || {};
     this._knowledgeSkills = data.knowledgeSkills || [];
@@ -190,6 +270,25 @@ class Character {
     this._attributes[attr] = value;
   }
 
+  // Persisting attribute adjustment — separate storage from the base
+  // value above, no range validation against metatype limits (an
+  // adjustment is explicitly meant to push past what character
+  // creation alone would allow — that's the point of a permanent
+  // Wired Reflexes-style bonus). getEffectiveAttribute() is the new
+  // read path combining the two; getAttribute() itself is untouched
+  // and keeps returning the pure base everywhere it's already used.
+
+  get attributeAdjustments() { return this._attributeAdjustments; }
+
+  setAttributeAdjustment(attr, value) {
+    if (!CORE_ATTRIBUTES.includes(attr)) return;
+    this._attributeAdjustments = { ...this._attributeAdjustments, [attr]: value };
+  }
+
+  getEffectiveAttribute(attr) {
+    return this.getAttribute(attr) + (this._attributeAdjustments[attr] ?? 0);
+  }
+
   get magicResonance() { return this._magicResonance; }
   set magicResonance(value) {
     if (value < 0 || value > 6) return;
@@ -246,6 +345,71 @@ class Character {
   // manual: "is this fight actually over" isn't worth trying to detect.
   resetEdge() {
     this._currentEdge = this._attributes.edge;
+  }
+
+  // ---- Derived Values (attribute-only tests) — real, sourced formulas
+  // (04-character-creation.md), each with a separate manual Adjustment
+  // margin. *Base getters expose the pure formula; the plain getters
+  // add the stored adjustment on top. Physical/Stun Condition Monitor
+  // max intentionally NOT duplicated here — already shown once, on the
+  // Condition Monitor itself.
+
+  get physicalAttackRatingBase() {
+    return this.getAttribute('reaction') + this.getAttribute('strength');
+  }
+  get physicalAttackRating() {
+    return this.physicalAttackRatingBase + this._derivedValueAdjustments.physicalAttackRating;
+  }
+
+  get composureBase() {
+    return this.getAttribute('willpower') + this.getAttribute('charisma');
+  }
+  get composure() {
+    return this.composureBase + this._derivedValueAdjustments.composure;
+  }
+
+  get judgeIntentionsBase() {
+    return this.getAttribute('willpower') + this.getAttribute('intuition');
+  }
+  get judgeIntentions() {
+    return this.judgeIntentionsBase + this._derivedValueAdjustments.judgeIntentions;
+  }
+
+  get memoryBase() {
+    return this.getAttribute('logic') + this.getAttribute('intuition');
+  }
+  get memory() {
+    return this.memoryBase + this._derivedValueAdjustments.memory;
+  }
+
+  get liftCarryBase() {
+    return this.getAttribute('body') + this.getAttribute('willpower');
+  }
+  get liftCarry() {
+    return this.liftCarryBase + this._derivedValueAdjustments.liftCarry;
+  }
+
+  get derivedValueAdjustments() { return this._derivedValueAdjustments; }
+  setDerivedValueAdjustment(key, value) {
+    if (!(key in this._derivedValueAdjustments)) return;
+    this._derivedValueAdjustments = { ...this._derivedValueAdjustments, [key]: value };
+  }
+
+  // ---- Initiative Adjustments — Score/Dice manual margin per type
+  // (physical/astral/matrix). The BASE formulas themselves are NOT
+  // computed here — Physical depends on Adept Power levels (Improved
+  // Reflexes), Matrix depends on GearManager's Device Mode and
+  // composited persona stats, neither of which Character reaches into
+  // directly. The display component combines its own live-computed
+  // base with these adjustments to get the final shown value.
+
+  get initiativeAdjustments() { return this._initiativeAdjustments; }
+  setInitiativeAdjustment(type, field, value) {
+    if (!this._initiativeAdjustments[type] || !(field in this._initiativeAdjustments[type])) return;
+    this._initiativeAdjustments = {
+      ...this._initiativeAdjustments,
+      [type]: { ...this._initiativeAdjustments[type], [field]: value },
+    };
   }
 
   // ---- Skills ----
@@ -484,6 +648,9 @@ class Character {
       attributes: this.attributes,
       magicResonance: this.magicResonance,
       currentEdge: this.currentEdge,
+      derivedValueAdjustments: this.derivedValueAdjustments,
+      initiativeAdjustments: this.initiativeAdjustments,
+      attributeAdjustments: this.attributeAdjustments,
       skills: this.skills,
       knowledgeSkills: this.knowledgeSkills,
       qualities: this.qualities,

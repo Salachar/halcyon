@@ -66,14 +66,24 @@ export const AMMO_TYPE_OPTIONS = Object.keys(AMMO_TYPE_MODIFIERS);
 
 // Effective Attack Ratings — base (5-value range-band array, nulls
 // preserved for ranges the weapon can't reach) + mode modifier + ammo
-// modifier, applied uniformly across every non-null range. Confirmed
-// against the worked example directly: an AR modifier changes every
-// listed range equally, not per-range.
-export function resolveEffectiveAttackRatings(item, selectedMode, loadedAmmoType) {
+// modifier + an optional manual adjustment, applied uniformly across
+// every non-null range. Confirmed against the worked example directly:
+// an AR modifier changes every listed range equally, not per-range —
+// the manual adjustment follows that same grain rather than
+// introducing new per-range granularity nothing else in this
+// computation has.
+//
+// `manualAdjustment` is new — a per-instance persisting nudge (a
+// player-owned rifle's Attack Rating pushed away from the catalog
+// baseline), stored on GearManager's existing weaponState alongside
+// selectedMode/loadedAmmoType (no GearManager changes needed — that
+// state object already merges whatever keys are set). Defaults to 0,
+// so every existing caller is unaffected.
+export function resolveEffectiveAttackRatings(item, selectedMode, loadedAmmoType, manualAdjustment = 0) {
   const base = item.stats?.attackRatings || [];
   const modeModifier = FIRE_MODE_MODIFIERS[selectedMode]?.attackRatingModifier ?? 0;
   const ammoModifier = AMMO_TYPE_MODIFIERS[loadedAmmoType]?.attackRatingModifier ?? 0;
-  const totalModifier = modeModifier + ammoModifier;
+  const totalModifier = modeModifier + ammoModifier + manualAdjustment;
 
   return base.map((val) => (val == null ? null : val + totalModifier));
 }

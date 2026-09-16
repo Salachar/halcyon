@@ -1,42 +1,65 @@
 import { useState } from 'react';
+import CasinoIcon from '@mui/icons-material/Casino';
 
+import { ModalMedium } from '@components/Modal';
+import { SecondaryButton, IconButton } from '@components/Buttons';
 import { SKILL_IDS, SKILLS } from '@data/character/skills';
 import { ATTRIBUTE_IDS, ATTRIBUTES } from '@data/character/attributes';
 import { buildOpenPool } from '@utils/skillEconomy';
 import Dice from '@components/Dice';
 
-import './poolBuilder.css';
+import {
+  RollButton, UntrainedButton, WarningBanner, ReferenceBlock, FieldRow, Field, FieldLabel,
+  ExtrasList, ExtraRow, AddModifierRow, ActionsRow,
+} from './PoolBuilder.styles';
 
-// One shared, fully-editable pool builder — the generalization the
-// project's been moving toward: a single roller, geared to the
-// situation by default, with nothing locked down. Skill and Attribute
-// are independent dropdowns (any skill can pair with any attribute,
-// not constrained to what that skill itself defines as valid — the
-// user should be able to make Jack Out a Perception/Charisma roll if
-// they want), arbitrary named modifiers can be added or removed
-// freely, and Reset snaps everything back to the original geared
-// default in one click. Feeds the resulting pool straight into Dice,
-// unmodified — Dice doesn't know or care that this pool came from an
-// editable builder instead of a fixed buildSkillPool call.
+// Redesigned from an inline-expanding widget into a button that opens
+// a full modal — the whole point being tablet space: a plain "8d6"
+// button costs nothing inline, and everything that used to be
+// squeezed into a collapsed/expanded toggle (Skill/Attribute pickers,
+// modifiers, Reset) now gets real room inside the modal instead.
 //
-// Collapsed by default now — editing controls (skill/attribute swap,
-// modifiers, reset) sit behind a small pencil toggle, so a plain roll
-// stays one tap on Dice's own collapsed summary, matching the original
-// "sleek/hidden" ask: nothing about the free-editing capability should
-// cost a plain roller anything visually. The pencil gets a filled dot
-// whenever the pool has actually drifted from its geared default, so
-// a collapsed row still hints something's been changed underneath.
+// The old two-step "Untrained button -> separate ConfirmationModal ->
+// then PoolBuilder appears" dance (SkillRow's own gating) collapses
+// into one thing here: an untrained pool just shows "Untrained" as its
+// own button label, and the warning becomes a banner INSIDE the same
+// modal rather than a wall blocking access to it. Opening the modal at
+// all is already the deliberate step that confirmation was providing.
 //
-// Only one real consumer today (MatrixActionsReference, Combat/Vehicle
-// Actions References) — nothing stops a retrofitted SkillRow importing
-// this directly once that migration happens.
-export default function PoolBuilder({ character, defaultSkillId, defaultAttribute, onHits }) {
-  const [editing, setEditing] = useState(false);
+// `gateUntrained` is opt-in (default false), NOT universal — in
+// SkillRow, the skill is a CHOICE the player is looking at on their
+// own sheet, so "you have zero training here, sure?" adds real value.
+// In VehicleActionsReference/MatrixActionsReference/
+// CombatActionsReference, the skill pairing is FIXED by the rules for
+// that action, so those pages default to gateUntrained=false — a real,
+// penalized pool shown directly, no gate.
+//
+// Now uses the shared Modal (Medium — the field rows/modifier list
+// content doesn't need Large's width) and Buttons components instead
+// of the old sr-modal-*/sr-btn className shell — same conversion
+// EdgeModal already went through. sr-number-input stays a plain
+// className on the select/input elements, matching that same
+// conversion's choice to leave genuinely shared, widely-used input
+// styling alone rather than reimplement it as a one-off here.
+// `referenceNotes` is new — optional, any React node. Solves a real
+// gap: a weapon's actual dice pool is just Skill+Attribute, but Damage
+// Value and the per-range Attack Rating array aren't pool components
+// at all — they're combat math a player needs to see WHILE rolling,
+// without being mistaken for real pool inputs. Rendered above the
+// pool-building UI in its own distinctly-styled block. Generic, not
+// weapon-specific — any caller can pass whatever reference content a
+// given roll needs.
+export default function PoolBuilder({ character, defaultSkillId, defaultAttribute, onHits, gateUntrained = false, referenceNotes }) {
+  const [modalOpen, setModalOpen] = useState(false);
   const [skillId, setSkillId] = useState(defaultSkillId ?? '');
   const [attributeKey, setAttributeKey] = useState(defaultAttribute ?? 'logic');
   const [extras, setExtras] = useState([]);
   const [newLabel, setNewLabel] = useState('');
   const [newValue, setNewValue] = useState('');
+
+  const skillDef = skillId ? SKILLS[skillId] : null;
+  const rank = skillDef ? character.getSkillRank(skillId) : null;
+  const isUntrained = gateUntrained && Boolean(skillDef && rank === 0 && !skillDef.untrained);
 
   const basePool = buildOpenPool(character, skillId, attributeKey);
   const extrasTotal = extras.reduce((sum, e) => sum + e.value, 0);
@@ -66,69 +89,89 @@ export default function PoolBuilder({ character, defaultSkillId, defaultAttribut
 
   const isDefault = skillId === (defaultSkillId ?? '') && attributeKey === (defaultAttribute ?? 'logic') && extras.length === 0;
 
+  const Button = isUntrained ? UntrainedButton : RollButton;
+
   return (
-    <div className="sr-pool-builder">
-      <div className="sr-pool-builder-collapsed-row">
-        <button
-          className={isDefault ? 'sr-icon-btn' : 'sr-icon-btn sr-pool-builder-edit-btn--changed'}
-          onClick={() => setEditing((v) => !v)}
-          title={editing ? 'Done editing' : 'Edit pool'}
-        >
-          ✎
-        </button>
-        <span className="sr-pool-builder-summary-label">
-          {SKILLS[skillId]?.label ?? 'No Skill'} + {ATTRIBUTES[attributeKey]?.label ?? attributeKey}
-        </span>
-      </div>
+    <>
+      <Button onClick={() => setModalOpen(true)}>
+        {isUntrained ? 'Untrained' : (
+          <>
+            {pool.total}d6 <CasinoIcon fontSize="small" />
+          </>
+        )}
+      </Button>
 
-      {editing && (
-        <div className="sr-pool-builder-edit">
-          <div className="sr-pool-builder-row">
-            <div className="sr-pool-builder-field">
-              <span className="sr-pool-builder-label">Skill</span>
-              <select className="sr-number-input" value={skillId} onChange={(e) => setSkillId(e.target.value)}>
-                <option value="">None</option>
-                {SKILL_IDS.map((id) => <option key={id} value={id}>{SKILLS[id].label}</option>)}
-              </select>
-            </div>
-            <div className="sr-pool-builder-field">
-              <span className="sr-pool-builder-label">Attribute</span>
-              <select className="sr-number-input" value={attributeKey} onChange={(e) => setAttributeKey(e.target.value)}>
-                {ATTRIBUTE_IDS.map((id) => <option key={id} value={id}>{ATTRIBUTES[id].label}</option>)}
-              </select>
-            </div>
-          </div>
+      <ModalMedium
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={`${SKILLS[skillId]?.label ?? 'No Skill'} + ${ATTRIBUTES[attributeKey]?.label ?? attributeKey}`}
+      >
+        {referenceNotes && <ReferenceBlock>{referenceNotes}</ReferenceBlock>}
 
-          {extras.length > 0 && (
-            <div className="sr-pool-builder-extras">
-              {extras.map((e) => (
-                <div key={e.id} className="sr-pool-builder-extra-row">
-                  <span>{e.label} {e.value >= 0 ? '+' : ''}{e.value}</span>
-                  <button className="sr-icon-btn" onClick={() => removeModifier(e.id)} title="Remove">−</button>
-                </div>
-              ))}
-            </div>
-          )}
+        {isUntrained && (
+          <WarningBanner>
+            No ranks in {skillDef.label} — this can't normally be attempted untrained. Rolling anyway applies a real penalty, already reflected in the pool below.
+          </WarningBanner>
+        )}
 
-          <div className="sr-pool-builder-add">
-            <div className="sr-pool-builder-field sr-pool-builder-add-label">
-              <span className="sr-pool-builder-label">Add Modifier</span>
-              <input type="text" className="sr-number-input" placeholder="Label" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
-            </div>
-            <div className="sr-pool-builder-field sr-pool-builder-add-value">
-              <span className="sr-pool-builder-label">Dice</span>
-              <input type="number" className="sr-number-input" value={newValue} onChange={(e) => setNewValue(e.target.value)} />
-            </div>
-            <button className="sr-btn sr-btn--secondary" onClick={handleAddModifier}>Add</button>
-          </div>
+        <FieldRow>
+          <Field>
+            <FieldLabel>Skill</FieldLabel>
+            <select className="sr-number-input" value={skillId} onChange={(e) => setSkillId(e.target.value)}>
+              <option value="">None</option>
+              {SKILL_IDS.map((id) => <option key={id} value={id}>{SKILLS[id].label}</option>)}
+            </select>
+          </Field>
+          <Field>
+            <FieldLabel>Attribute</FieldLabel>
+            <select className="sr-number-input" value={attributeKey} onChange={(e) => setAttributeKey(e.target.value)}>
+              {ATTRIBUTE_IDS.map((id) => <option key={id} value={id}>{ATTRIBUTES[id].label}</option>)}
+            </select>
+          </Field>
+        </FieldRow>
 
-          <div className="sr-pool-builder-actions">
-            <button className="sr-btn sr-btn--secondary" disabled={isDefault} onClick={handleReset}>Reset to Default</button>
-          </div>
-        </div>
-      )}
+        {extras.length > 0 && (
+          <ExtrasList>
+            {extras.map((e) => (
+              <ExtraRow key={e.id}>
+                <span>{e.label} {e.value >= 0 ? '+' : ''}{e.value}</span>
+                <IconButton onClick={() => removeModifier(e.id)} title="Remove">−</IconButton>
+              </ExtraRow>
+            ))}
+          </ExtrasList>
+        )}
 
-      <Dice pool={pool} onHits={onHits} />
-    </div>
+        <AddModifierRow>
+          <Field>
+            <FieldLabel>Add Modifier</FieldLabel>
+            <input
+              type="text"
+              className="sr-number-input"
+              placeholder="Label"
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+            />
+          </Field>
+          <Field style={{ maxWidth: '6rem' }}>
+            <FieldLabel>Dice</FieldLabel>
+            <input
+              type="number"
+              className="sr-number-input"
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+            />
+          </Field>
+          <SecondaryButton onClick={handleAddModifier}>Add</SecondaryButton>
+        </AddModifierRow>
+
+        <ActionsRow>
+          <SecondaryButton disabled={isDefault} onClick={handleReset}>
+            Reset to Default
+          </SecondaryButton>
+        </ActionsRow>
+
+        <Dice pool={pool} onHits={onHits} />
+      </ModalMedium>
+    </>
   );
 }

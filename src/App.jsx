@@ -7,11 +7,8 @@ import Runners from './pages/Runners';
 
 import Characters from './pages/Characters';
 import Gear from './pages/Gear';
-import Combat from './pages/Combat';
-import Matrix from './pages/Matrix';
 import ShadowSea from './pages/ShadowSea';
 import Notes from './pages/Notes';
-import Vehicles from './pages/Vehicles';
 
 import { SocketProvider } from '@hooks/useSocket';
 import { GameMessagesProvider } from '@context/GameMessagesContext';
@@ -67,11 +64,8 @@ export default function App() {
 
               <SrNavLink to="/characters" label="Characters" live />
               <SrNavLink to="/gear" label="Market" live />
-              <SrNavLink to="/combat" label="Combat" live />
-              <SrNavLink to="/matrix" label="Matrix" live />
               <SrNavLink to="/shadowsea" label="ShadowSea" live />
               <SrNavLink to="/notes" label="Notes" live />
-              <SrNavLink to="/vehicles" label="Vehicles" live />
 
               {navExtra && <div className="sr-nav-extra">{navExtra}</div>}
             </nav>
@@ -85,12 +79,9 @@ export default function App() {
                 <Route path="/rules" element={<Rules />} />
                 <Route path="/runners" element={<Runners />} />
                 <Route path="/gear" element={<Gear />} />
-                <Route path="/combat" element={<Combat />} />
-                <Route path="/matrix" element={<Matrix />} />
                 <Route path="/characters/:slug?" element={<Characters />} />
                 <Route path="/shadowsea" element={<ShadowSea />} />
                 <Route path="/notes" element={<Notes />} />
-                <Route path="/vehicles" element={<Vehicles />} />
               </Routes>
             </div>
           </div>

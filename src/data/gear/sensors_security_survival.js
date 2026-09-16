@@ -25,23 +25,89 @@
 // compatible-device family the PAN rules describe. Security devices and
 // Breaking/Entering tools are split by whether they manipulate an
 // electronic/RFID signal (wireless) or are purely mechanical (not).
-// CORRECTION (this pass): the line below used to claim Survival Gear
-// has NO wireless items at all. That was wrong — it was written from
-// the condensed descriptions, not the source prose, which is exactly
-// the blind spot this whole project pass exists to catch. Gas Mask,
-// Gecko Tape Gloves, and Hazmat Suit all have real "Wireless bonus:"
-// text in source and are now marked `wireless: true` accordingly. See
-// the PAN conversation for the rest of the per-item reasoning.
+// CORRECTION: the line below used to claim Survival Gear has NO
+// wireless items at all. That was wrong — it was written from the
+// condensed descriptions, not the source prose, which is exactly the
+// blind spot this whole project pass exists to catch. Gas Mask, Gecko
+// Tape Gloves, and Hazmat Suit all have real "Wireless bonus:" text in
+// source and are marked `wireless: true` accordingly. See the PAN
+// conversation for the rest of the per-item reasoning.
 //
-// CAPACITY FIELD SPLIT (this pass): per the project-wide convention,
-// all Capacity here — auditory device housings, audio enhancements,
-// sensor housings, and the sensor array/single sensor's own capacity
-// cost — falls into the same "electronics/optical" pool established in
+// CAPACITY FIELD SPLIT: per the project-wide convention, all Capacity
+// here — auditory device housings, audio enhancements, sensor
+// housings, and the sensor array/single sensor's own capacity cost —
+// falls into the same "electronics/optical" pool established in
 // armor_electronics.js (that file's capacity-split note explicitly
 // groups sensor housings into the same pool as glasses/goggles), so it
 // uses the same `deviceCapacityProvided[Range]` (housings) /
 // `deviceCapacityUsed[PerRating]` (things installed into them) fields,
 // not a separate audio-specific pool.
+//
+// ============================================================================
+// SCHEMA PASS 2 (the resolved-decisions pass) — applied on top of
+// everything in PASS 1 below:
+//
+// D1. `referenceOnly: true` — a new item-root boolean meaning "no stat
+//     field on this item lets the app apply ANY of its effects; a human
+//     adjudicates all of them." The test is deliberately mechanical so
+//     it isn't a per-item judgment call: an effect is BACKED only if a
+//     live computed field drives it — `damageValue`, `attackRatings`,
+//     `skill`, `structure`, `structuralArmor`, `flatDicePool`,
+//     `deviceModifiers`, or a `deviceCapacityProvided/Used` field.
+//     Purchase-time configuration (`ratingRange`, `costPer*`,
+//     `deviceRating`) does NOT count, since nothing reads it at play
+//     time. Item-level rather than per-entry, because per-entry would
+//     force `effects` entries to become objects and reverse the
+//     plain-string decision. 39 of the 48 items with effects qualify;
+//     the 9 that don't each carry a comment saying what backs them.
+// D2. BALLISTIC TENTS get `structuralArmor` + `structure` instead of
+//     the orphan `armorRating`, and lose `stats.size`. See the comment
+//     at the items themselves.
+// D3. `skill` MOVED TO THE ITEM ROOT on `grapple_gun`.
+// D4. CARD READER IS NO LONGER WIRELESS; Metal Restraints keeps its
+//     flag. See the comments at both items.
+// D5. `defaultAttachments` on CLIMBING GEAR and DIVING GEAR. Hazmat
+//     Suit deliberately gets none and takes `deviceCapacityProvided: 1`
+//     instead.
+//
+// SCHEMA PASS 1 — the original array/omittable-description pass:
+//
+// S1. `wirelessBonus` -> `wirelessBonuses`, and mechanical prose
+//     extracted from `description` into a new `effects` — both ARRAYS
+//     of plain strings, one distinct mechanic per entry, ordered active
+//     mechanics first and restrictions/compatibility last. This file
+//     was unusually prose-heavy: nearly every description here was
+//     load-bearing rules text with a sentence of flavor wrapped around
+//     it, so the extraction is larger than in armor_electronics.js.
+// S2. `description` IS NOW OMITTABLE — delete it and lose no gameplay
+//     information. Numbers already in a structured field are NOT
+//     restated in `effects`: the Miniwelder's and Monofilament
+//     Chainsaw's barrier DV live only in `damageValue`/`target`, each
+//     housing's Capacity only in `deviceCapacityProvided[Range]`, and
+//     the Sensor Array's Capacity cost only in
+//     `deviceCapacityUsedEqualsRating`.
+// S3. VARIANT SPLIT: Omnidirectional Mic's description buried a "micro
+//     version" with a DIFFERENT fixed Capacity (1, not the 1-6 range)
+//     and a DIFFERENT max range (5m). Two fixed, non-Rating-scaled
+//     differences at once, so it's a real separate purchase — split
+//     out as `omnidirectional_mic_micro`. Direct precedent: the same
+//     source pattern already produced a standalone `micro_camera` in
+//     armor_electronics.js rather than a note on `camera`.
+// S4. NO `defaultAttachments` AND NO `builtIn` ITEMS IN THIS FILE.
+//     Several items describe INCLUDED equipment (Climbing Gear's rope,
+//     Diving Gear's Cold Resistance wetsuit, Hazmat Suit's sensor
+//     slot), but each either explicitly says the component is bought
+//     separately or differs from the standalone catalog item's own
+//     stats. Flagged in the summary rather than forced into references
+//     that would misstate what the player actually gets.
+// ============================================================================
+
+// Shared by both Ballistic Tent variants — identical deployment and
+// camouflage behaviour, differing only in armor and price.
+const BALLISTIC_TENT_EFFECTS = [
+  'Self-inflating and steel-strutted; deployable in under 3 minutes.',
+  '+2 dice on Stealth tests when set against a building — the fabric doubles as urban camouflage.',
+];
 
 function sensorHousing(overrides) {
   return { category: 'sensor_housing', legality: null, image: null, ...overrides };
@@ -76,10 +142,15 @@ const directional_microphone = sensorHousingWireless({
   cost: null,
   costPerCapacity: 50,
   availability: 2,
-  description: 'Eavesdrops up to 100m away, must be pointed at the target. Solid objects/loud sound interfere.',
+  referenceOnly: true,
   tags: ['auditory'],
   stats: {
     deviceCapacityProvidedRange: [1, 6],
+    effects: [
+      'Eavesdrops on targets up to 100m away.',
+      'Must be pointed at the target.',
+      'Solid objects and loud ambient sound interfere.',
+    ],
   },
 });
 
@@ -89,7 +160,7 @@ const earbuds = sensorHousingWireless({
   cost: null,
   costPerCapacity: 50,
   availability: 1,
-  description: 'Hard to spot, near-indistinguishable from standard commlink/music-player earbuds.',
+  description: 'Hard to spot, and near-indistinguishable from standard commlink or music-player earbuds.',
   tags: ['auditory'],
   stats: {
     deviceCapacityProvidedRange: [1, 3],
@@ -102,7 +173,7 @@ const headphones = sensorHousingWireless({
   cost: null,
   costPerCapacity: 50,
   availability: 1,
-  description: 'Full headset, bulkier but more Capacity.',
+  description: 'A full headset — bulkier than earbuds, and it shows.',
   tags: ['auditory'],
   stats: {
     deviceCapacityProvidedRange: [1, 6],
@@ -115,10 +186,14 @@ const laser_mic = sensorHousingWireless({
   cost: null,
   costPerCapacity: 100,
   availability: 2,
-  description: 'Bounces a laser off a solid surface (like a windowpane) to read vibrations as sound. Max range 100m.',
+  referenceOnly: true,
   tags: ['auditory'],
   stats: {
     deviceCapacityProvidedRange: [1, 6],
+    effects: [
+      'Bounces a laser off a solid surface, such as a windowpane, to read its vibrations as sound.',
+      'Maximum range 100m.',
+    ],
   },
 });
 
@@ -128,22 +203,55 @@ const omnidirectional_mic = sensorHousingWireless({
   cost: null,
   costPerCapacity: 50,
   availability: 1,
-  description: 'Standard pickup, usually built into/linked with a commlink. Micro version is Capacity 1 only, max range 5m.',
+  description: 'The standard pickup, usually built into or linked with a commlink.',
+  referenceOnly: true,
   tags: ['auditory'],
   stats: {
     deviceCapacityProvidedRange: [1, 6],
+    effects: ['Picks up sound from all directions at once.'],
   },
 });
 
+// Split out from the standard mic's own description ("Micro version is
+// Capacity 1 only, max range 5m") — a fixed Capacity instead of the
+// 1-6 range AND a hard range limit the full-size version doesn't have,
+// so it's a separate purchase rather than a config of the same item.
+// Same treatment micro_camera already gets in armor_electronics.js.
+const omnidirectional_mic_micro = sensorHousingWireless({
+  id: 'omnidirectional_mic_micro',
+  label: 'Omnidirectional Mic, Micro',
+  cost: 50,
+  availability: 1,
+  description: 'The pinhead-sized version, for when the full-size pickup is too obvious.',
+  referenceOnly: true,
+  tags: ['auditory'],
+  stats: {
+    deviceCapacityProvided: 1,
+    effects: [
+      'Picks up sound from all directions at once.',
+      'Maximum range 5m.',
+    ],
+  },
+});
+
+// NOTE: "+1 dice pool on aural Perception tests" is exactly the shape
+// `flatDicePool` was built for (see additions.js), but this item has no
+// such field, so nothing can apply the bonus — hence referenceOnly.
+// Adding `flatDicePool: 1` would flip that; flagged rather than done.
 const audio_enhancement = sensorHousingWireless({
   id: 'audio_enhancement',
   label: 'Audio Enhancement',
   cost: 500,
   availability: 1,
-  description: 'Hear beyond normal frequency range, fine nuance discrimination, block distracting noise. +1 dice pool on aural Perception tests.',
+  referenceOnly: true,
   tags: ['auditory'],
   stats: {
     deviceCapacityUsed: 1,
+    effects: [
+      '+1 dice pool on aural Perception tests.',
+      'Hear beyond the normal frequency range.',
+      'Fine nuance discrimination, and blocks distracting noise.',
+    ],
   },
 });
 
@@ -153,11 +261,16 @@ const select_sound_filter_device = sensorHousingWireless({
   cost: null,
   costPerRating: 250,
   availability: 3,
-  description: 'Blocks background noise, focuses on chosen sound patterns (up to rating of them loaded). Actively listens to one group at a time, records/alerts on the rest. Standalone version — see also the implanted headware version.',
+  description: 'The standalone version — see also the implanted headware version.',
+  referenceOnly: true,
   tags: ['auditory'],
   stats: {
     ratingRange: [1, 3],
     deviceCapacityUsedPerRating: 1,
+    effects: [
+      'Blocks background noise and focuses on chosen sound patterns, up to Rating of them loaded.',
+      'Actively listens to one group at a time, recording or alerting on the rest.',
+    ],
   },
 });
 
@@ -166,12 +279,16 @@ const spatial_recognizer_device = sensorHousingWireless({
   label: 'Spatial Recognizer (Device)',
   cost: 1000,
   availability: 2,
-  wireless: true,
-  description: "Pinpoints a sound's source; use-it-or-lose-it bonus Edge on the relevant Perception test. Standalone version — see also the implanted headware version.",
+  description: 'The standalone version — see also the implanted headware version.',
+  referenceOnly: true,
   tags: ['auditory'],
   stats: {
     deviceCapacityUsed: 2,
-    wirelessBonus: '+1 dice pool on source-finding tests (stacks with other modifiers).',
+    effects: [
+      "Pinpoints a sound's source.",
+      'Use-it-or-lose-it bonus Edge on the relevant Perception test.',
+    ],
+    wirelessBonuses: ['+1 dice pool on source-finding tests, stacking with other modifiers.'],
   },
 });
 
@@ -183,7 +300,7 @@ const handheld_housing = sensorHousingWireless({
   cost: null,
   costPerCapacity: 100,
   availability: 1,
-  description: 'Portable sensor housing.',
+  description: 'A portable sensor housing.',
   tags: ['sensor'],
   stats: {
     deviceCapacityProvidedRange: [1, 3],
@@ -196,7 +313,7 @@ const wall_mounted_housing = sensorHousingWireless({
   cost: null,
   costPerCapacity: 250,
   availability: 1,
-  description: 'Fixed sensor housing.',
+  description: 'A fixed sensor housing.',
   tags: ['sensor'],
   stats: {
     deviceCapacityProvidedRange: [1, 6],
@@ -205,19 +322,24 @@ const wall_mounted_housing = sensorHousingWireless({
 
 // Capacity column in source literally reads "Rating" for the array —
 // its Capacity-cost (as installed in a housing) equals its own chosen
-// Rating, not a separate fixed number. New flag mirrors the existing
+// Rating, not a separate fixed number. The flag mirrors the existing
 // availabilityEqualsRating pattern used elsewhere in the catalog.
+// Not referenceOnly: deviceCapacityUsedEqualsRating is what actually
+// enforces "one sensor function per Rating point."
 const sensor_array = sensorHousingWireless({
   id: 'sensor_array',
   label: 'Sensor Array',
   cost: null,
   costPerRating: 1000,
   availability: 3,
-  description: 'Multiple sensor functions, one per rating point, purchased separately. Using it for Perception substitutes the sensor rating for the Perception skill.',
   tags: ['sensor'],
   stats: {
     ratingRange: [2, 8],
     deviceCapacityUsedEqualsRating: true,
+    effects: [
+      'Holds one sensor function per Rating point, each purchased separately.',
+      'Using it for Perception substitutes the sensor Rating for the Perception skill.',
+    ],
   },
 });
 
@@ -227,11 +349,11 @@ const single_sensor = sensorHousingWireless({
   cost: null,
   costPerRating: 100,
   availability: 2,
-  description: 'One sensor function (see SENSOR_FUNCTIONS for the available list and max ranges).',
   tags: ['sensor'],
   stats: {
     deviceCapacityUsed: 1,
     ratingRange: [1, 8],
+    effects: ['Holds one sensor function — see SENSOR_FUNCTIONS for the list and maximum ranges.'],
   },
 });
 
@@ -270,10 +392,15 @@ const containment_manacles = security({
   label: 'Containment Manacles',
   cost: 250,
   availability: 3,
-  description: 'Wrist+ankle restraint, restricts to 2m Move/3m Sprint and blocks cyber-implant weapon extension.',
+  description: 'A combined wrist and ankle restraint.',
+  referenceOnly: true,
   tags: ['security'],
   stats: {
     structure: 10,
+    effects: [
+      'Restricts the wearer to 2m Move and 3m Sprint.',
+      'Blocks cyber-implant weapon extension.',
+    ],
   },
 });
 
@@ -283,10 +410,12 @@ const key_lock = security({
   cost: null,
   costPerRating: 10,
   availability: 2,
-  description: "Old-fashioned, cheap, still around where tech hasn't caught up. Bypass with Engineering + Agility (Rating).",
+  description: "Old-fashioned and cheap, still around where tech hasn't caught up.",
+  referenceOnly: true,
   tags: ['security'],
   stats: {
     ratingRange: [1, 6],
+    effects: ['Bypass with Engineering + Agility (Rating).'],
   },
 });
 
@@ -296,10 +425,14 @@ const maglock = securityWireless({
   cost: null,
   costPerRating: 100,
   availability: 3,
-  description: 'Electronic, electromagnet-sealed, biometric/keycard/passcard/RFID access options.',
+  referenceOnly: true,
   tags: ['security'],
   stats: {
     ratingRange: [1, 9],
+    effects: [
+      'Electromagnetically sealed.',
+      'Takes biometric, keycard, passcard, or RFID access options.',
+    ],
   },
 });
 
@@ -308,40 +441,50 @@ const keypad = security({
   label: 'Keypad',
   cost: 50,
   availability: 1,
-  description: 'Maglock access option.',
+  referenceOnly: true,
   tags: ['security'],
-  stats: {},
+  stats: { effects: ['A maglock access option.'] },
 });
 
-const card_reader = securityWireless({
+// D4: demoted from securityWireless this pass. No source description
+// exists for this item, and its table-mates (Keypad, Biometric Reader,
+// Plasteel Restraints) are all plain physical hardware.
+const card_reader = security({
   id: 'card_reader',
   label: 'Card Reader',
   cost: 50,
   availability: 1,
-  description: 'Maglock access option.',
+  referenceOnly: true,
   tags: ['security'],
-  stats: {},
+  stats: { effects: ['A maglock access option.'] },
 });
 
+// NOTE: this is `security` (not wireless) while card_reader is
+// wireless, even though a biometric reader is at least as electronic.
+// Carried over unchanged; flagged in the summary rather than guessed at.
 const biometric_reader = security({
   id: 'biometric_reader',
   label: 'Biometric Reader',
   cost: 200,
   availability: 2,
-  description: 'Maglock access option.',
+  referenceOnly: true,
   tags: ['security'],
-  stats: {},
+  stats: { effects: ['A maglock access option.'] },
 });
 
+// KEEPS wireless, unlike its table-mates: this one has explicit
+// "mechanical or wireless lock" text in source, so D4's elimination
+// argument doesn't reach it.
 const metal_restraints = securityWireless({
   id: 'metal_restraints',
   label: 'Metal Restraints',
   cost: 20,
   availability: 1,
-  description: 'Mechanical or wireless lock.',
+  referenceOnly: true,
   tags: ['security'],
   stats: {
     structure: 10,
+    effects: ['Closes with either a mechanical or a wireless lock.'],
   },
 });
 
@@ -350,10 +493,11 @@ const plasteel_restraints = security({
   label: 'Plasteel Restraints',
   cost: 50,
   availability: 2,
-  description: 'Flash-fused, cut-only release.',
+  referenceOnly: true,
   tags: ['security'],
   stats: {
     structure: 12,
+    effects: ['Flash-fused — release requires cutting them off.'],
   },
 });
 
@@ -362,7 +506,7 @@ const plastic_straps = security({
   label: 'Plastic Straps (10)',
   cost: 5,
   availability: 1,
-  description: 'Lightweight, disposable.',
+  description: 'Lightweight and disposable.',
   tags: ['security'],
   stats: {
     structure: 6,
@@ -377,9 +521,10 @@ const autopicker = tool({
   cost: 500,
   availability: 4,
   legality: 'licensed',
-  description: 'Lockpick gun; +1 dice pool on mechanical lock-picking tests.',
+  description: 'A lockpick gun.',
+  referenceOnly: true,
   tags: ['breaking_entering'],
-  stats: {},
+  stats: { effects: ['+1 dice pool on mechanical lock-picking tests.'] },
 });
 
 const cellular_glove_molder = tool({
@@ -389,10 +534,14 @@ const cellular_glove_molder = tool({
   costPerRating: 500,
   availability: 6,
   legality: 'illegal',
-  description: 'Molds a print-mimicking "sleeve" from a lifted finger/palm print, fooling biometric locks.',
+  referenceOnly: true,
   tags: ['breaking_entering'],
   stats: {
     ratingRange: [1, 4],
+    effects: [
+      'Molds a print-mimicking "sleeve" from a lifted finger or palm print.',
+      'Fools biometric locks.',
+    ],
   },
 });
 
@@ -401,9 +550,9 @@ const chisel_wrecking_bar = tool({
   label: 'Chisel/Wrecking Bar',
   cost: 20,
   availability: 1,
-  description: 'Doubles effective Strength when forcing a door/lock/container.',
+  referenceOnly: true,
   tags: ['breaking_entering'],
-  stats: {},
+  stats: { effects: ['Doubles effective Strength when forcing a door, lock, or container.'] },
 });
 
 const keycard_copier = toolWireless({
@@ -412,9 +561,15 @@ const keycard_copier = toolWireless({
   cost: 600,
   availability: 4,
   legality: 'illegal',
-  description: 'Copies a keycard in seconds; manufacturing a working duplicate needs an Electronics Kit + Electronics + Logic (2, 10 minutes) test. Some systems flag suspicious duplicate-key usage patterns.',
+  referenceOnly: true,
   tags: ['breaking_entering'],
-  stats: {},
+  stats: {
+    effects: [
+      'Copies a keycard in seconds.',
+      'Manufacturing a working duplicate needs an Electronics Kit and an Electronics + Logic (2, 10 minutes) test.',
+      'Some systems flag suspicious duplicate-key usage patterns.',
+    ],
+  },
 });
 
 const lockpick_set = tool({
@@ -434,11 +589,13 @@ const maglock_passkey = toolWireless({
   costPerRating: 2000,
   availability: 3,
   legality: 'illegal',
-  description: 'A maglock "skeleton key" fooling any cardreader-based maglock.',
+  description: 'A maglock "skeleton key."',
+  referenceOnly: true,
   tags: ['breaking_entering'],
   stats: {
     ratingRange: [1, 4],
-    wirelessBonus: '+1 to its effective rating.',
+    effects: ['Fools any cardreader-based maglock.'],
+    wirelessBonuses: ['+1 to its effective Rating.'],
   },
 });
 
@@ -447,11 +604,15 @@ const miniwelder = tool({
   label: 'Miniwelder',
   cost: 250,
   availability: 1,
-  description: 'Small electric-arc cutting/welding tool, 30 minutes of power. Too small to be a good weapon, but DV 6 against barriers.',
+  description: 'A small electric-arc cutting and welding tool.',
   tags: ['breaking_entering'],
   stats: {
     damageValue: '6',
     target: 'barriers',
+    effects: [
+      '30 minutes of power per canister.',
+      'Too small to be an effective weapon.',
+    ],
   },
 });
 
@@ -460,7 +621,7 @@ const miniwelder_fuel_canister = tool({
   label: 'Miniwelder Fuel Canister',
   cost: 80,
   availability: 1,
-  description: 'Refill for the miniwelder.',
+  description: 'A refill for the miniwelder.',
   tags: ['breaking_entering'],
   stats: {},
 });
@@ -470,11 +631,12 @@ const monofilament_chainsaw = tool({
   label: 'Monofilament Chainsaw',
   cost: 500,
   availability: 3,
-  description: 'Monofilament-toothed portable saw for trees/doors/immovable objects. Not a viable melee weapon (no skill for it), DV 8 against barriers.',
+  description: 'A monofilament-toothed portable saw for trees, doors, and immovable objects.',
   tags: ['breaking_entering'],
   stats: {
     damageValue: '8',
     target: 'barriers',
+    effects: ['Not a viable melee weapon — no skill covers it.'],
   },
 });
 
@@ -485,11 +647,12 @@ const sequencer = toolWireless({
   costPerRating: 250,
   availability: 4,
   legality: 'illegal',
-  description: 'Defeats keypad-maglocks.',
+  referenceOnly: true,
   tags: ['breaking_entering'],
   stats: {
     ratingRange: [1, 6],
-    wirelessBonus: '+1 to its effective rating.',
+    effects: ['Defeats keypad maglocks.'],
+    wirelessBonuses: ['+1 to its effective Rating.'],
   },
 });
 
@@ -500,9 +663,9 @@ const glue_solvent = tool({
   label: 'Glue Solvent',
   cost: 90,
   availability: 1,
-  description: 'Dissolves ~1 sq m of the fast-drying superglue below.',
+  referenceOnly: true,
   tags: ['industrial_chemical'],
-  stats: {},
+  stats: { effects: ['Dissolves about 1 sq m of Glue Sprayer superglue.'] },
 });
 
 const glue_sprayer = tool({
@@ -510,9 +673,16 @@ const glue_sprayer = tool({
   label: 'Glue Sprayer',
   cost: 150,
   availability: 1,
-  description: 'Fast-drying aerosol superglue, ~1 sq m per can, hardens in 1 combat round. Resisting forced separation is a Body + Strength (5) Opposed test.',
+  description: 'Fast-drying aerosol superglue.',
+  referenceOnly: true,
   tags: ['industrial_chemical'],
-  stats: {},
+  stats: {
+    effects: [
+      'Covers about 1 sq m per can.',
+      'Hardens in 1 combat round.',
+      'Resisting forced separation is a Body + Strength (5) Opposed test.',
+    ],
+  },
 });
 
 const thermite_burning_bar = tool({
@@ -522,11 +692,14 @@ const thermite_burning_bar = tool({
   availability: 5,
   legality: 'licensed',
   wireless: true,
-  description: 'Melts through iron/steel/plasteel. Too slow/careful to use as a weapon except against someone already incapacitated.',
   tags: ['industrial_chemical'],
   stats: {
     damageValue: '10P(fire)',
-    wirelessBonus: 'Can be activated/deactivated wirelessly.',
+    effects: [
+      'Melts through iron, steel, and plasteel.',
+      'Too slow and careful to use as a weapon, except against someone already incapacitated.',
+    ],
+    wirelessBonuses: ['Can be activated and deactivated wirelessly.'],
   },
 });
 
@@ -538,31 +711,56 @@ const chemsuit = survival({
   cost: null,
   costPerRating: 150,
   availability: 4,
-  description: 'Impermeable coverall worn over clothes/armor, providing Chemical Protection. Not vacuum-sealed like a full hazmat suit.',
+  description: 'An impermeable coverall worn over clothes or armor.',
+  referenceOnly: true,
   tags: ['survival'],
   stats: {
     ratingRange: [1, 6],
+    effects: [
+      'Provides Chemical Protection equal to its Rating.',
+      'Not vacuum-sealed the way a full hazmat suit is.',
+    ],
   },
 });
 
+// D5: the kit's "100m rope (400kg test)" IS standard_rope — that item
+// is sold as a 100m coil (costPerUnit 50 / unitLength 100) rated to
+// 400kg, and its "reaches 60m" is firing range, not coil length.
 const climbing_gear = survival({
   id: 'climbing_gear',
   label: 'Climbing Gear',
   cost: 200,
   availability: 1,
-  description: '100m rope (400kg test), harness, gloves, carabiners, crampons, pitons, etc.',
+  referenceOnly: true,
+  description: 'Harness, gloves, carabiners, crampons, pitons, and a full coil of rope.',
   tags: ['survival'],
-  stats: {},
+  stats: {
+    effects: ['Includes a full set of climbing hardware alongside its rope.'],
+    defaultAttachments: ['standard_rope'],
+  },
 });
 
+// D5: the wetsuit's Cold Resistance references armor_cold_resistance
+// in armor_electronics.js. defaultAttachments entries are bare ids with
+// no Rating slot by decision, so this seeds at that item's Rating 1 and
+// is upgraded to 2 out of band.
+// KNOWN GAP: armor_cold_resistance costs armorCapacityUsed 3, and
+// diving_gear has no armorCapacityProvided pool at all.
 const diving_gear = survival({
   id: 'diving_gear',
   label: 'Diving Gear',
   cost: 2000,
   availability: 3,
-  description: 'Wetsuit, partial facemask + snorkel, regulator, 2-hour air tank (+50¥/extra tank), inflatable surface vest. Wetsuit gives Rating 2 Cold Resistance.',
+  description: 'Wetsuit, partial facemask and snorkel, regulator, and inflatable surface vest.',
+  referenceOnly: true,
   tags: ['survival'],
-  stats: {},
+  stats: {
+    effects: [
+      'The wetsuit provides Rating 2 Cold Resistance.',
+      '2-hour air tank; extra tanks cost 50¥ each.',
+    ],
+    defaultAttachments: ['armor_cold_resistance'],
+  },
 });
 
 const flashlight = survival({
@@ -570,9 +768,15 @@ const flashlight = survival({
   label: 'Flashlight',
   cost: 25,
   availability: 1,
-  description: 'Long-lasting, bright. Low-light and infrared versions available; mountable on a weapon.',
+  description: 'Long-lasting and bright.',
+  referenceOnly: true,
   tags: ['survival'],
-  stats: {},
+  stats: {
+    effects: [
+      'Mountable on a weapon.',
+      'Low-light and infrared versions available.',
+    ],
+  },
 });
 
 const gas_mask = survivalWireless({
@@ -580,10 +784,16 @@ const gas_mask = survivalWireless({
   label: 'Gas Mask',
   cost: 200,
   availability: 1,
-  description: "Full-face air-supplied re-breather, immunity to Inhalation-vector toxins. 1-hour clean air (40¥ refills). Can't combine with a regular respirator.",
+  description: 'A full-face air-supplied re-breather.',
+  referenceOnly: true,
   tags: ['survival'],
   stats: {
-    wirelessBonus: 'Analyzes and reports on the surrounding (unbreathed) air.',
+    effects: [
+      'Immunity to Inhalation-vector toxins.',
+      '1 hour of clean air; refills cost 40¥.',
+      "Can't be combined with a regular respirator.",
+    ],
+    wirelessBonuses: ['Analyzes and reports on the surrounding, unbreathed air.'],
   },
 });
 
@@ -592,22 +802,37 @@ const gecko_tape_gloves = survivalWireless({
   label: 'Gecko Tape Gloves',
   cost: 250,
   availability: 3,
-  description: 'Microscopic-hair dry adhesive set enabling assisted climbing on nearly any surface. Useless when wet.',
+  description: 'A microscopic-hair dry adhesive set.',
+  referenceOnly: true,
   tags: ['survival'],
   stats: {
-    wirelessBonus: 'Can temporarily neutralize the adhesive to avoid self-sticking while donning/doffing.',
+    effects: [
+      'Enables assisted climbing on nearly any surface.',
+      'Useless when wet.',
+    ],
+    wirelessBonuses: ['Can temporarily neutralize the adhesive, to avoid self-sticking while donning or doffing.'],
   },
 });
 
+// D5: NO defaultAttachments — source says the sensor is bought
+// separately, and "Geiger counter" names a SENSOR_FUNCTIONS entry, not
+// a real item. The empty slot is modeled as capacity instead, which is
+// also what keeps this one off referenceOnly.
 const hazmat_suit = survivalWireless({
   id: 'hazmat_suit',
   label: 'Hazmat Suit',
   cost: 3000,
   availability: 3,
-  description: 'Full-body, 4-hour internal air, full chemical seal, blocks Contact/Inhalation toxins. Standard sensor slot (often a Geiger counter, bought separately).',
+  description: 'A full-body sealed suit.',
   tags: ['survival'],
   stats: {
-    wirelessBonus: 'Environmental analysis and reporting.',
+    deviceCapacityProvided: 1,
+    effects: [
+      'Full chemical seal — blocks Contact- and Inhalation-vector toxins.',
+      '4 hours of internal air.',
+      'Has a standard sensor slot, often a Geiger counter; the sensor is bought separately.',
+    ],
+    wirelessBonuses: ['Environmental analysis and reporting.'],
   },
 });
 
@@ -616,9 +841,9 @@ const light_stick = survival({
   label: 'Light Stick',
   cost: 25,
   availability: 1,
-  description: '3 hours of soft chemical light, 10m radius.',
+  referenceOnly: true,
   tags: ['survival'],
-  stats: {},
+  stats: { effects: ['3 hours of soft chemical light out to a 10m radius.'] },
 });
 
 const magnesium_torch_flare = survival({
@@ -626,10 +851,13 @@ const magnesium_torch_flare = survival({
   label: 'Magnesium Torch/Flare',
   cost: 5,
   availability: 1,
-  description: '5 minutes of bright torchlight to 20m. Striking someone with it does 3P Fire damage.',
   tags: ['survival'],
   stats: {
     damageValue: '3P(fire)',
+    effects: [
+      '5 minutes of bright torchlight out to 20m.',
+      'Striking someone with it inflicts its Fire damage.',
+    ],
   },
 });
 
@@ -638,10 +866,13 @@ const microflare_launcher = survival({
   label: 'Microflare Launcher',
   cost: 175,
   availability: 1,
-  description: 'Fires colored flares 200m up, illuminating a city-block-sized area for a couple minutes. Hitting a person is an untrained skill check, 3P Fire damage.',
   tags: ['survival'],
   stats: {
     damageValue: '3P(fire)',
+    effects: [
+      'Fires colored flares 200m up, illuminating a city-block-sized area for a couple of minutes.',
+      'Hitting a person is an untrained skill check.',
+    ],
   },
 });
 
@@ -660,9 +891,14 @@ const rappelling_gloves = survival({
   label: 'Rappelling Gloves',
   cost: 50,
   availability: 1,
-  description: 'Better grip on a grapple line, use-it-or-lose-it bonus Edge on grip tests. Required to safely use microwire or stealth rope.',
+  referenceOnly: true,
   tags: ['survival'],
-  stats: {},
+  stats: {
+    effects: [
+      'Better grip on a grapple line — use-it-or-lose-it bonus Edge on grip tests.',
+      'Required to safely handle microwire or stealth rope.',
+    ],
+  },
 });
 
 const respirator = survival({
@@ -671,10 +907,15 @@ const respirator = survival({
   cost: null,
   costPerRating: 50,
   availability: 1,
-  description: 'Filter mask, blocks Inhalation-vector toxins, adds its rating as a dice pool bonus resisting them.',
+  description: 'A filter mask.',
+  referenceOnly: true,
   tags: ['survival'],
   stats: {
     ratingRange: [1, 6],
+    effects: [
+      'Blocks Inhalation-vector toxins.',
+      'Adds its Rating as a dice pool bonus resisting them.',
+    ],
   },
 });
 
@@ -683,24 +924,31 @@ const survival_kit = survival({
   label: 'Survival Kit',
   cost: 200,
   availability: 2,
-  description: 'Knife, lighter, matches, compass, string saw, thermal blanket, 7 days of soy ration bars, water purifier, fishing line/hook, and more.',
+  description: 'Knife, lighter, matches, compass, string saw, thermal blanket, seven days of soy ration bars, water purifier, fishing line and hook, and more.',
   tags: ['survival'],
   stats: {},
 });
 
 // ---- Grapple Gun family ----
 
+// D3: `skill` moved from stats to the item root this pass, matching
+// every weapon in firearms_explosives.js and melee_thrown.js.
 const grapple_gun = survival({
   id: 'grapple_gun',
   label: 'Grapple Gun',
   cost: 500,
   availability: 3,
-  description: 'Fires a grappling hook/rope up to 60m or 100m (line-dependent). Firearms test threshold to hit = (Range/20, rounded up). Internal winch retracts the line or hauls loads up to 10kg. Usable untrained as a weapon.',
+  skill: 'firearms',
   tags: ['grapple_gun_family'],
   stats: {
     damageValue: '1S',
     attackRatings: [1, null, null, null, null],
-    skill: 'firearms',
+    effects: [
+      'Fires a grappling hook and rope up to 60m or 100m, depending on the line loaded.',
+      'Firearms test threshold to hit = Range / 20, rounded up.',
+      'Internal winch retracts the line or hauls loads up to 10kg.',
+      'Usable untrained as a weapon.',
+    ],
   },
 });
 
@@ -711,9 +959,16 @@ const microwire = survival({
   costPerUnit: 50,
   unitLength: 100,
   availability: 2,
-  description: 'Extremely thin near-monofilament rope, fires to 100m, supports up to 100kg. Nearly invisible (Perception threshold 6); only safely gripped with rappelling gloves, otherwise inflicts 5P damage.',
+  description: 'Extremely thin near-monofilament line.',
+  referenceOnly: true,
   tags: ['grapple_gun_family'],
-  stats: {},
+  stats: {
+    effects: [
+      'Fires to 100m, supporting up to 100kg.',
+      'Nearly invisible — Perception threshold 6 to spot.',
+      'Only safely gripped with rappelling gloves; otherwise it inflicts 5P damage.',
+    ],
+  },
 });
 
 const myomeric_rope = survivalWireless({
@@ -723,9 +978,15 @@ const myomeric_rope = survivalWireless({
   costPerUnit: 200,
   unitLength: 10,
   availability: 4,
-  description: 'Special fiber, remotely controllable movement (up to 30m length, 2m/round), can wind around obstacles or tie itself off.',
+  description: 'A special contractile fiber.',
+  referenceOnly: true,
   tags: ['grapple_gun_family'],
-  stats: {},
+  stats: {
+    effects: [
+      'Remotely controllable movement, up to 30m of length at 2m per round.',
+      'Can wind around obstacles or tie itself off.',
+    ],
+  },
 });
 
 const standard_rope = survival({
@@ -735,9 +996,9 @@ const standard_rope = survival({
   costPerUnit: 50,
   unitLength: 100,
   availability: 1,
-  description: 'Reaches 60m, supports up to 400kg.',
+  referenceOnly: true,
   tags: ['grapple_gun_family'],
-  stats: {},
+  stats: { effects: ['Reaches 60m, supporting up to 400kg.'] },
 });
 
 const stealth_rope = survival({
@@ -748,9 +1009,14 @@ const stealth_rope = survival({
   unitLength: 100,
   availability: 3,
   legality: 'illegal',
-  description: 'Reaches 60m, supports up to 400kg. Dissolves to dust (near-traceless) when touched with a catalyst stick.',
+  referenceOnly: true,
   tags: ['grapple_gun_family'],
-  stats: {},
+  stats: {
+    effects: [
+      'Reaches 60m, supporting up to 400kg.',
+      'Dissolves to near-traceless dust when touched with a catalyst stick.',
+    ],
+  },
 });
 
 const catalyst_stick = survival({
@@ -759,43 +1025,56 @@ const catalyst_stick = survival({
   cost: 120,
   availability: 3,
   legality: 'illegal',
-  description: 'Reusable — dissolves stealth rope on contact.',
+  referenceOnly: true,
   tags: ['grapple_gun_family'],
-  stats: {},
+  stats: {
+    effects: [
+      'Dissolves stealth rope on contact.',
+      'Reusable.',
+    ],
+  },
 });
 
+// D2: `armorRating` -> `structuralArmor`, plus a `structure` value
+// alongside it, matching how SR6 barriers carry both. A tent is a
+// barrier, not worn armor: its Armor is what the shelter itself absorbs
+// before being breached, not a Defense Rating for whoever shelters in
+// it. `size` drops out of stats — nothing else in the catalog maps onto
+// it, so "Large" is plain description text now.
+// THE `structure` NUMBERS ARE INVENTED. The source table gives Armor
+// only. Flagged, not presented as confirmed.
 const ballistic_tent = survival({
   id: 'ballistic_tent',
   label: 'Ballistic Tent',
-  legality: null,
-  image: null,
+  referenceOnly: true,
   tags: ['survival'],
   cost: 1100,
   availability: 2,
-  description: 'Self-inflating, steel-strutted shelter, deployable in under 3 minutes. Fabric doubles as urban camouflage when set against a building (+2 dice on Stealth tests).',
+  description: 'A packable hard shelter, Large size when pitched.',
   stats: {
-    armorRating: 4,
-    size: 'Large',
+    structuralArmor: 4,
+    structure: 6,
+    effects: BALLISTIC_TENT_EFFECTS,
   },
 });
 
 const ballistic_tent_military_grade = survival({
   id: 'ballistic_tent_military_grade',
   label: 'Ballistic Tent (Military Grade)',
-  legality: null,
-  image: null,
+  referenceOnly: true,
   tags: ['survival'],
   cost: 4500,
   availability: 4,
-  description: 'Upgraded Ballistic Tent, later variant deployed for Desert Wars use.',
+  description: 'The upgraded Ballistic Tent, a later variant deployed for Desert Wars use. Large size when pitched.',
   stats: {
-    armorRating: 8,
-    size: 'Large',
+    structuralArmor: 8,
+    structure: 8,
+    effects: BALLISTIC_TENT_EFFECTS,
   },
 });
 
 export const GEAR_SENSORS_SECURITY_SURVIVAL = {
-  directional_microphone, earbuds, headphones, laser_mic, omnidirectional_mic,
+  directional_microphone, earbuds, headphones, laser_mic, omnidirectional_mic, omnidirectional_mic_micro,
   audio_enhancement, select_sound_filter_device, spatial_recognizer_device,
   handheld_housing, wall_mounted_housing, sensor_array, single_sensor,
   containment_manacles, key_lock, maglock, keypad, card_reader, biometric_reader, metal_restraints, plasteel_restraints, plastic_straps,

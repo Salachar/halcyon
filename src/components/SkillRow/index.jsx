@@ -1,12 +1,9 @@
-import { useState } from 'react';
-
 import { SKILLS } from '@data/character/skills';
 import { useCharacterManager } from '@hooks/useCharacterManager';
 import PoolBuilder from '@components/PoolBuilder';
-import ConfirmationModal from '@components/ConfirmationModal';
 
 import { karmaCost, hasAptitude } from '@utils/skillEconomy';
-import './skillRow.css';
+import { Row, Identity, Name, Meta, RankControls, CostLabel, DiceSlot } from './SkillRow.styles';
 
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
@@ -23,22 +20,23 @@ function capitalize(word) {
 // stepper's − is disabled — undoing that deliberately goes through the
 // GM Grant/Correct actions (not built this pass), not a casual click.
 //
-// Rolling now goes through PoolBuilder (buildOpenPool) instead of
-// buildSkillPool directly — same retrofit MatrixActionsReference/
-// CombatActionsReference/VehicleActionsReference already went through.
-// buildOpenPool never returns null the way buildSkillPool did for an
-// untrainable skill at rank 0 — it shows a real pool with the -1
-// untrained penalty baked in, matching this app's "nothing should be
-// locked down" principle. But the untrained STATE still deserves a
-// clear marker, not a silent penalty buried in the pool breakdown — an
-// "Untrained" button stands in for the roller until confirmed, opening
-// a plain warning modal first. Confirming just reveals PoolBuilder for
-// the rest of this component's lifetime; buying a rank makes the gate
-// disappear entirely on its own (isUntrained requires rank === 0).
+// Untrained gating (the whole point of skillId/rank ever mattering to
+// PoolBuilder's own display) now lives entirely inside PoolBuilder
+// itself, via gateUntrained — this component no longer hand-rolls any
+// of that. SkillRow is exactly the context where the gate earns its
+// keep: the skill here is a CHOICE the player is looking at on their
+// own sheet, not a rules-fixed pairing the way a Handling Test's
+// Piloting+Reaction is on a reference page (which is why those pages
+// leave gateUntrained off by default). Buying even one rank makes the
+// gate disappear on its own inside PoolBuilder — nothing here needs to
+// track or reset that state anymore.
+//
+// Styled with @emotion/styled (SkillRow.styles.js) for the bespoke
+// layout pieces — sr-icon-btn and sr-dice-count stay plain classNames,
+// since those are genuinely shared/generic across dozens of other
+// components, not something specific to this one.
 export default function SkillRow({ character, skillId }) {
   const { touch } = useCharacterManager();
-  const [untrainedConfirmed, setUntrainedConfirmed] = useState(false);
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const def = SKILLS[skillId];
   const rank = character.getSkillRank(skillId);
   const usingPoints = character.skillPointsRemaining > 0;
@@ -83,45 +81,24 @@ export default function SkillRow({ character, skillId }) {
 
   const attrLabel = capitalize(def.primaryAttribute) + (def.secondaryAttribute ? ` / ${capitalize(def.secondaryAttribute)}` : '');
   const costLabel = usingPoints ? '1 pt' : `${nextCost} karma`;
-  const isUntrained = rank === 0 && !def.untrained;
-  const showGate = isUntrained && !untrainedConfirmed;
 
   return (
-    <div className="sr-skill-row">
-      <div className="sr-skill-row-identity">
-        <div className="sr-skill-row-name">{def.label}</div>
-        <div className="sr-skill-row-meta">{attrLabel}</div>
-      </div>
+    <Row>
+      <Identity>
+        <Name>{def.label}</Name>
+        <Meta>{attrLabel}</Meta>
+      </Identity>
 
-      <div className="sr-skill-row-rank">
+      <RankControls>
         <button className="sr-icon-btn" onClick={handleDecrease} disabled={!canDecrease}>−</button>
         <span className="sr-dice-count">{rank}</span>
         <button className="sr-icon-btn" onClick={handleIncrease} disabled={!canIncrease}>+</button>
-        <span className="sr-skill-row-cost">{canIncrease ? costLabel : ''}</span>
-      </div>
+        <CostLabel>{canIncrease ? costLabel : ''}</CostLabel>
+      </RankControls>
 
-      <div className="sr-skill-row-dice">
-        {showGate ? (
-          <button className="sr-btn sr-btn--secondary sr-skill-row-untrained-btn" onClick={() => setConfirmModalOpen(true)}>
-            Untrained
-          </button>
-        ) : (
-          <PoolBuilder character={character} defaultSkillId={skillId} defaultAttribute={def.primaryAttribute} />
-        )}
-      </div>
-
-      <ConfirmationModal
-        open={confirmModalOpen}
-        title="Untrained Skill"
-        message={`You have no ranks in ${def.label} and it can't normally be attempted untrained. You can still try — it'll roll at a penalty. Attempt anyway?`}
-        confirmLabel="Attempt Anyway"
-        cancelLabel="Cancel"
-        onConfirm={() => {
-          setUntrainedConfirmed(true);
-          setConfirmModalOpen(false);
-        }}
-        onCancel={() => setConfirmModalOpen(false)}
-      />
-    </div>
+      <DiceSlot>
+        <PoolBuilder character={character} defaultSkillId={skillId} defaultAttribute={def.primaryAttribute} gateUntrained />
+      </DiceSlot>
+    </Row>
   );
 }

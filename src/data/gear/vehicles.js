@@ -1,8 +1,6 @@
 // Vehicles (ground and air, non-water) — split out of the former
-// monolithic vehicles_drones.js (Vehicles / Watercraft / Drones), per
-// request. Pure reorganization this pass — every stat here is
-// unchanged from the original file, just relocated. See watercraft.js
-// and drones.js for the other two splits.
+// monolithic vehicles_drones.js (Vehicles / Watercraft / Drones). See
+// watercraft.js and drones.js for the other two splits.
 //
 // Verified against 13g-gear-vehicles-drones.md (Gear Part 7/Final, pp.
 // 294-304) in full when originally built. Two irregularities in the
@@ -27,11 +25,55 @@
 // These mods live here as the "primary" vehicle file but apply
 // universally across all three splits (watercraft, drones included).
 //
-// WEAPON MOUNT CAPACITY (mountSlotsUsed, VEHICLE_WEAPON_MOUNT_RULES)
-// is now superseded by the Hardpoint system (additions.js) — kept here
-// unchanged for reference/backward compatibility, but WeaponMountsPanel
-// itself was retired in favor of Hardpoints. New builds should use
-// Hardpoint Additions + Weapon Mount Upgrades instead.
+// ============================================================================
+// SCHEMA PASSES 1 AND 2 (both applied at once — this file hadn't had
+// either yet):
+//
+// S1. `effects` ARRAYS extracted from `description` prose. Note how few
+//     items get any: most vehicle descriptions here are genuinely pure
+//     market positioning ("Boring, reliable, cheap four-door sedan"),
+//     and every mechanical fact about them already lives in a
+//     structured stat. Same outcome as the commlinks and RCCs in
+//     matrix_devices.js. No `wirelessBonuses` anywhere — vehicles are
+//     wireless by nature and the source gives them no per-item bonus.
+// S2. `description` IS NOW OMITTABLE.
+// D1. `referenceOnly: true` where no live computed field drives any of
+//     the item's effects. The two legacy weapon mounts are backed —
+//     `mountSlotsUsed` drives the slot arithmetic their effects state.
+// D2. `defaultAttachments` + A NEW `builtIn` SKU:
+//     `rigger_interface_integral`. Rigger Interface's own description
+//     says "All drones include one standard; vehicles need it installed
+//     separately" — so every drone ships with one, free, and none of
+//     the 24 drones in drones.js represented that at all. Since it's
+//     included rather than purchased, it takes an integral SKU rather
+//     than the 1,000¥ one, following the same pattern as the weapon and
+//     implant integrals. The references themselves live in drones.js.
+//
+// ============================================================================
+// FLAG — TWO PARALLEL WEAPON MOUNT SYSTEMS ARE BOTH LIVE.
+//
+// `standard_weapon_mount` (2,500¥, Avail 4) and `heavy_weapon_mount`
+// (5,000¥, Avail 5) in this file are EXACT cost and availability
+// duplicates of `weapon_mount_standard` (2,500¥, Avail 4) and
+// `weapon_mount_large` (5,000¥, Avail 5) in additions.js. Same
+// products, different ids, both purchasable, sitting in the catalog at
+// the same time.
+//
+// The header note here already said the mountSlotsUsed system was
+// "superseded by the Hardpoint system... kept for reference/backward
+// compatibility" and that WeaponMountsPanel was retired — but nothing
+// marks these two items as legacy in the DATA, so they still appear
+// wherever weapon mounts are listed. That's a real duplication a player
+// can walk into, not just a stale comment.
+//
+// NOT resolved here because it needs a decision, not a guess: either
+// these two get removed in favor of the Hardpoint versions, or they get
+// a `deprecated`-style flag so the market can hide them. Northrup
+// Wasp's "heavy weapon mount" is left as an effect rather than a
+// `defaultAttachments` reference for exactly this reason — there are
+// two equally valid targets and picking one would silently endorse a
+// system.
+// ============================================================================
 
 const V = (overrides) => ({
   category: 'vehicle',
@@ -48,7 +90,7 @@ const dodge_scoot = V({
   label: 'Dodge Scoot',
   cost: 3000,
   availability: 2,
-  description: "Compact, cheap, fuel-efficient. Not really shadowrunner gear unless you're blending in (or asking for a go-gang beatdown).",
+  description: "Compact, cheap, fuel-efficient. Not really shadowrunner gear unless you're blending in — or asking for a go-gang beatdown.",
   tags: ['bike'],
   stats: {
     handling: { onRoad: 5, offRoad: 7 },
@@ -68,7 +110,7 @@ const harley_davidson_scorpion = V({
   label: 'Harley-Davidson Scorpion',
   cost: 14000,
   availability: 2,
-  description: 'The classic heavy chromed road hog, armored, go-ganger favorite.',
+  description: 'The classic heavy chromed road hog, armored, and a go-ganger favorite.',
   tags: ['bike'],
   stats: {
     handling: { onRoad: 3, offRoad: 5 },
@@ -130,7 +172,8 @@ const chrysler_nissan_jackrabbit = V({
   label: 'Chrysler-Nissan Jackrabbit',
   cost: 11000,
   availability: 2,
-  description: 'Ubiquitous electric subcompact — anonymous, good for stakeouts/tailing, bad for car chases.',
+  referenceOnly: true,
+  description: 'A ubiquitous, anonymous electric subcompact.',
   tags: ['car'],
   stats: {
     handling: { onRoad: 3, offRoad: 5 },
@@ -142,6 +185,7 @@ const chrysler_nissan_jackrabbit = V({
     pilot: 2,
     sensor: 1,
     seats: 3,
+    effects: ['Good for stakeouts and tailing, bad for car chases.'],
   },
 });
 
@@ -150,7 +194,7 @@ const honda_spirit = V({
   label: 'Honda Spirit',
   cost: 13000,
   availability: 2,
-  description: 'Three-wheeled two-seat commuter, cheap and everywhere.',
+  description: 'A three-wheeled commuter, cheap and everywhere.',
   tags: ['car'],
   stats: {
     handling: { onRoad: 4, offRoad: 5 },
@@ -170,7 +214,7 @@ const eurocar_westwind_x80 = V({
   label: 'Eurocar Westwind X80',
   cost: 115000,
   availability: 3,
-  description: 'A top-tier luxury street machine pushing right up to the edge of street legality.',
+  description: 'A top-tier luxury street machine, pushing right up to the edge of street legality.',
   tags: ['car'],
   stats: {
     handling: { onRoad: 2, offRoad: 6 },
@@ -190,7 +234,7 @@ const hyundai_shin_hyung = V({
   label: 'Hyundai Shin-Hyung',
   cost: 20000,
   availability: 2,
-  description: 'A powerful, tuner-community-favorite sedan, popular with Asian criminal factions and slumming rich kids alike.',
+  description: 'A powerful tuner-community-favorite sedan, popular with Asian criminal factions and slumming rich kids alike.',
   tags: ['car'],
   stats: {
     handling: { onRoad: 3, offRoad: 5 },
@@ -272,7 +316,7 @@ const toyota_gopher = V({
   label: 'Toyota Gopher',
   cost: 25000,
   availability: 2,
-  description: 'A once-mocked pickup, now a design/power/feature pinnacle. Off-road capable, roomy 4-door cab.',
+  description: 'A once-mocked pickup, now a design, power, and feature pinnacle. Roomy 4-door cab.',
   tags: ['truck'],
   stats: {
     handling: { onRoad: 4, offRoad: 4 },
@@ -292,7 +336,8 @@ const gmc_bulldog_step_van = V({
   label: 'GMC Bulldog Step-Van',
   cost: 35000,
   availability: 2,
-  description: 'The best-selling delivery van worldwide — armored, roomy, blends in anywhere with the right paint. A runner favorite.',
+  referenceOnly: true,
+  description: 'The best-selling delivery van worldwide — armored, roomy, and a runner favorite.',
   tags: ['truck'],
   stats: {
     handling: { onRoad: 5, offRoad: 7 },
@@ -304,6 +349,7 @@ const gmc_bulldog_step_van = V({
     pilot: 2,
     sensor: 3,
     seats: { crew: 2, total: 10 },
+    effects: ['Blends in almost anywhere with the right paint.'],
   },
 });
 
@@ -332,7 +378,8 @@ const ares_roadmaster = V({
   label: 'Ares Roadmaster',
   cost: 68000,
   availability: 2,
-  description: 'A tank-like long-haul commercial van, heavily armored, easy remote-turret installation. Also used by security firms transporting valuables.',
+  referenceOnly: true,
+  description: 'A tank-like long-haul commercial van, heavily armored. Also used by security firms transporting valuables.',
   tags: ['truck'],
   stats: {
     handling: { onRoad: 5, offRoad: 7 },
@@ -344,17 +391,24 @@ const ares_roadmaster = V({
     pilot: 2,
     sensor: 2,
     seats: { crew: 2, total: 12 },
+    effects: ['Built for easy remote-turret installation.'],
   },
 });
 
 // ---- Fixed-Wing Aircraft (needs a runway) ----
+// NOTE: every aircraft below carries `handling: { onRoad: N }` — the
+// shared vehicle stat shape has only onRoad/offRoad, so aircraft and
+// rotorcraft file their single Handling figure under `onRoad`. It's the
+// right number under a wrong name; flagged rather than renamed, since
+// renaming touches every vehicle, watercraft, and drone at once.
 
 const artemis_nightwing = V({
   id: 'artemis_nightwing',
   label: 'Artemis Industries Nightwing',
   cost: 20000,
   availability: 2,
-  description: 'A near-silent stealth glider disguised as a hobbyist toy; used by spec-ops and smugglers alike.',
+  referenceOnly: true,
+  description: 'A stealth glider used by spec-ops and smugglers alike.',
   tags: ['fixed_wing'],
   stats: {
     handling: { onRoad: 4 },
@@ -366,6 +420,10 @@ const artemis_nightwing = V({
     pilot: 1,
     sensor: 1,
     seats: 1,
+    effects: [
+      'Near-silent in flight.',
+      'Disguised as a hobbyist toy.',
+    ],
   },
 });
 
@@ -374,7 +432,7 @@ const cessna_c750 = V({
   label: 'Cessna C750',
   cost: 150000,
   availability: 2,
-  description: 'Affordable, easy-to-maintain twin-prop for passengers/cargo (or surveillance in a pinch).',
+  description: 'An affordable, easy-to-maintain twin-prop for passengers or cargo — or surveillance in a pinch.',
   tags: ['fixed_wing'],
   stats: {
     handling: { onRoad: 5 },
@@ -389,12 +447,16 @@ const cessna_c750 = V({
   },
 });
 
+// FLAG: the source description says "6 passengers or cargo" while the
+// stat table gives Seats 8. Carried forward as-is — the structured
+// number wins, and the prose figure is not restated in effects.
 const mct_sikorsky_bell_seahawk = V({
   id: 'mct_sikorsky_bell_seahawk',
   label: 'MCT-Sikorsky-Bell Seahawk',
   cost: 300000,
   availability: 2,
-  description: 'A rescued design turned high-speed amphibious personal jet, 6 passengers or cargo, land-or-water capable.',
+  referenceOnly: true,
+  description: 'A rescued design turned high-speed amphibious personal jet.',
   tags: ['fixed_wing'],
   stats: {
     handling: { onRoad: 5 },
@@ -406,6 +468,7 @@ const mct_sikorsky_bell_seahawk = V({
     pilot: 2,
     sensor: 2,
     seats: 8,
+    effects: ['Takes off from and lands on either land or water.'],
   },
 });
 
@@ -416,7 +479,8 @@ const ares_dragon = V({
   label: 'Ares Dragon',
   cost: 360000,
   availability: 2,
-  description: "The world's most recognizable cargo helicopter; double-rotor lifting power for heavy cargo, strike teams, or ordnance.",
+  referenceOnly: true,
+  description: "The world's most recognizable cargo helicopter.",
   tags: ['rotorcraft'],
   stats: {
     handling: { onRoad: 4 },
@@ -428,6 +492,7 @@ const ares_dragon = V({
     pilot: 2,
     sensor: 3,
     seats: { crew: 2, total: 16 },
+    effects: ['Double-rotor lifting power, for heavy cargo, strike teams, or ordnance.'],
   },
 });
 
@@ -436,7 +501,7 @@ const mct_sikorsky_bell_wolfhound = V({
   label: 'MCT-Sikorsky-Bell Wolfhound',
   cost: 423000,
   availability: 4,
-  description: "A battle-and-boardroom-ready rotorcraft rapidly spreading across MCT's many markets.",
+  description: "A battle-and-boardroom-ready rotorcraft, rapidly spreading across MCT's many markets.",
   tags: ['rotorcraft'],
   stats: {
     handling: { onRoad: 3 },
@@ -451,12 +516,17 @@ const mct_sikorsky_bell_wolfhound = V({
   },
 });
 
+// FLAG: "with a heavy weapon mount" names a real item — but there are
+// TWO of them (heavy_weapon_mount here, weapon_mount_large in
+// additions.js), same price, same availability, different systems. Left
+// as an effect rather than picking one. See the header note.
 const northrup_wasp = V({
   id: 'northrup_wasp',
   label: 'Northrup Wasp',
   cost: 93000,
   availability: 3,
-  description: "A fast, maneuverable single-seat police/security craft with a heavy weapon mount — a runner's bane in numbers.",
+  referenceOnly: true,
+  description: "A fast, maneuverable single-seat police and security craft — a runner's bane in numbers.",
   tags: ['rotorcraft'],
   stats: {
     handling: { onRoad: 3 },
@@ -468,6 +538,7 @@ const northrup_wasp = V({
     pilot: 3,
     sensor: 3,
     seats: 2,
+    effects: ['Comes with a heavy weapon mount.'],
   },
 });
 
@@ -478,7 +549,8 @@ const ares_venture = V({
   label: 'Ares Venture',
   cost: 400000,
   availability: 3,
-  description: 'A cheap, small, highly customizable "sleeper" LAV popular with security, military, and the smugglers they chase.',
+  referenceOnly: true,
+  description: 'A cheap, small "sleeper" LAV popular with security, military, and the smugglers they chase.',
   tags: ['vtol'],
   stats: {
     handling: { onRoad: 4 },
@@ -490,6 +562,7 @@ const ares_venture = V({
     pilot: 2,
     sensor: 2,
     seats: { crew: 2, total: 8 },
+    effects: ['Highly customizable.'],
   },
 });
 
@@ -518,7 +591,7 @@ const federated_boeing_commuter = V({
   label: 'Federated Boeing Commuter',
   cost: 350000,
   availability: 2,
-  description: 'A repurposed battle-tested VTOL/VSTOL platform, exec-shuttle passenger variant.',
+  description: 'A repurposed battle-tested VTOL/VSTOL platform — the exec-shuttle passenger variant.',
   tags: ['vtol'],
   stats: {
     handling: { onRoad: 3 },
@@ -538,7 +611,7 @@ const federated_boeing_osprey_x = V({
   label: 'Federated Boeing Osprey X',
   cost: 800000,
   availability: 4,
-  description: 'The combat/recon original the Commuter was repurposed from.',
+  description: 'The combat and recon original the Commuter was repurposed from.',
   tags: ['vtol'],
   stats: {
     handling: { onRoad: 3 },
@@ -568,11 +641,45 @@ const rigger_interface = {
   legality: null,
   wireless: true,
   image: null,
-  description: "Lets a rigger jump in and feel like the vehicle rather than remote-controlling it. All drones include one standard; vehicles need it installed separately unless noted.",
+  referenceOnly: true,
   tags: ['vehicle_mod'],
-  stats: {},
+  stats: {
+    effects: [
+      'Lets a rigger jump in and feel like the vehicle, rather than remote-controlling it.',
+      'Vehicles need one installed separately; every drone already includes one.',
+    ],
+  },
 };
 
+// D2: the free interface every drone ships with. Not purchasable and
+// not removable, and it costs nothing — which is why it can't just
+// reference the 1,000¥ SKU above. Seeded via each drone's
+// stats.defaultAttachments in drones.js.
+const rigger_interface_integral = {
+  id: 'rigger_interface_integral',
+  label: 'Rigger Interface (Integral)',
+  category: 'vehicle_mod',
+  legality: null,
+  wireless: true,
+  image: null,
+  mount: null,
+  builtIn: true,
+  cost: null,
+  availability: null,
+  referenceOnly: true,
+  description: 'The rigger interface built into every drone as standard.',
+  tags: ['vehicle_mod'],
+  stats: {
+    effects: [
+      'Lets a rigger jump in and feel like the drone, rather than remote-controlling it.',
+      'Included with every drone at no additional cost.',
+    ],
+  },
+};
+
+// NOT referenceOnly: mountSlotsUsed drives the slot arithmetic these
+// effects state. See the header FLAG — this duplicates
+// weapon_mount_standard in additions.js exactly.
 const standard_weapon_mount = {
   id: 'standard_weapon_mount',
   label: 'Standard Weapon Mount',
@@ -581,13 +688,18 @@ const standard_weapon_mount = {
   availability: 4,
   legality: 'illegal',
   image: null,
-  description: 'Holds an assault rifle or smaller plus 250 rounds. Vehicles can carry mounts up to (unaugmented Body / 3, rounded down). Superseded by the Hardpoint system (additions.js) for new builds — kept for reference/backward compatibility.',
+  description: 'Superseded by the Hardpoint system in additions.js for new builds — kept for reference and backward compatibility.',
   tags: ['vehicle_mod'],
   stats: {
     mountSlotsUsed: 1,
+    effects: [
+      'Holds an assault rifle or smaller, plus 250 rounds.',
+      'A vehicle can carry mounts up to its unaugmented Body / 3, rounded down.',
+    ],
   },
 };
 
+// NOT referenceOnly: same reasoning. Duplicates weapon_mount_large.
 const heavy_weapon_mount = {
   id: 'heavy_weapon_mount',
   label: 'Heavy Weapon Mount',
@@ -596,10 +708,14 @@ const heavy_weapon_mount = {
   availability: 5,
   legality: 'illegal',
   image: null,
-  description: 'Counts as 2 mounts. Holds anything plus 500 belted rounds or up to (Body) rockets/missiles. Superseded by the Hardpoint system (additions.js) for new builds — kept for reference/backward compatibility.',
+  description: 'Superseded by the Hardpoint system in additions.js for new builds — kept for reference and backward compatibility.',
   tags: ['vehicle_mod'],
   stats: {
     mountSlotsUsed: 2,
+    effects: [
+      'Counts as 2 mounts.',
+      'Holds anything, plus 500 belted rounds or up to Body rockets or missiles.',
+    ],
   },
 };
 
@@ -616,9 +732,14 @@ const manual_operation = {
   availabilityModifier: 1,
   legality: null,
   image: null,
-  description: 'Adds manual operation to a weapon mount. Vehicles only, not drones.',
+  referenceOnly: true,
   tags: ['vehicle_mod'],
-  stats: {},
+  stats: {
+    effects: [
+      'Adds manual operation to a weapon mount.',
+      'Vehicles only, not drones.',
+    ],
+  },
 };
 
 // Reference data, not a purchasable item. Superseded by the Hardpoint
@@ -640,7 +761,7 @@ export const GEAR_VEHICLES = {
   artemis_nightwing, cessna_c750, mct_sikorsky_bell_seahawk,
   ares_dragon, mct_sikorsky_bell_wolfhound, northrup_wasp,
   ares_venture, gmc_banshee, federated_boeing_commuter, federated_boeing_osprey_x,
-  rigger_interface, standard_weapon_mount, heavy_weapon_mount, manual_operation,
+  rigger_interface, rigger_interface_integral, standard_weapon_mount, heavy_weapon_mount, manual_operation,
 };
 
 export const GEAR_VEHICLES_IDS = Object.keys(GEAR_VEHICLES);

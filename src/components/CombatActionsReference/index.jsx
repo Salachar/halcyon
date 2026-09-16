@@ -88,24 +88,6 @@ export default function CombatActionsReference({ character }) {
           </div>
         );
       })}
-
-      <div className="sr-car-type-group">
-        <div className="sr-car-type-title">Edge Actions</div>
-        <table className="sr-car-edge-table">
-          <thead>
-            <tr><th>Action</th><th>Cost</th><th>Associated Action</th></tr>
-          </thead>
-          <tbody>
-            {COMBAT_EDGE_ACTIONS.map((e) => (
-              <tr key={e.id}>
-                <td>{e.label}</td>
-                <td className="sr-car-edge-cost">{e.cost}</td>
-                <td>{e.associatedAction}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

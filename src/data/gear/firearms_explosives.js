@@ -26,9 +26,9 @@
 //    sites don't need touching. Individual weapons with genuinely
 //    ADDITIONAL bonus text beyond the universal one (Defiance Super
 //    Shock, Yamaha Pulsar I/II, Fichetti Tiffani Needler, Colt America
-//    L36, Ruger Redhawk) have that extra text appended in their own
-//    `stats.wirelessBonus`, which the factory concatenates with the
-//    universal text automatically.
+//    L36, Ruger Redhawk) list that extra text in their own
+//    `stats.wirelessBonuses`, which the factory prepends the universal
+//    entry to automatically.
 //    NOTE: `exoticFirearm()` was deliberately NOT given this same
 //    treatment — it's shared between two source subsections (Special
 //    Weapons and Launchers) with their own separate, non-overlapping
@@ -72,11 +72,135 @@
 //    Periscope, Smartgun System) but are priced differently — these are
 //    the weapon-mount-specific versions. Suffixed `_weapon_accessory`
 //    to avoid id collisions; genuinely different SKUs, not duplicates.
-// 6. CAPACITY FIELD SPLIT (this pass): Imaging Scope, Periscope, and
-//    Smartgun System (External) are optical/device housings providing
-//    Capacity for vision enhancements — same pool as their counterparts
-//    in armor_electronics.js — so their `capacity` fields are now
+// 6. CAPACITY FIELD SPLIT: Imaging Scope, Periscope, and Smartgun
+//    System (External) are optical/device housings providing Capacity
+//    for vision enhancements — same pool as their counterparts in
+//    armor_electronics.js — so their `capacity` fields are
 //    `deviceCapacityProvided`.
+// 7. DEFAULT ATTACHMENTS: dozens of weapon descriptions claim a
+//    built-in accessory (integral silencer, built-in laser sight,
+//    preloaded/internal smartgun, barrel gas-vent) with no stat
+//    consequence anywhere in the data — the bonus text existed only as
+//    prose. Modeled as `stats.defaultAttachments: [itemId, ...]`, a
+//    flat list of real accessory items the weapon ships with. The list
+//    takes ANY accessory id; whether a given entry can be removed is a
+//    property of the referenced ITEM (`builtIn`), not of the reference.
+// 8. VARIANT SPLIT: Defiance T-250's short-barreled version and
+//    Mossberg CMDT's drum-magazine option were previously buried in
+//    prose as alternate configurations of the same item. Split into
+//    real standalone items — different Concealability/DV/AR/ammo, not
+//    a Rating-scaled config choice, same reasoning distinct barrel-
+//    length revolvers would be separate weapons rather than one item
+//    with a config toggle.
+//
+// SCHEMA PASS 2 (the resolved-decisions pass) — applied on top of
+// everything in PASS 1 below:
+//
+// D1. `referenceOnly: true` on all 55 items carrying `effects`. The
+//     test (see sensors_security_survival.js for the canonical wording)
+//     is that an effect counts as BACKED only if a live computed field
+//     DRIVES it — `flatDicePool`, `deviceModifiers`, `structure`,
+//     `structuralArmor`, or a device-capacity field. NOTHING in this
+//     file qualifies: `damageValue`/`attackRatings`/`modes`/`ammo` all
+//     drive the attack roll, not the separate rules the effects
+//     describe ("caseless flechette only," "Requires Strength 3+,"
+//     "Can mount 2 additional underbarrel accessories"). So the flag is
+//     universal here. That's an honest signal about how little of this
+//     chapter is mechanized, not a bug in the test.
+// D1b. VERIFICATION FOLLOW-UP: the original D1 pass scoped itself to
+//     "items carrying effects" only, and never ran wirelessBonuses-only
+//     items through the same test — but the universal firearm wireless
+//     bonus (ammo counter/ARO/bonus Minor Action) is exactly as
+//     unmechanized as everything else here, and every single firearm
+//     item carries it via the factory. That left 43 items with real,
+//     unbacked wirelessBonuses text and no referenceOnly flag. Fixed
+//     below — every one of those 43 now carries the flag too. This
+//     also covers a few accessory-only items (Spare Clip) and two
+//     explosive items (Grenade/Rocket Fragmentation and High Explosive)
+//     whose wirelessBonuses were the same oversight.
+// D2. NEW INTEGRAL SKUs: `bipod_integral` and `flashlight_integral`.
+//     See D3/D4 below for who uses them.
+// D3. RANGER ARMS SM-5 and BARRET MODEL 122 now take
+//     `silencer_suppressor_integral` rather than the removable
+//     barrel-mount SKU — "a silenced sniper rifle" that breaks down as
+//     one unit, and an anti-materiel rifle whose suppressor is part of
+//     the build. The Barret's "folding bipod" likewise takes
+//     `bipod_integral`: a bipod that folds against the receiver is part
+//     of the rifle. Note bipod_integral KEEPS its full +2, unlike
+//     laser_sight_integral — a bipod bonus is conditional on being
+//     deployed, so it can't have been folded into a printed AR.
+// D4. FN P93 PRAETOR's 3-setting flashlight gets `flashlight_integral`,
+//     a dedicated SKU rather than a reference to the plain 25¥
+//     `flashlight` in sensors_security_survival.js. That item is a
+//     basic mountable light with no vision-mode switching, so the
+//     reference would attach the wrong stats.
+// D5. ACCESSORY-COMPATIBILITY RULES SURFACED. Two families had their
+//     restrictions living only in section comments, where a player
+//     never sees them: the three Tasers ("accepts top-mounted
+//     accessories only") and the three Hold-outs ("can't take
+//     accessories or modifications"). Both are now `effects` entries on
+//     each item. The permissive section notes ("top and barrel mounts"
+//     on pistols, SMGs, shotguns, rifles) were NOT surfaced — they
+//     describe the default rather than a restriction, and doing so
+//     would add a near-identical line to 40+ items.
+// D6. DEFIANCE T-250, SHORT-BARRELED differentiated. See the FUDGED
+//     comment at the item — ammo capacity dropped 5 -> 4, invented.
+//
+// STILL DELIBERATELY UNCHANGED: Remington 900's "top imaging scope
+// standard" and Parashield Dart Rifle's "Includes a top imaging scope"
+// keep the REMOVABLE scope SKU. "Standard" and "includes" describe what
+// ships in the box, not something welded on, unlike Ruger 101's
+// "built-in imaging scope."
+//
+// SCHEMA PASS 1 — the original array/omittable-description pass:
+//
+// 9. `effect` -> `effects`, and `wirelessBonus` -> `wirelessBonuses`.
+//    Both are now ARRAYS of plain strings, one distinct mechanic per
+//    entry, so the renderer decides layout instead of the data baking
+//    it into comma-joined prose. Ordering convention: active mechanics
+//    first, restrictions and compatibility limits last. This also kills
+//    three string-concatenation sites — the `firearm()` factory and the
+//    two launchers that template-literal'd the blanket launcher bonus
+//    onto their own text now just spread arrays.
+// 10. `description` IS NOW OMITTABLE. The rule: you must be able to
+//    delete an item's description and lose no gameplay information.
+//    Anything mechanical that lived in prose has moved into `effects`,
+//    including restrictions ("not compatible with revolvers/shotguns"),
+//    activation tests, and Strength requirements. Several purely
+//    mechanical accessories legitimately end up with no meaningful
+//    flavor left — that's correct, not an omission. Purchase-shape
+//    notes ("per 10 rounds") stay in `description`, since they're
+//    pricing facts rather than play effects.
+// 11. `builtIn: true` — a new item-root flag meaning "welded to its
+//    parent: not removable, not separately purchasable." Such items are
+//    always `mount: null` (they consume no accessory mount — that's
+//    most of the point of being integral) and carry `cost: null` /
+//    `availability: null`, since they're never bought on their own.
+//    This reverses wrinkle 7's original "removable instances rather
+//    than a separate built-in concept" — deliberately. The removable
+//    model let a player strip 1,500Y of accessories off a 750Y Ingram
+//    Smartgun XI, and it double-counted bonuses the source had already
+//    folded into printed stats. Note `smartgun_system_internal` is NOT
+//    flagged: it already behaves correctly and stays installable into
+//    a gun a character already owns.
+// 12. INTEGRAL SKUs. Three new `_integral` accessories, following the
+//    existing `smartgun_system_internal` vs `_external` precedent —
+//    same accessory, two SKUs, the integral one occupying no mount:
+//      - silencer_suppressor_integral  (keeps its full effect)
+//      - imaging_scope_integral        (keeps its full effect + Capacity)
+//      - laser_sight_integral          (NO Attack Rating bonus — see below)
+//    laser_sight_integral is deliberately effect-free because the
+//    source has ALREADY folded the +1 into the printed Attack Ratings
+//    of every weapon that ships with one. Proof: Colt Cobra TZ-100
+//    (no sight) is 9/9/6, and the TZ-110 — described as "the TZ-100
+//    plus a laser sight" — is 10/10/7, exactly +1 across every
+//    populated band. Seeding the normal +1 item there would count it
+//    twice. Contrast the smartgun, whose +2 is conditional on the
+//    CHARACTER having a smartlink and so cannot be printed on a gun:
+//    Ares Light Fire 70 and 75 have identical 10/7/6 despite the 75
+//    adding smartlink hardware. So `builtIn` (removability) and
+//    baked-into-stats are INDEPENDENT properties — do not "fix"
+//    laser_sight_integral by giving it a bonus.
 
 const UNIVERSAL_FIREARM_WIRELESS_BONUS = 'Every modern gun is wireless-equipped with a digital ammo counter and loaded-ammo-type ARO; with DNI, gain a bonus Minor Action on any turn you eject a clip or change fire modes.';
 
@@ -91,16 +215,11 @@ function firearm(overrides) {
     ...rest,
     stats: {
       ...stats,
-      wirelessBonus: stats.wirelessBonus
-        ? `${UNIVERSAL_FIREARM_WIRELESS_BONUS} ${stats.wirelessBonus}`
-        : UNIVERSAL_FIREARM_WIRELESS_BONUS,
+      wirelessBonuses: [UNIVERSAL_FIREARM_WIRELESS_BONUS, ...(stats.wirelessBonuses ?? [])],
     },
   };
 }
 function firearmWireless(overrides) {
-  // firearm() now sets wireless: true unconditionally (see note above) —
-  // this wrapper is a no-op alias kept so existing call sites work
-  // unchanged.
   return firearm({ ...overrides });
 }
 function exoticFirearm(overrides) {
@@ -115,13 +234,21 @@ function weaponAccessory(overrides) {
 function weaponAccessoryWireless(overrides) {
   return weaponAccessory({ wireless: true, ...overrides });
 }
+function integralAccessory(overrides) {
+  return {
+    category: 'weapon_accessory',
+    legality: null,
+    image: null,
+    mount: null,
+    builtIn: true,
+    cost: null,
+    availability: null,
+    ...overrides,
+  };
+}
 function explosiveItem(overrides) {
   return { category: 'explosive', legality: 'illegal', image: null, ...overrides };
 }
-
-// ============================================================================
-// TASERS — accept top-mounted accessories only
-// ============================================================================
 
 const defiance_super_shock = firearm({
   id: 'defiance_super_shock',
@@ -129,17 +256,20 @@ const defiance_super_shock = firearm({
   cost: 340,
   availability: 1,
   legality: null,
-  description: 'Fires up to 4 wired darts (20m wire), more powerful but shorter-ranged than wireless models; usable point-blank in Close Combat for the same damage.',
+  description: 'A wired-dart taser — more powerful but shorter-ranged than the wireless models.',
+  referenceOnly: true,
   tags: ['taser'],
   stats: {
     damageValue: '6S(e)',
     modes: ['SS'],
     attackRatings: [10, 6, null, null, null],
-    ammo: {
-      capacity: 4,
-      container: 'm',
-    },
-    wirelessBonus: 'A hit reveals the target\u2019s general Condition Monitor status.',
+    ammo: { capacity: 4, container: 'm' },
+    effects: [
+      'Fires wired darts on 20m of wire.',
+      'Usable point-blank in Close Combat for the same damage.',
+      'Accepts top-mounted accessories only.',
+    ],
+    wirelessBonuses: ['A hit reveals the target\u2019s general Condition Monitor status.'],
   },
 });
 
@@ -149,17 +279,19 @@ const yamaha_pulsar_i = firearmWireless({
   cost: 325,
   availability: 1,
   legality: null,
-  description: 'Wireless capacitors mean longer range but less punch, firing faster for repeat hits. No melee grip contacts.',
+  description: 'Wireless capacitors mean longer range but less punch, firing faster for repeat hits.',
+  referenceOnly: true,
   tags: ['taser'],
   stats: {
     damageValue: '4S(e)',
     modes: ['SS'],
     attackRatings: [9, 9, null, null, null],
-    ammo: {
-      capacity: 4,
-      container: 'm',
-    },
-    wirelessBonus: 'A hit reveals the target\u2019s general Condition Monitor status.',
+    ammo: { capacity: 4, container: 'm' },
+    effects: [
+      'No melee grip contacts — no Close Combat option.',
+      'Accepts top-mounted accessories only.',
+    ],
+    wirelessBonuses: ['A hit reveals the target\u2019s general Condition Monitor status.'],
   },
 });
 
@@ -169,40 +301,43 @@ const yamaha_pulsar_ii = firearmWireless({
   cost: 350,
   availability: 1,
   legality: null,
-  description: 'As the Pulsar I, plus melee grip contacts — treat as a Close Combat Club attack.',
+  description: 'As the Pulsar I, plus melee grip contacts.',
+  referenceOnly: true,
   tags: ['taser'],
   stats: {
     damageValue: '4S(e)',
     modes: ['SS'],
     attackRatings: [9, 9, null, null, null],
-    ammo: {
-      capacity: 4,
-      container: 'm',
-    },
-    wirelessBonus: 'A hit reveals the target\u2019s general Condition Monitor status.',
+    ammo: { capacity: 4, container: 'm' },
+    effects: [
+      'Melee grip contacts — treat as a Close Combat Club attack.',
+      'Accepts top-mounted accessories only.',
+    ],
+    wirelessBonuses: ['A hit reveals the target\u2019s general Condition Monitor status.'],
   },
 });
-
-// ============================================================================
-// HOLD-OUTS — can't take accessories or modifications
-// ============================================================================
 
 const fichetti_tiffani_needler = firearmWireless({
   id: 'fichetti_tiffani_needler',
   label: 'Fichetti Tiffani Needler',
   cost: 435,
   availability: 2,
-  description: "The world's most popular designer handgun; color-changing coating via wireless signal, caseless flechette-only.",
+  description: "The world's most popular designer handgun, with a color-changing coating driven by its wireless signal.",
+  referenceOnly: true,
   tags: ['holdout'],
   stats: {
     damageValue: '3P',
     modes: ['SS'],
     attackRatings: [10, 6, 2, null, null],
-    ammo: {
-      capacity: 4,
-      container: 'c',
-    },
-    wirelessBonus: 'Change the coating\u2019s color as a Minor Action; a camo pattern raises visual Concealability threshold by 1.',
+    ammo: { capacity: 4, container: 'c' },
+    effects: [
+      'Caseless flechette ammo only.',
+      "Can't take accessories or modifications.",
+    ],
+    wirelessBonuses: [
+      'Change the coating\u2019s color as a Minor Action.',
+      'A camo pattern raises visual Concealability threshold by 1.',
+    ],
   },
 });
 
@@ -211,16 +346,18 @@ const streetline_special = firearm({
   label: 'Streetline Special',
   cost: 200,
   availability: 2,
-  description: 'Cheap 3D-nanoprinted composite construction, harder to detect with MAD scanners (+1 threshold).',
+  description: 'Cheap 3D-nanoprinted composite construction.',
+  referenceOnly: true,
   tags: ['holdout'],
   stats: {
     damageValue: '2P',
     modes: ['SS'],
     attackRatings: [8, 8, null, null, null],
-    ammo: {
-      capacity: 6,
-      container: 'c',
-    },
+    ammo: { capacity: 6, container: 'c' },
+    effects: [
+      '+1 threshold to detect with MAD scanners.',
+      "Can't take accessories or modifications.",
+    ],
   },
 });
 
@@ -229,38 +366,35 @@ const walther_palm_pistol = firearm({
   label: 'Walther Palm Pistol',
   cost: 345,
   availability: 2,
-  description: 'Double-barreled over-under derringer; Burst Fire = both barrels at once, only 6-shot capacity.',
+  description: 'A double-barreled over-under derringer.',
+  referenceOnly: true,
   tags: ['holdout'],
   stats: {
     damageValue: '2P',
     modes: ['SS', 'BF'],
     attackRatings: [12, 7, null, null, null],
-    ammo: {
-      capacity: 6,
-      container: 'b',
-    },
+    ammo: { capacity: 6, container: 'b' },
+    effects: [
+      'Burst Fire fires both barrels at once instead of a normal Burst.',
+      "Can't take accessories or modifications.",
+    ],
   },
 });
-
-// ============================================================================
-// LIGHT PISTOLS — top and barrel mounts
-// ============================================================================
 
 const ares_light_fire_70 = firearm({
   id: 'ares_light_fire_70',
   label: 'Ares Light Fire 70',
   cost: 350,
   availability: 3,
-  description: 'Special-ops design with a built-in barrel silencer (+3 threshold to notice).',
+  description: 'A special-ops design built around its integral suppressor.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA'],
     attackRatings: [10, 7, 6, null, null],
-    ammo: {
-      capacity: 16,
-      container: 'c',
-    },
+    ammo: { capacity: 16, container: 'c' },
+    defaultAttachments: ['silencer_suppressor_integral'],
   },
 });
 
@@ -270,15 +404,14 @@ const ares_light_fire_75 = firearmWireless({
   cost: 400,
   availability: 3,
   description: 'As the 70, plus preloaded smartlink hardware. Not legally common.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA'],
     attackRatings: [10, 7, 6, null, null],
-    ammo: {
-      capacity: 16,
-      container: 'c',
-    },
+    ammo: { capacity: 16, container: 'c' },
+    defaultAttachments: ['silencer_suppressor_integral', 'smartgun_system_internal'],
   },
 });
 
@@ -287,16 +420,14 @@ const beretta_101t = firearm({
   label: 'Beretta 101T',
   cost: 260,
   availability: 2,
-  description: 'Shares a frame with the 201T for easy disguise. Detachable shoulder stock, often lost before street sale.',
+  description: 'Shares a frame with the 201T for easy disguise. Ships with a detachable shoulder stock, more often than not lost before street sale.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA'],
     attackRatings: [9, 8, 6, null, null],
-    ammo: {
-      capacity: 21,
-      container: 'c',
-    },
+    ammo: { capacity: 21, container: 'c' },
   },
 });
 
@@ -305,16 +436,14 @@ const beretta_201t = firearm({
   label: 'Beretta 201T',
   cost: 460,
   availability: 3,
-  description: "Automatic fire capability, popular where heavy/machine pistols are restricted.",
+  description: 'Automatic fire capability, popular where heavy and machine pistols are restricted.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA', 'FA'],
     attackRatings: [9, 8, 6, null, null],
-    ammo: {
-      capacity: 21,
-      container: 'c',
-    },
+    ammo: { capacity: 21, container: 'c' },
   },
 });
 
@@ -323,17 +452,15 @@ const colt_america_l36 = firearm({
   label: 'Colt America L36',
   cost: 230,
   availability: 2,
-  description: "Cheap, concealable, an ownership-swap feature abused by cops and crooks alike.",
+  description: 'Cheap and concealable, with an ownership-swap feature abused by cops and crooks alike.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA'],
     attackRatings: [8, 8, 6, null, null],
-    ammo: {
-      capacity: 11,
-      container: 'c',
-    },
-    wirelessBonus: 'Alter ownership data with a Minor Action.',
+    ammo: { capacity: 11, container: 'c' },
+    wirelessBonuses: ['Alter ownership data with a Minor Action.'],
   },
 });
 
@@ -342,16 +469,15 @@ const fichetti_security_600 = firearm({
   label: 'Fichetti Security 600',
   cost: 390,
   availability: 3,
-  description: '30-round magazine security sidearm, popular with deckers for the ammo buffer. Detachable folding stock and laser sight.',
+  description: 'A 30-round security sidearm, popular with deckers for the ammo buffer. Ships with a detachable folding stock.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA'],
     attackRatings: [10, 9, 6, null, null],
-    ammo: {
-      capacity: 30,
-      container: 'c',
-    },
+    ammo: { capacity: 30, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
 
@@ -360,39 +486,33 @@ const ruger_redhawk = firearm({
   label: 'Ruger Redhawk',
   cost: 250,
   availability: 2,
-  description: 'Single/double firing selector: double action = Semi-Auto Fire, single action = Burst Fire.',
+  description: 'A heavy revolver with a single/double firing selector.',
+  referenceOnly: true,
   tags: ['light_pistol'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [7, 10, 7, null, null],
-    ammo: {
-      capacity: 8,
-      container: 'cy',
-    },
-    wirelessBonus: 'Bonus Minor Action when switching firing mode.',
+    ammo: { capacity: 8, container: 'cy' },
+    effects: ['Double action fires Semi-Auto; single action fires Burst Fire.'],
+    wirelessBonuses: ['Bonus Minor Action when switching firing mode.'],
   },
 });
-
-// ============================================================================
-// MACHINE PISTOLS — top and barrel mounts
-// ============================================================================
 
 const ares_crusader_ii = firearmWireless({
   id: 'ares_crusader_ii',
   label: 'Ares Crusader II',
   cost: 520,
   availability: 4,
-  description: 'High capacity, gas-vent recoil compensation, preloaded smartgun.',
+  description: 'A high-capacity machine pistol sold ready to run.',
+  referenceOnly: true,
   tags: ['machine_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA', 'BF'],
     attackRatings: [9, 9, 7, null, null],
-    ammo: {
-      capacity: 40,
-      container: 'c',
-    },
+    ammo: { capacity: 40, container: 'c' },
+    defaultAttachments: ['gas_vent_system', 'smartgun_system_internal'],
   },
 });
 
@@ -401,16 +521,14 @@ const ceska_black_scorpion = firearm({
   label: 'Ceska Black Scorpion',
   cost: 510,
   availability: 3,
-  description: 'Small, Burst Fire capable, integral folding stock.',
+  description: 'Small, Burst Fire capable, with an integral folding stock.',
+  referenceOnly: true,
   tags: ['machine_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA', 'BF'],
     attackRatings: [10, 9, 8, null, null],
-    ammo: {
-      capacity: 35,
-      container: 'c',
-    },
+    ammo: { capacity: 35, container: 'c' },
   },
 });
 
@@ -419,38 +537,33 @@ const steyr_tmp = firearm({
   label: 'Steyr TMP',
   cost: 690,
   availability: 3,
-  description: 'Lightweight polymer frame with full-auto capability. Standard top-mounted laser sight.',
+  description: 'A lightweight polymer frame with full-auto capability.',
+  referenceOnly: true,
   tags: ['machine_pistol'],
   stats: {
     damageValue: '2P',
     modes: ['SA', 'FA'],
     attackRatings: [8, 8, 6, null, null],
-    ammo: {
-      capacity: 30,
-      container: 'c',
-    },
+    ammo: { capacity: 30, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
-
-// ============================================================================
-// HEAVY PISTOLS — top and barrel mounts
-// ============================================================================
 
 const ares_predator_vi = firearmWireless({
   id: 'ares_predator_vi',
   label: 'Ares Predator VI',
   cost: 750,
   availability: 2,
-  description: 'Standard smartgun, Burst Fire, variable ammunition system letting one magazine carry different ammo types.',
+  description: 'The definitive runner sidearm, sold with its smartgun already fitted.',
+  referenceOnly: true,
   tags: ['heavy_pistol'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [10, 10, 8, null, null],
-    ammo: {
-      capacity: 15,
-      container: 'c',
-    },
+    ammo: { capacity: 15, container: 'c' },
+    effects: ['Variable ammunition system — one magazine can carry mixed ammo types.'],
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
 
@@ -459,16 +572,16 @@ const ares_viper_slivergun = firearm({
   label: 'Ares Viper Slivergun',
   cost: 610,
   availability: 4,
-  description: 'Fires flechette-classed metal slivers unique to this gun. Burst Fire, integrated barrel silencer, large capacity.',
+  description: 'A large-capacity burst-fire pistol built around an integrated barrel suppressor.',
+  referenceOnly: true,
   tags: ['heavy_pistol'],
   stats: {
     damageValue: '2P(fl)',
     modes: ['SA', 'BF'],
     attackRatings: [13, 9, 7, null, null],
-    ammo: {
-      capacity: 30,
-      container: 'c',
-    },
+    ammo: { capacity: 30, container: 'c' },
+    effects: ['Fires only its own flechette-classed metal slivers.'],
+    defaultAttachments: ['silencer_suppressor_integral'],
   },
 });
 
@@ -477,16 +590,15 @@ const browning_ultra_power = firearm({
   label: 'Browning Ultra Power',
   cost: 315,
   availability: 2,
-  description: "The Predator's former rival, cheaper, hasn't kept pace tech-wise. Built-in top laser sight.",
+  description: "The Predator's former rival — cheaper, and it hasn't kept pace tech-wise.",
+  referenceOnly: true,
   tags: ['heavy_pistol'],
   stats: {
     damageValue: '3P',
     modes: ['SA'],
     attackRatings: [10, 9, 6, null, null],
-    ammo: {
-      capacity: 10,
-      container: 'c',
-    },
+    ammo: { capacity: 10, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
 
@@ -495,16 +607,15 @@ const colt_government_2076 = firearm({
   label: 'Colt Government 2076',
   cost: 275,
   availability: 3,
-  description: "A callback to the classic Manhunter design after post-'60s hacking fears sidelined the electronic-fire 2076. Integral laser sight.",
+  description: "A callback to the classic Manhunter design after post-'60s hacking fears sidelined the electronic-fire 2076.",
+  referenceOnly: true,
   tags: ['heavy_pistol'],
   stats: {
     damageValue: '3P',
     modes: ['SA'],
     attackRatings: [10, 8, 6, null, null],
-    ammo: {
-      capacity: 14,
-      container: 'c',
-    },
+    ammo: { capacity: 14, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
 
@@ -514,15 +625,14 @@ const colt_manhunter = firearmWireless({
   cost: 500,
   availability: 3,
   description: 'The smartgun-equipped variant of the 2076, carrying the classic Manhunter name.',
+  referenceOnly: true,
   tags: ['heavy_pistol'],
   stats: {
     damageValue: '3P',
     modes: ['SA'],
     attackRatings: [10, 8, 6, null, null],
-    ammo: {
-      capacity: 14,
-      container: 'c',
-    },
+    ammo: { capacity: 14, container: 'c' },
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
 
@@ -531,22 +641,16 @@ const ruger_super_warhawk = firearm({
   label: 'Ruger Super Warhawk',
   cost: 400,
   availability: 3,
-  description: 'Flashy chrome revolver, big holes out of the box, more precise with upgrades.',
+  description: 'Flashy chrome revolver — big holes out of the box, more precise with upgrades.',
+  referenceOnly: true,
   tags: ['heavy_pistol'],
   stats: {
     damageValue: '4P',
     modes: ['SA'],
     attackRatings: [8, 11, 8, null, null],
-    ammo: {
-      capacity: 6,
-      container: 'cy',
-    },
+    ammo: { capacity: 6, container: 'cy' },
   },
 });
-
-// ============================================================================
-// SUBMACHINE GUNS — top and barrel mounts
-// ============================================================================
 
 const colt_cobra_tz100 = firearm({
   id: 'colt_cobra_tz100',
@@ -554,15 +658,13 @@ const colt_cobra_tz100 = firearm({
   cost: 730,
   availability: 2,
   description: 'Folding stock. First of an increasing-accessory line, popular with security and trid shows alike.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [9, 9, 6, null, null],
-    ammo: {
-      capacity: 32,
-      container: 'c',
-    },
+    ammo: { capacity: 32, container: 'c' },
   },
 });
 
@@ -572,15 +674,14 @@ const colt_cobra_tz110 = firearm({
   cost: 785,
   availability: 2,
   description: 'As the TZ-100, plus a laser sight.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [10, 10, 7, null, null],
-    ammo: {
-      capacity: 32,
-      container: 'c',
-    },
+    ammo: { capacity: 32, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
 
@@ -590,15 +691,14 @@ const colt_cobra_tz120 = firearm({
   cost: 840,
   availability: 3,
   description: 'As the TZ-110, plus a gas-vent system.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [10, 11, 8, null, null],
-    ammo: {
-      capacity: 32,
-      container: 'c',
-    },
+    ammo: { capacity: 32, container: 'c' },
+    defaultAttachments: ['laser_sight_integral', 'gas_vent_system'],
   },
 });
 
@@ -607,16 +707,15 @@ const fn_p93_praetor = firearm({
   label: 'FN P93 Praetor',
   cost: 925,
   availability: 4,
-  description: 'Intimidating bullpup design; integrated rigid stock, laser sight, and a 3-setting flashlight.',
+  description: 'An intimidating bullpup design with an integrated rigid stock.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [9, 12, 7, null, null],
-    ammo: {
-      capacity: 50,
-      container: 'c',
-    },
+    ammo: { capacity: 50, container: 'c' },
+    defaultAttachments: ['laser_sight_integral', 'flashlight_integral'],
   },
 });
 
@@ -625,16 +724,15 @@ const hk_227 = firearmWireless({
   label: 'HK-227',
   cost: 825,
   availability: 3,
-  description: 'Built on the century-old MP5 frame; retractable stock, smartgun, integral barrel silencer.',
+  description: 'Built on the century-old MP5 frame, with a retractable stock.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [10, 11, 8, null, null],
-    ammo: {
-      capacity: 28,
-      container: 'c',
-    },
+    ammo: { capacity: 28, container: 'c' },
+    defaultAttachments: ['smartgun_system_internal', 'silencer_suppressor_integral'],
   },
 });
 
@@ -643,16 +741,15 @@ const ingram_smartgun_xi = firearmWireless({
   label: 'Ingram Smartgun XI',
   cost: 750,
   availability: 3,
-  description: 'A legendary street samurai weapon of choice since the 2050s; gas-vent, smartgun, integral silencer.',
+  description: 'A legendary street samurai weapon of choice since the 2050s.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [11, 9, 6, null, null],
-    ammo: {
-      capacity: 32,
-      container: 'c',
-    },
+    ammo: { capacity: 32, container: 'c' },
+    defaultAttachments: ['gas_vent_system', 'smartgun_system_internal', 'silencer_suppressor_integral'],
   },
 });
 
@@ -661,16 +758,15 @@ const sck_model_100 = firearmWireless({
   label: 'SCK Model 100',
   cost: 725,
   availability: 3,
-  description: 'Japanacorp standard issue (Red Samurai-associated); internal smartgun, folding stock.',
+  description: 'Japanacorp standard issue, associated with the Red Samurai. Folding stock.',
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF'],
     attackRatings: [10, 10, 7, null, null],
-    ammo: {
-      capacity: 30,
-      container: 'c',
-    },
+    ammo: { capacity: 30, container: 'c' },
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
 
@@ -679,38 +775,48 @@ const uzi_v = firearm({
   label: 'Uzi V',
   cost: 455,
   availability: 2,
-  description: "Spinrad Global's latest entry; integral folding stock, built-in top laser sight.",
+  description: "Spinrad Global's latest entry, with an integral folding stock.",
+  referenceOnly: true,
   tags: ['smg'],
   stats: {
     damageValue: '3P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [8, 8, 7, null, null],
-    ammo: {
-      capacity: 24,
-      container: 'c',
-    },
+    ammo: { capacity: 24, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
-
-// ============================================================================
-// SHOTGUNS — stats are for normal slug rounds; top, barrel, underbarrel mounts
-// ============================================================================
 
 const defiance_t250 = firearm({
   id: 'defiance_t250',
   label: 'Defiance T-250',
   cost: 330,
   availability: 2,
-  description: 'Semi-auto street howitzer, gas-operated with a secondary pump action to clear glitch-jams. Short-barreled variant: Concealability 3, DV 3P, AR 8/8/4/-/-.',
+  description: 'A semi-auto street howitzer, gas-operated with a secondary pump action to clear glitch-jams.',
+  referenceOnly: true,
   tags: ['shotgun'],
   stats: {
     damageValue: '4P',
     modes: ['SS', 'SA'],
     attackRatings: [7, 10, 6, null, null],
-    ammo: {
-      capacity: 5,
-      container: 'm',
-    },
+    ammo: { capacity: 5, container: 'm' },
+  },
+});
+
+const defiance_t250_short_barreled = firearm({
+  id: 'defiance_t250_short_barreled',
+  label: 'Defiance T-250, Short-Barreled',
+  cost: 330,
+  availability: 2,
+  description: 'The T-250 with the barrel cut down — trades range and capacity for concealability.',
+  referenceOnly: true,
+  tags: ['shotgun'],
+  stats: {
+    damageValue: '3P',
+    modes: ['SS', 'SA'],
+    attackRatings: [8, 8, 4, null, null],
+    ammo: { capacity: 4, container: 'm' },
+    effects: ['Concealability 3.'],
   },
 });
 
@@ -719,16 +825,32 @@ const mossberg_cmdt = firearm({
   label: 'Mossberg CMDT',
   cost: 700,
   availability: 4,
-  description: '10-round clip or 24-round drum, burst fire, top laser sight.',
+  description: 'A burst-fire combat shotgun fed from a 10-round clip.',
+  referenceOnly: true,
   tags: ['shotgun'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF'],
     attackRatings: [4, 11, 7, null, null],
-    ammo: {
-      capacity: 10,
-      container: 'c',
-    },
+    ammo: { capacity: 10, container: 'c' },
+    defaultAttachments: ['laser_sight_integral'],
+  },
+});
+
+const mossberg_cmdt_drum = firearm({
+  id: 'mossberg_cmdt_drum',
+  label: 'Mossberg CMDT, Drum-Fed',
+  cost: 700,
+  availability: 4,
+  description: 'The CMDT running a 24-round drum instead of the standard clip.',
+  referenceOnly: true,
+  tags: ['shotgun'],
+  stats: {
+    damageValue: '4P',
+    modes: ['SA', 'BF'],
+    attackRatings: [4, 11, 7, null, null],
+    ammo: { capacity: 24, container: 'drum' },
+    defaultAttachments: ['laser_sight_integral'],
   },
 });
 
@@ -737,16 +859,16 @@ const pjss_model_55 = firearm({
   label: 'PJSS Model 55',
   cost: 325,
   availability: 5,
-  description: 'A European hunter/trap-shooter status symbol; rigid stock with shock pad, can fire both barrels at once as a short burst.',
+  description: 'A European hunter and trap-shooter status symbol.',
+  referenceOnly: true,
   tags: ['shotgun'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF (short)'],
     attackRatings: [3, 12, 8, null, null],
-    ammo: {
-      capacity: 2,
-      container: 'b',
-    },
+    ammo: { capacity: 2, container: 'b' },
+    effects: ['Burst Fire fires both barrels at once as a short burst.'],
+    defaultAttachments: ['shock_pads'],
   },
 });
 
@@ -755,38 +877,31 @@ const remington_roomsweeper = firearm({
   label: 'Remington Roomsweeper',
   cost: 325,
   availability: 2,
-  description: 'Double-barreled, pistol-gripped; loadable with Heavy Pistol rounds for an inaccurate hand cannon if not using flechette.',
+  description: 'Double-barreled and pistol-gripped — an inaccurate hand cannon.',
+  referenceOnly: true,
   tags: ['shotgun'],
   stats: {
     damageValue: '5P',
     modes: ['SA'],
     attackRatings: [9, 8, 4, null, null],
-    ammo: {
-      capacity: 8,
-      container: 'm',
-    },
+    ammo: { capacity: 8, container: 'm' },
+    effects: ['Can load Heavy Pistol rounds when not firing flechette.'],
   },
 });
-
-// ============================================================================
-// RIFLES — top, barrel, underbarrel mounts
-// ============================================================================
 
 const ak_97 = firearm({
   id: 'ak_97',
   label: 'AK-97',
   cost: 2100,
   availability: 2,
-  description: 'The eternal classic, unchanged look since the 20th century.',
+  description: 'The eternal classic, unchanged in look since the 20th century.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [4, 11, 9, 7, 1],
-    ammo: {
-      capacity: 38,
-      container: 'c',
-    },
+    ammo: { capacity: 38, container: 'c' },
   },
 });
 
@@ -795,28 +910,24 @@ const ares_alpha = firearmWireless({
   label: 'Ares Alpha',
   cost: 3400,
   availability: 5,
-  description: 'Made famous by Ares Firewatch; integrated underbarrel grenade launcher, smartgun, superior handling design.',
+  description: 'Made famous by Ares Firewatch; a superior handling design with an integrated underbarrel grenade launcher.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [4, 10, 9, 7, 2],
-    ammo: {
-      capacity: 42,
-      container: 'c',
-    },
+    ammo: { capacity: 42, container: 'c' },
     integratedWeapons: [
       {
         label: 'Grenade Launcher (Underbarrel)',
         modes: ['SS'],
         damageValue: 'As grenade loaded',
         attackRatings: [4, 10, 6, 2, null],
-        ammo: {
-          capacity: 6,
-          container: 'c',
-        },
+        ammo: { capacity: 6, container: 'c' },
       },
     ],
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
 
@@ -825,16 +936,15 @@ const colt_m23 = firearm({
   label: 'Colt M23',
   cost: 2100,
   availability: 2,
-  description: 'Cheap, mass-produced, everywhere. Can mount 2 additional underbarrel accessories (3 total).',
+  description: 'Cheap, mass-produced, everywhere.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [5, 8, 8, 8, 1],
-    ammo: {
-      capacity: 40,
-      container: 'c',
-    },
+    ammo: { capacity: 40, container: 'c' },
+    effects: ['Can mount 2 additional underbarrel accessories (3 total).'],
   },
 });
 
@@ -843,16 +953,15 @@ const fn_har = firearm({
   label: 'FN-HAR',
   cost: 2100,
   availability: 3,
-  description: 'The private-security/HTR fear-inducer; laser sight and gas-vent system.',
+  description: 'The private-security and HTR fear-inducer.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [3, 11, 10, 6, 1],
-    ammo: {
-      capacity: 35,
-      container: 'c',
-    },
+    ammo: { capacity: 35, container: 'c' },
+    defaultAttachments: ['laser_sight_integral', 'gas_vent_system'],
   },
 });
 
@@ -861,38 +970,31 @@ const yamaha_raiden = firearmWireless({
   label: 'Yamaha Raiden',
   cost: 3200,
   availability: 5,
-  description: 'Japanacorp/Imperial Marine standard; electronic firing, integral silencer, smartgun, underbarrel shotgun/grenade launcher.',
+  description: 'Japanacorp and Imperial Marine standard; electronic firing, with an underbarrel shotgun and grenade launcher.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [4, 11, 10, 7, 2],
-    ammo: {
-      capacity: 60,
-      container: 'c',
-    },
+    ammo: { capacity: 60, container: 'c' },
     integratedWeapons: [
       {
         label: 'Grenade Launcher (Underbarrel)',
         modes: ['SS'],
         damageValue: 'As grenade loaded',
         attackRatings: [4, 11, 7, 1, null],
-        ammo: {
-          capacity: 4,
-          container: 'c',
-        },
+        ammo: { capacity: 4, container: 'c' },
       },
       {
         label: 'Shotgun (Underbarrel)',
         modes: ['SS', 'SA'],
         damageValue: '4P',
         attackRatings: [7, 9, 8, null, null],
-        ammo: {
-          capacity: 2,
-          container: 'b',
-        },
+        ammo: { capacity: 2, container: 'b' },
       },
     ],
+    defaultAttachments: ['silencer_suppressor_integral', 'smartgun_system_internal'],
   },
 });
 
@@ -902,16 +1004,15 @@ const ares_desert_strike = firearm({
   cost: 11000,
   availability: 4,
   legality: 'illegal',
-  description: 'Built for harsh conditions; rigid stock with shock pad, detachable imaging scope.',
+  description: 'A sniper rifle built for harsh conditions, on a rigid stock.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SA'],
     attackRatings: [3, 10, 10, 10, 10],
-    ammo: {
-      capacity: 14,
-      container: 'c',
-    },
+    ammo: { capacity: 14, container: 'c' },
+    defaultAttachments: ['imaging_scope_weapon_accessory', 'shock_pads'],
   },
 });
 
@@ -921,16 +1022,15 @@ const cavalier_arms_crockett_ebr = firearm({
   cost: 9050,
   availability: 5,
   legality: 'illegal',
-  description: 'A burst-fire-capable sniper rifle; accurate at range but bursts sacrifice repeat precision. Rigid stock with shock pad, detachable imaging scope.',
+  description: 'A burst-fire-capable sniper rifle on a rigid stock — accurate at range, though bursts sacrifice repeat precision.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SA', 'BF'],
     attackRatings: [3, 8, 11, 8, 8],
-    ammo: {
-      capacity: 20,
-      container: 'c',
-    },
+    ammo: { capacity: 20, container: 'c' },
+    defaultAttachments: ['imaging_scope_weapon_accessory', 'shock_pads'],
   },
 });
 
@@ -940,16 +1040,16 @@ const ranger_arms_sm5 = firearmWireless({
   cost: 13200,
   availability: 5,
   legality: 'illegal',
-  description: 'A silenced sniper rifle built for quick in-and-out work; silencer, imaging scope, smartgun, rigid stock. Fits in a briefcase (assembly/breakdown: Firearms + Logic (6, Major Action) Extended test). Note: referred to as "SM-6" in the book\'s prose but "SM-5" in its own stat table — used the table\'s naming here.',
+  description: 'A silenced sniper rifle on a rigid stock, built for quick in-and-out work.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SA'],
     attackRatings: [3, 6, 9, 11, 12],
-    ammo: {
-      capacity: 15,
-      container: 'c',
-    },
+    ammo: { capacity: 15, container: 'c' },
+    effects: ['Fits in a briefcase — Firearms + Logic (6, Major Action) Extended Test to assemble or break down.'],
+    defaultAttachments: ['silencer_suppressor_integral', 'imaging_scope_weapon_accessory', 'smartgun_system_internal'],
   },
 });
 
@@ -958,16 +1058,16 @@ const remington_900 = firearm({
   label: 'Remington 900',
   cost: 12000,
   availability: 3,
-  description: 'Classic wooden bolt-action hunting rifle, top imaging scope standard, no underbarrel mounting.',
+  description: 'A classic wooden bolt-action hunting rifle.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SS'],
     attackRatings: [2, 7, 10, 12, 11],
-    ammo: {
-      capacity: 5,
-      container: 'm',
-    },
+    ammo: { capacity: 5, container: 'm' },
+    effects: ['No underbarrel mounting.'],
+    defaultAttachments: ['imaging_scope_weapon_accessory'],
   },
 });
 
@@ -976,16 +1076,15 @@ const ruger_101 = firearm({
   label: 'Ruger 101',
   cost: 11100,
   availability: 2,
-  description: 'Gas-operated hunting favorite, built-in imaging scope, rigid stock with shock pad.',
+  description: 'A gas-operated hunting favorite on a rigid stock.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '5P',
     modes: ['SA'],
     attackRatings: [2, 6, 10, 12, 11],
-    ammo: {
-      capacity: 8,
-      container: 'm',
-    },
+    ammo: { capacity: 8, container: 'm' },
+    defaultAttachments: ['imaging_scope_integral', 'shock_pads'],
   },
 });
 
@@ -995,41 +1094,32 @@ const barret_model_122 = firearmWireless({
   cost: 15200,
   availability: 6,
   legality: 'illegal',
-  description: 'An anti-materiel rifle for tearing through vehicles/APCs; silencer, smartgun, folding bipod.',
+  description: 'An anti-materiel rifle for tearing through vehicles and APCs.',
+  referenceOnly: true,
   tags: ['rifle'],
   stats: {
     damageValue: '6P',
     modes: ['SA'],
     attackRatings: [1, 8, 11, 16, 14],
-    ammo: {
-      capacity: 10,
-      container: 'c',
-    },
+    ammo: { capacity: 10, container: 'c' },
+    defaultAttachments: ['silencer_suppressor_integral', 'smartgun_system_internal', 'bipod_integral'],
   },
 });
-
-// ============================================================================
-// MACHINE GUNS / ASSAULT CANNONS — top, barrel, underbarrel mounts.
-// Medium/Heavy MGs need Strength 3+/5+ and are designed vehicle-mounted.
-// ============================================================================
 
 const ingram_valiant = firearm({
   id: 'ingram_valiant',
   label: 'Ingram Valiant',
   cost: 4175,
   availability: 4,
-  description: 'Light MG, mercenary favorite; rigid stock with shock pad, laser sight, barrel gas-vent.',
+  description: 'A light MG on a rigid stock, and a mercenary favorite.',
+  referenceOnly: true,
   tags: ['machine_gun'],
   stats: {
     damageValue: '4P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [2, 11, 12, 7, 3],
-    ammo: {
-      options: [
-        { capacity: 50, container: 'c' },
-        { capacity: 100, container: 'belt' },
-      ],
-    },
+    ammo: { options: [{ capacity: 50, container: 'c' }, { capacity: 100, container: 'belt' }] },
+    defaultAttachments: ['laser_sight_integral', 'gas_vent_system', 'shock_pads'],
   },
 });
 
@@ -1038,18 +1128,15 @@ const stoner_ares_m202 = firearm({
   label: 'Stoner-Ares M202',
   cost: 6900,
   availability: 4,
-  description: 'Medium MG, tremendous punch, brutally simple, often seen with trolls. Strength 3+.',
+  description: 'A medium MG with tremendous punch — brutally simple, and often seen with trolls.',
+  referenceOnly: true,
   tags: ['machine_gun'],
   stats: {
     damageValue: '5P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [1, 10, 11, 7, 6],
-    ammo: {
-      options: [
-        { capacity: 50, container: 'c' },
-        { capacity: 100, container: 'belt' },
-      ],
-    },
+    ammo: { options: [{ capacity: 50, container: 'c' }, { capacity: 100, container: 'belt' }] },
+    effects: ['Requires Strength 3+.'],
   },
 });
 
@@ -1058,18 +1145,16 @@ const rpk_hmg = firearm({
   label: 'RPK HMG',
   cost: 8000,
   availability: 5,
-  description: 'Heavy MG, Eastern European/Asian military staple, usually vehicle-mounted; comes with a detachable tripod. Strength 5+.',
+  description: 'A heavy MG, Eastern European and Asian military staple, usually vehicle-mounted.',
+  referenceOnly: true,
   tags: ['machine_gun'],
   stats: {
     damageValue: '6P',
     modes: ['SA', 'BF', 'FA'],
     attackRatings: [1, 10, 12, 8, 7],
-    ammo: {
-      options: [
-        { capacity: 50, container: 'c' },
-        { capacity: 100, container: 'belt' },
-      ],
-    },
+    ammo: { options: [{ capacity: 50, container: 'c' }, { capacity: 100, container: 'belt' }] },
+    effects: ['Requires Strength 5+.'],
+    defaultAttachments: ['tripod'],
   },
 });
 
@@ -1079,38 +1164,34 @@ const panther_xxl = firearmWireless({
   cost: 10000,
   availability: 6,
   legality: 'illegal',
-  description: 'Assault cannon; bulky, ugly, deadly. Built-in smartgun system.',
+  description: 'An assault cannon — bulky, ugly, deadly.',
+  referenceOnly: true,
   tags: ['machine_gun'],
   stats: {
     damageValue: '7P',
     modes: ['SA'],
     attackRatings: [1, 9, 12, 8, 6],
-    ammo: {
-      capacity: 15,
-      container: 'c',
-    },
+    ammo: { capacity: 15, container: 'c' },
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
-
-// ============================================================================
-// SPECIAL WEAPONS (EXOTIC) — Exotic Weapons skill
-// ============================================================================
 
 const ares_super_squirt = exoticFirearm({
   id: 'ares_super_squirt',
   label: 'Ares Super Squirt',
   cost: 560,
   availability: 3,
-  description: "A nonlethal DMSO-gel-pack \"paintball marker\" despite the name. No direct damage; drives a chosen chemical payload into the target's bloodstream as a Contact-vector toxin.",
+  description: 'A nonlethal DMSO-gel-pack "paintball marker" despite the name.',
+  referenceOnly: true,
   tags: ['special_weapon'],
   stats: {
     damageValue: 'Special',
     modes: ['SS'],
     attackRatings: [8, 12, 9, null, null],
-    ammo: {
-      capacity: 20,
-      container: 'c',
-    },
+    ammo: { capacity: 20, container: 'c' },
+    effects: [
+      'No direct damage — drives a chosen chemical payload into the target\u2019s bloodstream as a Contact-vector toxin.',
+    ],
   },
 });
 
@@ -1119,17 +1200,19 @@ const parashield_dart_pistol = exoticFirearmWireless({
   label: 'Parashield DART Pistol',
   cost: 510,
   availability: 2,
-  description: 'The industry standard dart weapon; top accessories only.',
+  description: 'The industry standard dart weapon.',
+  referenceOnly: true,
   tags: ['special_weapon'],
   stats: {
     damageValue: '1P + special',
     modes: ['SS'],
     attackRatings: [9, 10, 8, null, null],
-    ammo: {
-      capacity: 5,
-      container: 'c',
-    },
-    wirelessBonus: 'Reports hit/injection success and a (low-fidelity, Device Rating 1) heart-rate/pulse readout.',
+    ammo: { capacity: 5, container: 'c' },
+    effects: ['Top-mounted accessories only.'],
+    wirelessBonuses: [
+      'Reports hit and injection success.',
+      'Provides a low-fidelity (Device Rating 1) heart-rate/pulse readout.',
+    ],
   },
 });
 
@@ -1138,29 +1221,22 @@ const parashield_dart_rifle = exoticFirearmWireless({
   label: 'Parashield DART Rifle',
   cost: 710,
   availability: 3,
-  description: 'Includes a top imaging scope, can mount top/underbarrel.',
+  description: 'The shoulder-fired dart weapon, sold with a scope fitted.',
+  referenceOnly: true,
   tags: ['special_weapon'],
   stats: {
     damageValue: '1P + special',
     modes: ['SS'],
     attackRatings: [5, 8, 11, 3, null],
-    ammo: {
-      capacity: 6,
-      container: 'm',
-    },
-    wirelessBonus: 'Reports hit/injection success and a (low-fidelity, Device Rating 1) heart-rate/pulse readout.',
+    ammo: { capacity: 6, container: 'm' },
+    effects: ['Can mount top and underbarrel accessories.'],
+    wirelessBonuses: [
+      'Reports hit and injection success.',
+      'Provides a low-fidelity (Device Rating 1) heart-rate/pulse readout.',
+    ],
+    defaultAttachments: ['imaging_scope_weapon_accessory'],
   },
 });
-
-// ============================================================================
-// LAUNCHERS — Exotic Weapons skill; fire minigrenades or missiles/rockets
-// All 5 launchers share a blanket "Wireless bonus (all launchers, via
-// wireless-active ordnance): wireless link trigger available even
-// without DNI." Ares Antioch II's own description already covers this
-// (its "secondary wireless-activation trigger" IS the blanket bonus, so
-// no separate additional text); Aztechnology Striker and Onotari
-// Interceptor each have a further bonus stacked on top.
-// ============================================================================
 
 const LAUNCHER_WIRELESS_BONUS = 'Wireless link trigger available even without DNI.';
 
@@ -1169,17 +1245,16 @@ const ares_antioch_ii = exoticFirearmWireless({
   label: 'Ares Antioch II',
   cost: 5900,
   availability: 3,
-  description: 'Integral smartgun, secondary wireless-activation trigger setting for launched projectiles.',
+  description: 'A grenade launcher with a secondary wireless-activation trigger setting for launched projectiles.',
+  referenceOnly: true,
   tags: ['launcher'],
   stats: {
     damageValue: 'As grenade loaded',
     modes: ['SS'],
     attackRatings: [null, 6, 8, 6, 5],
-    ammo: {
-      capacity: 8,
-      container: 'm',
-    },
-    wirelessBonus: LAUNCHER_WIRELESS_BONUS,
+    ammo: { capacity: 8, container: 'm' },
+    wirelessBonuses: [LAUNCHER_WIRELESS_BONUS],
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
 
@@ -1188,17 +1263,15 @@ const armtech_mgl6 = exoticFirearmWireless({
   label: 'ArmTech MGL-6',
   cost: 1800,
   availability: 4,
-  description: 'Bullpup pistol-style semi-auto grenade launcher.',
+  description: 'A bullpup pistol-style semi-auto grenade launcher.',
+  referenceOnly: true,
   tags: ['launcher'],
   stats: {
     damageValue: 'As grenade loaded',
     modes: ['SA'],
     attackRatings: [null, 8, 8, 3, null],
-    ammo: {
-      capacity: 6,
-      container: 'c',
-    },
-    wirelessBonus: LAUNCHER_WIRELESS_BONUS,
+    ammo: { capacity: 6, container: 'c' },
+    wirelessBonuses: [LAUNCHER_WIRELESS_BONUS],
   },
 });
 
@@ -1207,17 +1280,15 @@ const armtech_mgl12 = exoticFirearmWireless({
   label: 'ArmTech MGL-12',
   cost: 5000,
   availability: 4,
-  description: 'Bullpup rifle-style semi-auto grenade launcher.',
+  description: 'A bullpup rifle-style semi-auto grenade launcher.',
+  referenceOnly: true,
   tags: ['launcher'],
   stats: {
     damageValue: 'As grenade loaded',
     modes: ['SA'],
     attackRatings: [null, 8, 9, 6, 2],
-    ammo: {
-      capacity: 12,
-      container: 'c',
-    },
-    wirelessBonus: LAUNCHER_WIRELESS_BONUS,
+    ammo: { capacity: 12, container: 'c' },
+    wirelessBonuses: [LAUNCHER_WIRELESS_BONUS],
   },
 });
 
@@ -1226,17 +1297,18 @@ const aztechnology_striker = exoticFirearmWireless({
   label: 'Aztechnology Striker',
   cost: 7000,
   availability: 5,
-  description: 'Missile launcher; disposable warhead, reusable tube.',
+  description: 'A missile launcher with a disposable warhead and a reusable tube.',
+  referenceOnly: true,
   tags: ['launcher'],
   stats: {
     damageValue: 'As missile loaded',
     modes: ['SS'],
     attackRatings: [null, 4, 10, 9, 6],
-    ammo: {
-      capacity: 1,
-      container: 'ml',
-    },
-    wirelessBonus: `${LAUNCHER_WIRELESS_BONUS} +1 dice pool if Matrix-connected (and no other bonus-applying system is active).`,
+    ammo: { capacity: 1, container: 'ml' },
+    wirelessBonuses: [
+      LAUNCHER_WIRELESS_BONUS,
+      '+1 dice pool if Matrix-connected, and no other bonus-applying system is active.',
+    ],
   },
 });
 
@@ -1245,23 +1317,26 @@ const onotari_interceptor = exoticFirearmWireless({
   label: 'Onotari Interceptor',
   cost: 9000,
   availability: 5,
-  description: 'Saeder-Krupp military missile launcher with two independently-loadable barrels. An internal smartgun controls a fire-safety interlock preventing simultaneous firing — some remove it, to the detriment of firer and target alike; firing both splits the attack dice pool, resolves each shot independently, and the firer resists 6P Fire damage.',
+  description: 'A Saeder-Krupp military missile launcher with two independently-loadable barrels. Some owners strip out the safety interlock, to the detriment of firer and target alike.',
+  referenceOnly: true,
   tags: ['launcher'],
   stats: {
     damageValue: 'As missile loaded',
     modes: ['SS'],
     attackRatings: [null, 5, 9, 10, 8],
-    ammo: {
-      capacity: 2,
-      container: 'ml',
-    },
-    wirelessBonus: `${LAUNCHER_WIRELESS_BONUS} The smartlink bonus applies, but the safety interlock can't be disabled this way.`,
+    ammo: { capacity: 2, container: 'ml' },
+    effects: [
+      'An internal smartgun runs a fire-safety interlock preventing simultaneous firing.',
+      'Firing both barrels splits the attack dice pool and resolves each shot independently.',
+      'Firing both barrels makes the firer resist 6P Fire damage.',
+    ],
+    wirelessBonuses: [
+      LAUNCHER_WIRELESS_BONUS,
+      'The smartlink bonus applies, but the safety interlock can\u2019t be disabled this way.',
+    ],
+    defaultAttachments: ['smartgun_system_internal'],
   },
 });
-
-// ============================================================================
-// ACCESSORIES — most attach to a mount (top/barrel/underbarrel), one per mount
-// ============================================================================
 
 const airburst_link = weaponAccessoryWireless({
   id: 'airburst_link',
@@ -1269,9 +1344,15 @@ const airburst_link = weaponAccessoryWireless({
   mount: null,
   cost: 600,
   availability: 3,
-  description: 'Smartgun rangefinder accessory for grenade/rocket launchers; halves scatter when using the wireless link trigger. Requires wireless on both launcher and ordnance.',
+  description: 'A smartgun rangefinder accessory for grenade and rocket launchers.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    effects: [
+      'Halves scatter when using the wireless link trigger.',
+      'Requires wireless active on both the launcher and the ordnance.',
+    ],
+  },
 });
 
 const bipod = weaponAccessoryWireless({
@@ -1280,10 +1361,14 @@ const bipod = weaponAccessoryWireless({
   mount: 'underbarrel',
   cost: 200,
   availability: 1,
-  description: '+2 Attack Rating when deployed prone/sitting.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: '+3 Attack Rating instead of +2 when deployed.',
+    effects: [
+      '+2 Attack Rating when deployed prone or sitting.',
+      'Requires a rigid stock.',
+    ],
+    wirelessBonuses: ['+3 Attack Rating instead of +2 when deployed.'],
   },
 });
 
@@ -1293,10 +1378,14 @@ const concealable_holster = weaponAccessoryWireless({
   mount: null,
   cost: 150,
   availability: 1,
-  description: '+1 Concealability threshold. Pistols (incl. machine pistols) and tasers only.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'An additional +1 Concealability threshold via active color/shape-shifting.',
+    effects: [
+      '+1 Concealability threshold.',
+      'Pistols (including machine pistols) and tasers only.',
+    ],
+    wirelessBonuses: ['An additional +1 Concealability threshold via active color/shape-shifting.'],
   },
 });
 
@@ -1306,9 +1395,15 @@ const gas_vent_system = weaponAccessory({
   mount: 'barrel',
   cost: 500,
   availability: 3,
-  description: 'Permanent once installed; removes the SA Attack Rating penalty, reduces BF penalty to 2.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    effects: [
+      'Removes the SA Attack Rating penalty.',
+      'Reduces the BF Attack Rating penalty to 2.',
+      'Permanent once installed.',
+    ],
+  },
 });
 
 const weapon_gyro_mount = weaponAccessoryWireless({
@@ -1317,10 +1412,16 @@ const weapon_gyro_mount = weaponAccessoryWireless({
   mount: 'underbarrel',
   cost: 1400,
   availability: 3,
-  description: 'Heavy harness for a rifle/MG; negates SA/BF penalties, +3 AR on Full-Auto, lowers medium/heavy MG Strength requirements to 2+/4+.',
+  description: 'A heavy harness for a rifle or MG.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'Quick-release exit becomes a Minor Action instead of a Major Action.',
+    effects: [
+      'Negates SA/BF Attack Rating penalties.',
+      '+3 Attack Rating on Full-Auto.',
+      'Lowers medium/heavy MG Strength requirements to 2+/4+.',
+    ],
+    wirelessBonuses: ['Quick-release exit becomes a Minor Action instead of a Major Action.'],
   },
 });
 
@@ -1330,10 +1431,16 @@ const weapon_hidden_arm_slide = weaponAccessoryWireless({
   mount: null,
   cost: 350,
   availability: 2,
-  description: 'Holds a Hold-out/Light Pistol/Taser under clothing; Minor Action + gesture draws it, granting bonus Edge on first use and +1 Concealability.',
+  description: 'A spring rig worn along the forearm, under clothing.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'Bonus Minor Action when activating.',
+    effects: [
+      'A Minor Action plus a gesture draws the weapon, granting bonus Edge on first use.',
+      '+1 Concealability.',
+      'Holds a Hold-out, Light Pistol, or Taser only.',
+    ],
+    wirelessBonuses: ['Bonus Minor Action when activating.'],
   },
 });
 
@@ -1343,11 +1450,16 @@ const imaging_scope_weapon_accessory = weaponAccessoryWireless({
   mount: 'top',
   cost: 350,
   availability: 1,
-  description: 'Micro camera + vision magnification, Capacity 3. Needs Take Aim to benefit; denies the target Edge from a higher Defense Rating.',
+  description: 'A micro camera paired with vision magnification.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
     deviceCapacityProvided: 3,
-    wirelessBonus: 'Shareable "line of sight" feed with the team.',
+    effects: [
+      'Denies the target Edge from a higher Defense Rating.',
+      'Requires a Take Aim action to benefit.',
+    ],
+    wirelessBonuses: ['Shareable "line of sight" feed with the team.'],
   },
 });
 
@@ -1357,10 +1469,17 @@ const laser_sight_weapon_accessory = weaponAccessoryWireless({
   mount: 'top or underbarrel',
   cost: 125,
   availability: 1,
-  description: '+1 Attack Rating (not cumulative with smartlink).',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: '+2 Attack Rating instead of +1, plus a bonus Minor Action on activation/deactivation.',
+    effects: [
+      '+1 Attack Rating.',
+      'Not cumulative with a smartlink.',
+    ],
+    wirelessBonuses: [
+      '+2 Attack Rating instead of +1.',
+      'Bonus Minor Action on activation or deactivation.',
+    ],
   },
 });
 
@@ -1370,11 +1489,13 @@ const periscope_weapon_accessory = weaponAccessoryWireless({
   mount: 'top',
   cost: 70,
   availability: 2,
-  description: 'Fire around corners; reduces the Cover IV penalty to -1. Upgradeable with vision enhancements, Capacity 3.',
+  description: 'Lets the firer shoot around corners. Upgradeable with vision enhancements.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
     deviceCapacityProvided: 3,
-    wirelessBonus: 'Reduces the Cover IV penalty to 0 instead of -1.',
+    effects: ['Reduces the Cover IV penalty to -1.'],
+    wirelessBonuses: ['Reduces the Cover IV penalty to 0 instead of -1.'],
   },
 });
 
@@ -1384,9 +1505,11 @@ const quick_draw_holster = weaponAccessory({
   mount: null,
   cost: 175,
   availability: 2,
-  description: 'Bonus Minor Action on a Quick-Draw action.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    effects: ['Bonus Minor Action on a Quick-Draw action.'],
+  },
 });
 
 const shock_pads = weaponAccessory({
@@ -1395,9 +1518,14 @@ const shock_pads = weaponAccessory({
   mount: null,
   cost: 50,
   availability: 2,
-  description: 'Rigid-stock accessory; -1 to SA/BF Attack Rating penalties.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    effects: [
+      '-1 to SA/BF Attack Rating penalties.',
+      'Requires a rigid stock.',
+    ],
+  },
 });
 
 const silencer_suppressor_weapon_accessory = weaponAccessoryWireless({
@@ -1407,10 +1535,14 @@ const silencer_suppressor_weapon_accessory = weaponAccessoryWireless({
   cost: 500,
   availability: 4,
   legality: 'illegal',
-  description: 'Not compatible with revolvers/shotguns; +2 threshold to notice the use/locate the firer.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'An AR alert if someone nearby reacts to the muffled shot.',
+    effects: [
+      '+2 threshold to notice the shot or locate the firer.',
+      'Not compatible with revolvers or shotguns.',
+    ],
+    wirelessBonuses: ['An AR alert if someone nearby reacts to the muffled shot.'],
   },
 });
 
@@ -1420,14 +1552,30 @@ const smart_firing_platform = weaponAccessoryWireless({
   mount: 'underbarrel',
   cost: 2500,
   availability: 5,
-  description: 'A robotic tripod mounting one smartgun weapon, fired by its own pilot (DR 3, Targeting autosoft Rating 3). Negates SA/BF penalties, +3 AR on Full-Auto.',
+  description: 'A robotic tripod that aims and fires the weapon it carries.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'Can be fired remotely via an implanted smartlink in VR, substituting your own dice pools.',
+    effects: [
+      'Negates SA/BF Attack Rating penalties.',
+      '+3 Attack Rating on Full-Auto.',
+      'Fires under its own pilot (Device Rating 3, Targeting autosoft Rating 3).',
+      'Mounts one smartgun-equipped weapon.',
+    ],
+    wirelessBonuses: ['Can be fired remotely via an implanted smartlink in VR, substituting your own dice pools.'],
   },
 });
 
-const SMARTGUN_SYSTEM_WIRELESS_BONUS = '+1 dice pool, plus a bonus Minor Action on Reload Smartgun/Change Device Mode.';
+const SMARTGUN_SYSTEM_WIRELESS_BONUSES = [
+  '+1 dice pool.',
+  'Bonus Minor Action on Reload Smartgun or Change Device Mode.',
+];
+
+const SMARTGUN_SYSTEM_EFFECTS = [
+  'With a smartlink, +2 Attack Rating across all ranges.',
+  'Via DNI, switch modes, eject clips, and fire without a trigger pull.',
+  'Fire from cover without Attack penalties.',
+];
 
 const smartgun_system_internal = weaponAccessoryWireless({
   id: 'smartgun_system_internal',
@@ -1436,10 +1584,15 @@ const smartgun_system_internal = weaponAccessoryWireless({
   cost: 500,
   availability: 1,
   legality: 'licensed',
-  description: 'Camera + rangefinder; via DNI, switch modes/eject clips/fire without a trigger pull, and fire from cover without Attack penalties. With a smartlink, +2 Attack Rating across all ranges. Adds to the weapon price rather than being bought standalone.',
+  description: 'A camera and rangefinder fitted inside the weapon itself.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: SMARTGUN_SYSTEM_WIRELESS_BONUS,
+    effects: [
+      ...SMARTGUN_SYSTEM_EFFECTS,
+      'Adds to the weapon price rather than being bought standalone.',
+    ],
+    wirelessBonuses: SMARTGUN_SYSTEM_WIRELESS_BONUSES,
   },
 });
 
@@ -1450,11 +1603,16 @@ const smartgun_system_external = weaponAccessoryWireless({
   cost: 200,
   availability: 2,
   legality: 'licensed',
-  description: 'As the internal version; mounts via an Engineering + Logic (4, 1 hour) Extended test. Camera has Capacity 1 for vision enhancements.',
+  description: 'The rail-mounted version of the internal system.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
     deviceCapacityProvided: 1,
-    wirelessBonus: SMARTGUN_SYSTEM_WIRELESS_BONUS,
+    effects: [
+      ...SMARTGUN_SYSTEM_EFFECTS,
+      'Mounts via an Engineering + Logic (4, 1 hour) Extended Test.',
+    ],
+    wirelessBonuses: SMARTGUN_SYSTEM_WIRELESS_BONUSES,
   },
 });
 
@@ -1465,9 +1623,10 @@ const spare_clip = weaponAccessoryWireless({
   cost: 5,
   availability: 2,
   description: 'An unloaded magazine for a specific weapon.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'Live ammo count even without a smartgun system.',
+    wirelessBonuses: ['Live ammo count even without a smartgun system.'],
   },
 });
 
@@ -1477,9 +1636,14 @@ const speed_loader = weaponAccessory({
   mount: null,
   cost: 25,
   availability: 1,
-  description: 'Weapon-specific; lets a revolver fully reload as a Minor Action.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
-  stats: {},
+  stats: {
+    effects: [
+      'Lets a revolver fully reload as a Minor Action.',
+      'Weapon-specific.',
+    ],
+  },
 });
 
 const tripod = weaponAccessoryWireless({
@@ -1488,16 +1652,91 @@ const tripod = weaponAccessoryWireless({
   mount: 'underbarrel',
   cost: 500,
   availability: 2,
-  description: 'Negates SA/BF penalties, +3 AR on Full-Auto when deployed kneeling/sitting.',
+  referenceOnly: true,
   tags: ['weapon_accessory'],
   stats: {
-    wirelessBonus: 'Free Minor Action on fold/deploy/remove.',
+    effects: [
+      'Negates SA/BF Attack Rating penalties when deployed.',
+      '+3 Attack Rating on Full-Auto when deployed.',
+      'Deployed kneeling or sitting.',
+    ],
+    wirelessBonuses: ['Free Minor Action on fold, deploy, or remove.'],
   },
 });
 
-// ============================================================================
-// AMMO — reference tables, not per-combination items (see file header)
-// ============================================================================
+const silencer_suppressor_integral = integralAccessory({
+  id: 'silencer_suppressor_integral',
+  label: 'Silencer/Suppressor (Integral)',
+  wireless: true,
+  description: 'A suppressor built into the weapon\u2019s barrel or shroud rather than threaded onto it.',
+  referenceOnly: true,
+  tags: ['weapon_accessory'],
+  stats: {
+    effects: ['+2 threshold to notice the shot or locate the firer.'],
+    wirelessBonuses: ['An AR alert if someone nearby reacts to the muffled shot.'],
+  },
+});
+
+const laser_sight_integral = integralAccessory({
+  id: 'laser_sight_integral',
+  label: 'Laser Sight (Integral)',
+  description: 'A laser sight machined into the weapon rather than rail-mounted.',
+  referenceOnly: true,
+  tags: ['weapon_accessory'],
+  stats: {
+    effects: [
+      'Attack Rating bonus is already included in this weapon\u2019s listed Attack Ratings.',
+      'Not cumulative with a smartlink.',
+    ],
+  },
+});
+
+const bipod_integral = integralAccessory({
+  id: 'bipod_integral',
+  label: 'Bipod (Integral)',
+  wireless: true,
+  description: 'A bipod that folds flat against the receiver rather than clipping on.',
+  referenceOnly: true,
+  tags: ['weapon_accessory'],
+  stats: {
+    effects: [
+      '+2 Attack Rating when deployed prone or sitting.',
+      'Requires a rigid stock.',
+    ],
+    wirelessBonuses: ['+3 Attack Rating instead of +2 when deployed.'],
+  },
+});
+
+const flashlight_integral = integralAccessory({
+  id: 'flashlight_integral',
+  label: 'Flashlight, 3-Setting (Integral)',
+  description: 'A weapon light built into the fore-end, switchable between three output modes.',
+  referenceOnly: true,
+  tags: ['weapon_accessory'],
+  stats: {
+    effects: [
+      'Three settings, tuned to benefit low-light, thermographic, or regular vision.',
+      'Switching setting is a Minor Action.',
+    ],
+  },
+});
+
+const imaging_scope_integral = integralAccessory({
+  id: 'imaging_scope_integral',
+  label: 'Imaging Scope (Integral)',
+  wireless: true,
+  description: 'A magnifying optic built into the weapon\u2019s receiver.',
+  referenceOnly: true,
+  tags: ['weapon_accessory'],
+  stats: {
+    deviceCapacityProvided: 3,
+    effects: [
+      'Denies the target Edge from a higher Defense Rating.',
+      'Requires a Take Aim action to benefit.',
+    ],
+    wirelessBonuses: ['Shareable "line of sight" feed with the team.'],
+  },
+});
 
 export const AMMO_TYPES = [
   {
@@ -1545,61 +1784,16 @@ export const AMMO_TYPES = [
 ];
 
 export const AMMO_BASE_COST_BY_CLASS = [
-  {
-    weaponClass: 'Hold-out/Light Pistol/Machine Pistol',
-    availability: 1,
-    costPer10: 5,
-  },
-  {
-    weaponClass: 'Heavy Pistol/SMG',
-    availability: 1,
-    costPer10: 10,
-  },
-  {
-    weaponClass: 'Rifles',
-    availability: 2,
-    legality: 'licensed',
-    costPer10: 20,
-  },
-  {
-    weaponClass: 'Taser',
-    availability: 1,
-    costPer10: 10,
-  },
-  {
-    weaponClass: 'Injection Dart',
-    availability: 2,
-    costPer10: 5,
-    note: '+ cost of toxin payload',
-  },
-  {
-    weaponClass: 'Assault Cannon',
-    availability: 4,
-    legality: 'illegal',
-    costPer10: 50,
-  },
-  {
-    weaponClass: 'Machine Gun',
-    availability: 2,
-    legality: 'licensed',
-    costPer10: 15,
-  },
-  {
-    weaponClass: 'DMSO',
-    availability: 1,
-    costPer10: 10,
-  },
-  {
-    weaponClass: 'Shotgun',
-    availability: 2,
-    legality: 'licensed',
-    costPer10: 15,
-  },
+  { weaponClass: 'Hold-out/Light Pistol/Machine Pistol', availability: 1, costPer10: 5 },
+  { weaponClass: 'Heavy Pistol/SMG', availability: 1, costPer10: 10 },
+  { weaponClass: 'Rifles', availability: 2, legality: 'licensed', costPer10: 20 },
+  { weaponClass: 'Taser', availability: 1, costPer10: 10 },
+  { weaponClass: 'Injection Dart', availability: 2, costPer10: 5, note: '+ cost of toxin payload' },
+  { weaponClass: 'Assault Cannon', availability: 4, legality: 'illegal', costPer10: 50 },
+  { weaponClass: 'Machine Gun', availability: 2, legality: 'licensed', costPer10: 15 },
+  { weaponClass: 'DMSO', availability: 1, costPer10: 10 },
+  { weaponClass: 'Shotgun', availability: 2, legality: 'licensed', costPer10: 15 },
 ];
-
-// Only "Regular" (unmodified) ammo per class gets a real purchasable
-// item — everything else is AMMO_BASE_COST_BY_CLASS x an AMMO_TYPES
-// modifier, computed rather than pre-built.
 
 const ammo_pistol_regular = {
   id: 'ammo_pistol_regular',
@@ -1610,9 +1804,7 @@ const ammo_pistol_regular = {
   legality: null,
   description: 'Per 10 rounds.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'Hold-out/Light Pistol/Machine Pistol',
-  },
+  stats: { weaponClass: 'Hold-out/Light Pistol/Machine Pistol' },
 };
 
 const ammo_heavy_pistol_smg_regular = {
@@ -1624,9 +1816,7 @@ const ammo_heavy_pistol_smg_regular = {
   legality: null,
   description: 'Per 10 rounds.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'Heavy Pistol/SMG',
-  },
+  stats: { weaponClass: 'Heavy Pistol/SMG' },
 };
 
 const ammo_rifle_regular = {
@@ -1638,9 +1828,7 @@ const ammo_rifle_regular = {
   legality: 'licensed',
   description: 'Per 10 rounds.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'Rifles',
-  },
+  stats: { weaponClass: 'Rifles' },
 };
 
 const ammo_taser_regular = {
@@ -1652,9 +1840,7 @@ const ammo_taser_regular = {
   legality: null,
   description: 'Per 10 rounds/darts.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'Taser',
-  },
+  stats: { weaponClass: 'Taser' },
 };
 
 const ammo_injection_dart_regular = {
@@ -1664,10 +1850,12 @@ const ammo_injection_dart_regular = {
   cost: 5,
   availability: 2,
   legality: null,
-  description: 'Per 10 darts, plus the cost of whatever toxin payload is loaded. Delivery needs 1+ net hit vs. an unarmored target or 2+ vs. any armor.',
+  description: 'Per 10 darts, plus the cost of whatever toxin payload is loaded.',
+  referenceOnly: true,
   tags: ['ammo'],
   stats: {
     weaponClass: 'Injection Dart',
+    effects: ['Delivery needs 1+ net hit against an unarmored target, or 2+ against any armor.'],
   },
 };
 
@@ -1678,10 +1866,12 @@ const ammo_assault_cannon_regular = {
   cost: 50,
   availability: 4,
   legality: 'illegal',
-  description: "Per 10 rounds. The only ammo type assault cannons load — can't be modified with other ammo types.",
+  description: 'Per 10 rounds.',
+  referenceOnly: true,
   tags: ['ammo'],
   stats: {
     weaponClass: 'Assault Cannon',
+    effects: ['The only ammo assault cannons load — can\u2019t be modified with other ammo types.'],
   },
 };
 
@@ -1694,9 +1884,7 @@ const ammo_machine_gun_regular = {
   legality: 'licensed',
   description: 'Per 10 rounds.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'Machine Gun',
-  },
+  stats: { weaponClass: 'Machine Gun' },
 };
 
 const ammo_dmso = {
@@ -1708,9 +1896,7 @@ const ammo_dmso = {
   legality: null,
   description: 'Per 10 doses. Carrier compound for chemical/toxin delivery.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'DMSO',
-  },
+  stats: { weaponClass: 'DMSO' },
 };
 
 const ammo_shotgun_regular = {
@@ -1722,14 +1908,8 @@ const ammo_shotgun_regular = {
   legality: 'licensed',
   description: 'Per 10 rounds.',
   tags: ['ammo'],
-  stats: {
-    weaponClass: 'Shotgun',
-  },
+  stats: { weaponClass: 'Shotgun' },
 };
-
-// ============================================================================
-// GRENADES — arm after 5m travel, damage decreases GZ -> Close -> Near
-// ============================================================================
 
 const GRENADE_WIRELESS_BONUS = 'Wireless link trigger usable via commlink ARO even without DNI.';
 
@@ -1740,12 +1920,14 @@ const grenade_stun = explosiveItem({
   availability: 4,
   legality: 'licensed',
   wireless: true,
-  description: 'Flash-bang; anyone in the Blast also gets Blinded I, Deafened I, and Dazed.',
+  description: 'Flash-bang.',
+  referenceOnly: true,
   tags: ['grenade'],
   stats: {
     damageValue: '10S/8S/6S',
     blast: 15,
-    wirelessBonus: GRENADE_WIRELESS_BONUS,
+    effects: ['Anyone in the Blast also gets Blinded I, Deafened I, and Dazed.'],
+    wirelessBonuses: [GRENADE_WIRELESS_BONUS],
   },
 });
 
@@ -1756,11 +1938,12 @@ const grenade_fragmentation = explosiveItem({
   availability: 4,
   wireless: true,
   description: 'Classic wide-area shrapnel grenade.',
+  referenceOnly: true,
   tags: ['grenade'],
   stats: {
     damageValue: '16P/12P/8P',
     blast: 20,
-    wirelessBonus: GRENADE_WIRELESS_BONUS,
+    wirelessBonuses: [GRENADE_WIRELESS_BONUS],
   },
 });
 
@@ -1771,11 +1954,12 @@ const grenade_high_explosive = explosiveItem({
   availability: 4,
   wireless: true,
   description: 'Powerful blast over a smaller area than Fragmentation.',
+  referenceOnly: true,
   tags: ['grenade'],
   stats: {
     damageValue: '16P/10P/4P',
     blast: 15,
-    wirelessBonus: GRENADE_WIRELESS_BONUS,
+    wirelessBonuses: [GRENADE_WIRELESS_BONUS],
   },
 });
 
@@ -1785,10 +1969,15 @@ const grenade_gas = explosiveItem({
   cost: 50,
   availability: 4,
   wireless: true,
-  description: 'Any chemical/toxin payload; cloud lasts ~10 rounds. Cost is the grenade shell plus 20 doses of chemical payload.',
+  description: 'Cost is the grenade shell plus 20 doses of chemical payload.',
+  referenceOnly: true,
   tags: ['grenade'],
   stats: {
-    wirelessBonus: GRENADE_WIRELESS_BONUS,
+    effects: [
+      'Carries any chemical or toxin payload.',
+      'The cloud lasts about 10 rounds.',
+    ],
+    wirelessBonuses: [GRENADE_WIRELESS_BONUS],
   },
 });
 
@@ -1798,10 +1987,15 @@ const grenade_smoke = explosiveItem({
   cost: 50,
   availability: 4,
   wireless: true,
-  description: 'Obscures vision — Blinded I (acting through the smoke) or Blinded II (acting from within it); lasts ~10 rounds.',
+  description: 'Obscures vision across a wide area.',
+  referenceOnly: true,
   tags: ['grenade'],
   stats: {
-    wirelessBonus: GRENADE_WIRELESS_BONUS,
+    effects: [
+      'Blinded I acting through the smoke, or Blinded II acting from within it.',
+      'Lasts about 10 rounds.',
+    ],
+    wirelessBonuses: [GRENADE_WIRELESS_BONUS],
   },
 });
 
@@ -1812,18 +2006,22 @@ const flash_pak = explosiveItem({
   availability: 4,
   legality: 'licensed',
   wireless: true,
-  description: 'A 10x10x2cm strobing device (not a grenade proper). Anyone using standard vision in range gets Blinded (worse with low-light, better with flare compensation, no effect on thermographic/ultrasound). 10 charges, 1/round used.',
+  description: 'A 10x10x2cm strobing device, not a grenade proper.',
+  referenceOnly: true,
   tags: ['grenade'],
   stats: {
     damageValue: 'BIII/BII/BI',
     blast: 10,
-    wirelessBonus: 'Can spare a subscribed/paired character from the effect, and recharges by induction at 1 charge/hour.',
+    effects: [
+      'Anyone using standard vision in range gets Blinded — worse with low-light, better with flare compensation, no effect on thermographic or ultrasound.',
+      '10 charges, 1 used per round.',
+    ],
+    wirelessBonuses: [
+      'Can spare a subscribed or paired character from the effect.',
+      'Recharges by induction at 1 charge per hour.',
+    ],
   },
 });
-
-// ============================================================================
-// ROCKETS AND MISSILES — arm after 10m travel
-// ============================================================================
 
 const ROCKET_WIRELESS_BONUS = 'Wireless link trigger without DNI.';
 
@@ -1833,12 +2031,14 @@ const rocket_anti_vehicle = explosiveItem({
   cost: 2800,
   availability: 5,
   wireless: true,
-  description: 'Shaped-charge warhead for burning/punching through vehicles/barriers; smaller blast than HE, +2 Attack Rating vs. vehicles.',
+  description: 'A shaped-charge warhead for burning through vehicles and barriers.',
+  referenceOnly: true,
   tags: ['rocket'],
   stats: {
     damageValue: '12P/8P/4P',
     blast: 10,
-    wirelessBonus: ROCKET_WIRELESS_BONUS,
+    effects: ['+2 Attack Rating vs. vehicles.'],
+    wirelessBonuses: [ROCKET_WIRELESS_BONUS],
   },
 });
 
@@ -1848,12 +2048,13 @@ const rocket_fragmentation = explosiveItem({
   cost: 2000,
   availability: 5,
   wireless: true,
-  description: 'Anti-personnel shrapnel; poor against structures/vehicles.',
+  description: 'Anti-personnel shrapnel; poor against structures and vehicles.',
+  referenceOnly: true,
   tags: ['rocket'],
   stats: {
     damageValue: '16P/12P/8P',
     blast: 30,
-    wirelessBonus: ROCKET_WIRELESS_BONUS,
+    wirelessBonuses: [ROCKET_WIRELESS_BONUS],
   },
 });
 
@@ -1863,12 +2064,13 @@ const rocket_high_explosive = explosiveItem({
   cost: 2100,
   availability: 5,
   wireless: true,
-  description: 'Heavy damage in a small area, grenade-like but larger.',
+  description: 'Heavy damage in a small area — grenade-like, but larger.',
+  referenceOnly: true,
   tags: ['rocket'],
   stats: {
     damageValue: '16P/10P/4P',
     blast: 20,
-    wirelessBonus: ROCKET_WIRELESS_BONUS,
+    wirelessBonuses: [ROCKET_WIRELESS_BONUS],
   },
 });
 
@@ -1878,10 +2080,15 @@ const rocket_gas = explosiveItem({
   cost: 750,
   availability: 4,
   wireless: true,
-  description: 'As the Gas grenade, delivered at range. Cost is the rocket plus a 100-dose payload.',
+  description: 'Cost is the rocket plus a 100-dose payload.',
+  referenceOnly: true,
   tags: ['rocket'],
   stats: {
-    wirelessBonus: ROCKET_WIRELESS_BONUS,
+    effects: [
+      'Carries any chemical or toxin payload, delivered at range.',
+      'The cloud lasts about 10 rounds.',
+    ],
+    wirelessBonuses: [ROCKET_WIRELESS_BONUS],
   },
 });
 
@@ -1891,10 +2098,15 @@ const rocket_smoke = explosiveItem({
   cost: 1200,
   availability: 4,
   wireless: true,
-  description: 'As the Smoke grenade, delivered at range.',
+  description: 'The Smoke grenade, delivered at range.',
+  referenceOnly: true,
   tags: ['rocket'],
   stats: {
-    wirelessBonus: ROCKET_WIRELESS_BONUS,
+    effects: [
+      'Blinded I acting through the smoke, or Blinded II acting from within it.',
+      'Lasts about 10 rounds.',
+    ],
+    wirelessBonuses: [ROCKET_WIRELESS_BONUS],
   },
 });
 
@@ -1905,46 +2117,14 @@ export const MISSILE_VARIANT_MODIFIER = {
   costPerSensorRating: 500,
 };
 
-// ============================================================================
-// CONVENTIONAL EXPLOSIVES — Rating-banded package pricing
-// ============================================================================
-
 export const EXPLOSIVE_RATING_BANDS = [
-  {
-    ratingRange: [1, 3],
-    availability: 1,
-    costPerRating: 10,
-  },
-  {
-    ratingRange: [4, 6],
-    availability: 2,
-    costPerRating: 50,
-  },
-  {
-    ratingRange: [7, 9],
-    availability: 3,
-    costPerRating: 100,
-  },
-  {
-    ratingRange: [10, 12],
-    availability: 4,
-    costPerRating: 250,
-  },
-  {
-    ratingRange: [13, 15],
-    availability: 5,
-    costPerRating: 500,
-  },
-  {
-    ratingRange: [16, 18],
-    availability: 6,
-    costPerRating: 1000,
-  },
-  {
-    ratingRange: [19, 20],
-    availability: 7,
-    costPerRating: 5000,
-  },
+  { ratingRange: [1, 3], availability: 1, costPerRating: 10 },
+  { ratingRange: [4, 6], availability: 2, costPerRating: 50 },
+  { ratingRange: [7, 9], availability: 3, costPerRating: 100 },
+  { ratingRange: [10, 12], availability: 4, costPerRating: 250 },
+  { ratingRange: [13, 15], availability: 5, costPerRating: 500 },
+  { ratingRange: [16, 18], availability: 6, costPerRating: 1000 },
+  { ratingRange: [19, 20], availability: 7, costPerRating: 5000 },
 ];
 
 const explosive_package_plastic = explosiveItem({
@@ -1952,10 +2132,12 @@ const explosive_package_plastic = explosiveItem({
   label: 'Explosive Package, Plastic',
   cost: null,
   availability: null,
-  description: 'Stable, moldable, adhesive, military-grade; color-tinted by detonation current needed. Bought at a chosen Rating combining power and quantity — see EXPLOSIVE_RATING_BANDS. Packages can\'t be combined across rating bands.',
+  description: 'Stable, moldable, adhesive, military-grade; color-tinted by the detonation current needed. Bought at a chosen Rating combining power and quantity — see EXPLOSIVE_RATING_BANDS.',
+  referenceOnly: true,
   tags: ['conventional_explosive'],
   stats: {
     ratingRange: [1, 20],
+    effects: ['Packages can\u2019t be combined across rating bands.'],
   },
 });
 
@@ -1964,10 +2146,15 @@ const explosive_package_foam = explosiveItem({
   label: 'Explosive Package, Foam',
   cost: null,
   availability: null,
-  description: 'Shaving-cream-consistency plastic explosive in an aerosol can, good for spraying into crevices. Detonates the same way as regular plastic; same rating-band pricing.',
+  description: 'Shaving-cream-consistency plastic explosive in an aerosol can, good for spraying into crevices. Same rating-band pricing as regular plastic.',
+  referenceOnly: true,
   tags: ['conventional_explosive'],
   stats: {
     ratingRange: [1, 20],
+    effects: [
+      'Detonates the same way as regular plastic explosive.',
+      'Packages can\u2019t be combined across rating bands.',
+    ],
   },
 });
 
@@ -1977,10 +2164,15 @@ const detonator_cap = explosiveItem({
   cost: 75,
   availability: 4,
   wireless: true,
-  description: 'Inserted into an explosive mass, set off by programmable timer or radio signal. Setting the timer is a Major Action.',
+  description: 'Inserted into an explosive mass, set off by programmable timer or radio signal.',
+  referenceOnly: true,
   tags: ['conventional_explosive'],
   stats: {
-    wirelessBonus: 'Set the timer as a Minor Action instead of a Major Action, plus a Minor Action DNI-linked "detonate" command.',
+    effects: ['Setting the timer is a Major Action.'],
+    wirelessBonuses: [
+      'Set the timer as a Minor Action instead of a Major Action.',
+      'Adds a Minor Action DNI-linked "detonate" command.',
+    ],
   },
 });
 
@@ -1991,7 +2183,7 @@ export const GEAR_FIREARMS_EXPLOSIVES = {
   ares_crusader_ii, ceska_black_scorpion, steyr_tmp,
   ares_predator_vi, ares_viper_slivergun, browning_ultra_power, colt_government_2076, colt_manhunter, ruger_super_warhawk,
   colt_cobra_tz100, colt_cobra_tz110, colt_cobra_tz120, fn_p93_praetor, hk_227, ingram_smartgun_xi, sck_model_100, uzi_v,
-  defiance_t250, mossberg_cmdt, pjss_model_55, remington_roomsweeper,
+  defiance_t250, defiance_t250_short_barreled, mossberg_cmdt, mossberg_cmdt_drum, pjss_model_55, remington_roomsweeper,
   ak_97, ares_alpha, colt_m23, fn_har, yamaha_raiden, ares_desert_strike, cavalier_arms_crockett_ebr, ranger_arms_sm5, remington_900, ruger_101, barret_model_122,
   ingram_valiant, stoner_ares_m202, rpk_hmg, panther_xxl,
   ares_super_squirt, parashield_dart_pistol, parashield_dart_rifle,
@@ -2000,6 +2192,7 @@ export const GEAR_FIREARMS_EXPLOSIVES = {
   imaging_scope_weapon_accessory, laser_sight_weapon_accessory, periscope_weapon_accessory, quick_draw_holster, shock_pads,
   silencer_suppressor_weapon_accessory, smart_firing_platform, smartgun_system_internal, smartgun_system_external,
   spare_clip, speed_loader, tripod,
+  silencer_suppressor_integral, laser_sight_integral, imaging_scope_integral, bipod_integral, flashlight_integral,
   ammo_pistol_regular, ammo_heavy_pistol_smg_regular, ammo_rifle_regular, ammo_taser_regular, ammo_injection_dart_regular,
   ammo_assault_cannon_regular, ammo_machine_gun_regular, ammo_dmso, ammo_shotgun_regular,
   grenade_stun, grenade_fragmentation, grenade_high_explosive, grenade_gas, grenade_smoke, flash_pak,

@@ -49,7 +49,7 @@ class GearManager {
   _persona = { ...DEFAULT_PERSONA };
   _deviceMode = 'AR';
   _essenceAdjustments = []; // [{ amount, note }] — manual, stacks with the automatic gear-based deduction
-  _weaponState = {}; // { [instanceId]: { selectedMode, loadedAmmoType, ammoContainer, currentAmmoCount } } — all optional, nothing here ever gates or blocks weapon use; see setWeaponState below
+  _weaponState = {}; // { [instanceId]: { selectedMode, loadedAmmoType, ammoContainer, currentAmmoCount, attackRatingAdjustment } } — all optional, nothing here ever gates or blocks weapon use; see setWeaponState below
   _vehicleState = {}; // { [instanceId]: { conditionMonitorDamage, currentSpeed, controlMode, driverName } } — same shape/philosophy as weaponState; see setVehicleState below
 
   constructor(data = {}) {
@@ -135,6 +135,30 @@ class GearManager {
 
   attachmentsOf(parentInstanceId) {
     return Object.entries(this._gear).filter(([, entry]) => entry.attachedTo === parentInstanceId);
+  }
+
+  // Seeds a weapon's "comes with X" accessories (built-in laser sight,
+  // gas-vent, internal smartgun, etc. — priced into the weapon's own
+  // catalog cost, not a separate purchase) as real, removable
+  // attachment instances — same add()+attach() machinery as any other
+  // attachment, no separate "built-in" concept needed. Skips any
+  // default itemId already attached to this parent, so calling this
+  // twice (or clicking the seed button again after removing just one)
+  // can't produce duplicates. The player can Detach any seeded
+  // instance afterward like anything else, even where that doesn't
+  // make much narrative sense for something like an internal smartgun —
+  // same "don't police behavior, just model the data" instinct as
+  // everywhere else in this app.
+  addDefaultAttachments(parentInstanceId, itemIds) {
+    if (!this._gear[parentInstanceId] || !itemIds?.length) return;
+    const alreadyAttached = new Set(
+      this.attachmentsOf(parentInstanceId).map(([, entry]) => entry.itemId)
+    );
+    itemIds.forEach((itemId) => {
+      if (alreadyAttached.has(itemId)) return;
+      const childId = this.add(itemId);
+      this.attach(childId, parentInstanceId);
+    });
   }
 
   // ---- PAN (Personal Area Network) ----
@@ -348,13 +372,14 @@ class GearManager {
   // ---- Weapon State ----
   // Per-instance, purely informational — currently selected firing
   // mode, loaded ammo type, which ammo container (for the few weapons
-  // with ammo.options, clip vs. belt), and a freely-editable round
-  // count. Deliberately never gates or blocks anything: a weapon works
-  // in combat with no weapon state set at all, an empty ammo count, or
-  // any combination thereof. This exists purely to compute and display
-  // the CORRECT effective Attack Rating for whatever's currently
-  // selected (see weaponEconomy.js) — not to enforce or automate
-  // ammo tracking, which is explicitly out of scope.
+  // with ammo.options, clip vs. belt), a freely-editable round count,
+  // and a persisting Attack Rating adjustment. Deliberately never
+  // gates or blocks anything: a weapon works in combat with no weapon
+  // state set at all, an empty ammo count, or any combination thereof.
+  // This exists purely to compute and display the CORRECT effective
+  // Attack Rating for whatever's currently selected (see
+  // weaponEconomy.js) — not to enforce or automate ammo tracking,
+  // which is explicitly out of scope.
 
   getWeaponState(instanceId) {
     return this._weaponState[instanceId] || {};
